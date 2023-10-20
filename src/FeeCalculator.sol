@@ -6,8 +6,8 @@ import "./interfaces/IPool.sol";
 
 contract FeeCalculator is IDepositFeeCalculator, IRedemptionFeeCalculator {
 
-    uint256 private ratioDenominator = 1e3;
-    uint256 private tokenDenominator = 1e18;
+    uint256 private constant ratioDenominator = 1e3;
+    uint256 private constant tokenDenominator = 1e18;
 
     function calculateDepositFees(address tco2, address pool, uint256 depositAmount) external override returns (address[] memory recipients, uint256[] memory feesDenominatedInPoolTokens) {
         recipients = new address[](1);
@@ -23,13 +23,13 @@ contract FeeCalculator is IDepositFeeCalculator, IRedemptionFeeCalculator {
         feesDenominatedInPoolTokens[0] = depositAmount / 100;
     }
 
-    function getTokenBalance(address pool, address tco2) external view returns (uint256) {
+    function getTokenBalance(address pool, address tco2) private view returns (uint256) {
         IPool poolInstance = IPool(pool);
         uint256 tokenBalance = poolInstance.tokenBalances(tco2);
         return tokenBalance;
     }
 
-    function getTotalSupply(address pool) external view returns (uint256) {
+    function getTotalSupply(address pool) private view returns (uint256) {
         IPool poolInstance = IPool(pool);
         uint256 totalSupply = poolInstance.totalSupply();
         return totalSupply;
@@ -60,13 +60,8 @@ contract FeeCalculator is IDepositFeeCalculator, IRedemptionFeeCalculator {
     }
 
     function getDepositFee(uint256 amount, uint256 current, uint256 total) private pure returns (uint256) {
-
-        uint256 total = getTotalSupply(pool);
-        uint256 current = getTokenBalance(pool, tco2);
-        (uint256 a, uint256 b) = getRatios(depositAmount, current, total);
-
-        uint256 fee = getDepositFee(a, b, depositAmount);
-
+        (uint256 a, uint256 b) = getRatios(amount, current, total);
+        uint256 fee = calculateDepositFee(a, b, amount);
         return fee;
     }
 

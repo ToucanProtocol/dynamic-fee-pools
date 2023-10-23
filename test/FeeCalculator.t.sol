@@ -45,6 +45,24 @@ contract FeeCalculatorTest is Test {
         assertEq(fees[0], 42930021838396800000);
     }
 
+    function testCalculateDepositFeesComplicatedCase() public {
+        // Arrange
+        // Set up your test data
+        address tco2 = 0xAb8483F64d9C6d1EcF9b849Ae677dD3315835cb2; // Example address
+        uint256 depositAmount = 932*1e18;
+
+        // Set up mock pool
+        mockPool.setTotalSupply(53461*1e18);
+        mockPool.setTokenBalance(tco2, 15462*1e18);
+
+        // Act
+        (address[] memory recipients, uint256[] memory fees) = feeCalculator.calculateDepositFees(tco2, address(mockPool), depositAmount);
+
+        // Assert
+        assertEq(recipients[0], tco2);
+        assertEq(fees[0], 72033402676272096000);
+    }
+
     function testCalculateDepositFees_ZeroDepositZeroFees() public {
         // Arrange
         // Set up your test data

@@ -51,7 +51,7 @@ contract FeeCalculator is IDepositFeeCalculator, IRedemptionFeeCalculator {
 
         if (relativeFee > relativeFeeCap) // cap the fee at 3/4
         {
-            relativeFeeCap = relativeFeeCap;
+            relativeFee = relativeFeeCap;
         }
 
         uint256 fee = (relativeFee * amount) / relativeFeeDenominator;

@@ -45,6 +45,60 @@ contract FeeCalculatorTest is Test {
         assertEq(fees[0], 42930021838396800000);
     }
 
+    function testCalculateDepositFees_ZeroDepositZeroFees() public {
+        // Arrange
+        // Set up your test data
+        address tco2 = 0xAb8483F64d9C6d1EcF9b849Ae677dD3315835cb2; // Example address
+        uint256 depositAmount = 0;
+
+        // Set up mock pool
+        mockPool.setTotalSupply(1000*1e18);
+        mockPool.setTokenBalance(tco2, 500*1e18);
+
+        // Act
+        (address[] memory recipients, uint256[] memory fees) = feeCalculator.calculateDepositFees(tco2, address(mockPool), depositAmount);
+
+        // Assert
+        assertEq(recipients[0], tco2);
+        assertEq(fees[0], 0);
+    }
+
+    function testCalculateDepositFees_ZeroTotalCappedFeesAt75Percent() public {
+        // Arrange
+        // Set up your test data
+        address tco2 = 0xAb8483F64d9C6d1EcF9b849Ae677dD3315835cb2; // Example address
+        uint256 depositAmount = 100*1e18;
+
+        // Set up mock pool
+        mockPool.setTotalSupply(0);
+        mockPool.setTokenBalance(tco2, 0);
+
+        // Act
+        (address[] memory recipients, uint256[] memory fees) = feeCalculator.calculateDepositFees(tco2, address(mockPool), depositAmount);
+
+        // Assert
+        assertEq(recipients[0], tco2);
+        assertEq(fees[0], 75 * 1e18);
+    }
+
+    function testCalculateDepositFees_ZeroCurrentNormalFees() public {
+        // Arrange
+        // Set up your test data
+        address tco2 = 0xAb8483F64d9C6d1EcF9b849Ae677dD3315835cb2; // Example address
+        uint256 depositAmount = 100*1e18;
+
+        // Set up mock pool
+        mockPool.setTotalSupply(1000*1e18);
+        mockPool.setTokenBalance(tco2, 0);
+
+        // Act
+        (address[] memory recipients, uint256[] memory fees) = feeCalculator.calculateDepositFees(tco2, address(mockPool), depositAmount);
+
+        // Assert
+        assertEq(recipients[0], tco2);
+        assertEq(fees[0], 56331707175000000);
+    }
+
     function testCalculateDepositFeesFuzzy(uint256 depositAmount, uint256 current, uint256 total) public {
         //vm.assume(depositAmount > 0);
         //vm.assume(total > 0);

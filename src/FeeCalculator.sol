@@ -6,7 +6,7 @@ import "./interfaces/IPool.sol";
 
 contract FeeCalculator is IDepositFeeCalculator, IRedemptionFeeCalculator {
 
-    uint256 private constant ratioDenominator = 1e3;
+    uint256 private constant ratioDenominator = 1e5;
     uint256 private constant tokenDenominator = 1e18;
 
     function calculateDepositFees(address tco2, address pool, uint256 depositAmount) external override returns (address[] memory recipients, uint256[] memory feesDenominatedInPoolTokens) {

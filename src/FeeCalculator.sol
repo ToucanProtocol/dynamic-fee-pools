@@ -7,7 +7,7 @@ import "./interfaces/IPool.sol";
 contract FeeCalculator is IDepositFeeCalculator, IRedemptionFeeCalculator {
 
     uint256 private constant tokenDenominator = 1e18;
-    uint256 private constant ratioDenominator = 1e5;
+    uint256 private constant ratioDenominator = 1e12;
     uint256 private constant relativeFeeDenominator = ratioDenominator**3;
     uint256 private constant relativeFeeCap = 3*relativeFeeDenominator/4;
 

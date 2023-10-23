@@ -47,7 +47,7 @@ contract FeeCalculator is IDepositFeeCalculator, IRedemptionFeeCalculator {
     function calculateDepositFee(uint256 a, uint256 b, uint256 amount) private pure returns (uint256) {
         uint256 scale = 3;
 
-        uint256 relativeFee = b-a==0 ? 0 : scale * (b**4 - a**4) / (b-a) / 4;
+        uint256 relativeFee = b-a==0 ? relativeFeeCap : scale * (b**4 - a**4) / (b-a) / 4;
 
         if (relativeFee > relativeFeeCap) // cap the fee at 3/4
         {

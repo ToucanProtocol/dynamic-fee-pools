@@ -17,6 +17,8 @@ contract FeeCalculator is IDepositFeeCalculator, IRedemptionFeeCalculator {
 
     function feeSetup(address[] memory recipients, uint256[] memory shares) external {
         require(recipients.length == shares.length, "Recipients and shares arrays must have the same length");
+        require(recipients.length > 0);
+
         uint256 totalShares = 0;
         for (uint i = 0; i < shares.length; i++) {
             totalShares += shares[i];

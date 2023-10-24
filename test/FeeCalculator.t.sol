@@ -100,6 +100,66 @@ contract FeeCalculatorTest is Test {
         assertEq(fees[0], 42930597295197661532);
     }
 
+    function testCalculateDepositFeesNormalCase_TwoFeeRecipientsSplitEqually() public {
+        // Arrange
+        // Set up your test data
+        uint256 depositAmount = 100*1e18;
+        address feeRecipient1 = 0xAb5801a7D398351b8bE11C439e05C5B3259aeC9B;
+        address feeRecipient2 = 0xCA35b7d915458EF540aDe6068dFe2F44E8fa733c;
+
+        // Set up mock pool
+        mockPool.setTotalSupply(1000*1e18);
+        mockToken.setTokenBalance(address(mockPool), 500*1e18);
+
+        address[] memory _recipients = new address[](2);
+        _recipients[0] = feeRecipient1;
+        _recipients[1] = feeRecipient2;
+        uint256[] memory _feeShares = new uint256[](2);
+        _feeShares[0] = 50;
+        _feeShares[1] = 50;
+        feeCalculator.feeSetup(_recipients, _feeShares);
+
+        // Act
+        (address[] memory recipients, uint256[] memory fees) = feeCalculator.calculateDepositFees(address(mockToken), address(mockPool), depositAmount);
+
+        // Assert
+        assertEq(recipients[0], feeRecipient1);
+        assertEq(recipients[1], feeRecipient2);
+        assertEq(sumOf(fees), 42930597295197661532);
+        assertEq(fees[0], 42930597295197661532/2);
+        assertEq(fees[1], 42930597295197661532/2);
+    }
+
+    function testCalculateDepositFeesNormalCase_TwoFeeRecipientsSplit30To70() public {
+        // Arrange
+        // Set up your test data
+        uint256 depositAmount = 100*1e18;
+        address feeRecipient1 = 0xAb5801a7D398351b8bE11C439e05C5B3259aeC9B;
+        address feeRecipient2 = 0xCA35b7d915458EF540aDe6068dFe2F44E8fa733c;
+
+        // Set up mock pool
+        mockPool.setTotalSupply(1000*1e18);
+        mockToken.setTokenBalance(address(mockPool), 500*1e18);
+
+        address[] memory _recipients = new address[](2);
+        _recipients[0] = feeRecipient1;
+        _recipients[1] = feeRecipient2;
+        uint256[] memory _feeShares = new uint256[](2);
+        _feeShares[0] = 30;
+        _feeShares[1] = 70;
+        feeCalculator.feeSetup(_recipients, _feeShares);
+
+        // Act
+        (address[] memory recipients, uint256[] memory fees) = feeCalculator.calculateDepositFees(address(mockToken), address(mockPool), depositAmount);
+
+        // Assert
+        assertEq(recipients[0], feeRecipient1);
+        assertEq(recipients[1], feeRecipient2);
+        assertEq(sumOf(fees), 42930597295197661532);
+        assertEq(fees[0], uint256(42930597295197661532) * 30 / 100 + 1);//rest from division operation goes to first recipient
+        assertEq(fees[1], uint256(42930597295197661532) * 70 / 100);
+    }
+
     function testCalculateDepositFeesComplicatedCase() public {
         // Arrange
         // Set up your test data
@@ -211,6 +271,97 @@ contract FeeCalculatorTest is Test {
         assertEq(fees[0], 3000405020250060);
     }
 
+    function testCalculateDepositFees_DepositOfOne_NormalFee_FiveRecipientsEqualSplit() public {
+        // Arrange
+        // Set up your test data
+        uint256 depositAmount = 1 * 1e18;
+        address feeRecipient1 = 0xAb5801a7D398351b8bE11C439e05C5B3259aeC9B;
+        address feeRecipient2 = 0xCA35b7d915458EF540aDe6068dFe2F44E8fa733c;
+        address feeRecipient3 = 0x4B0897b0513fdC7C541B6d9D7E929C4e5364D2dB;
+        address feeRecipient4 = 0x583031D1113aD414F02576BD6afaBfb302140225;
+        address feeRecipient5 = 0xdD870fA1b7C4700F2BD7f44238821C26f7392148;
+
+        // Set up mock pool
+        mockPool.setTotalSupply(1e5 * 1e18);
+        mockToken.setTokenBalance(address(mockPool), 1e4 * 1e18);
+
+
+        address[] memory _recipients = new address[](5);
+        _recipients[0] = feeRecipient1;
+        _recipients[1] = feeRecipient2;
+        _recipients[2] = feeRecipient3;
+        _recipients[3] = feeRecipient4;
+        _recipients[4] = feeRecipient5;
+        uint256[] memory _feeShares = new uint256[](5);
+        _feeShares[0] = 20;
+        _feeShares[1] = 20;
+        _feeShares[2] = 20;
+        _feeShares[3] = 20;
+        _feeShares[4] = 20;
+        feeCalculator.feeSetup(_recipients, _feeShares);
+
+        // Act
+        (address[] memory recipients, uint256[] memory fees) = feeCalculator.calculateDepositFees(address(mockToken), address(mockPool), depositAmount);
+
+        // Assert
+        assertEq(recipients[0], feeRecipient1);
+        assertEq(recipients[1], feeRecipient2);
+        assertEq(recipients[2], feeRecipient3);
+        assertEq(recipients[3], feeRecipient4);
+        assertEq(recipients[4], feeRecipient5);
+        assertEq(sumOf(fees), 3000405020250060);
+        assertEq(fees[0], 3000405020250060 * 20 / 100);
+        assertEq(fees[1], 3000405020250060 * 20 / 100);
+        assertEq(fees[2], 3000405020250060 * 20 / 100);
+        assertEq(fees[3], 3000405020250060 * 20 / 100);
+        assertEq(fees[4], 3000405020250060 * 20 / 100);
+    }
+
+    function testCalculateDepositFees_DepositOfOne_NormalFee_FiveRecipientsComplicatedSplit() public {
+        // Arrange
+        // Set up your test data
+        uint256 depositAmount = 1 * 1e18;
+        address feeRecipient1 = 0xAb5801a7D398351b8bE11C439e05C5B3259aeC9B;
+        address feeRecipient2 = 0xCA35b7d915458EF540aDe6068dFe2F44E8fa733c;
+        address feeRecipient3 = 0x4B0897b0513fdC7C541B6d9D7E929C4e5364D2dB;
+        address feeRecipient4 = 0x583031D1113aD414F02576BD6afaBfb302140225;
+        address feeRecipient5 = 0xdD870fA1b7C4700F2BD7f44238821C26f7392148;
+
+        // Set up mock pool
+        mockPool.setTotalSupply(1e5 * 1e18);
+        mockToken.setTokenBalance(address(mockPool), 1e4 * 1e18);
+
+
+        address[] memory _recipients = new address[](5);
+        _recipients[0] = feeRecipient1;
+        _recipients[1] = feeRecipient2;
+        _recipients[2] = feeRecipient3;
+        _recipients[3] = feeRecipient4;
+        _recipients[4] = feeRecipient5;
+        uint256[] memory _feeShares = new uint256[](5);
+        _feeShares[0] = 15;
+        _feeShares[1] = 30;
+        _feeShares[2] = 50;
+        _feeShares[3] = 3;
+        _feeShares[4] = 2;
+        feeCalculator.feeSetup(_recipients, _feeShares);
+
+        // Act
+        (address[] memory recipients, uint256[] memory fees) = feeCalculator.calculateDepositFees(address(mockToken), address(mockPool), depositAmount);
+
+        // Assert
+        assertEq(recipients[0], feeRecipient1);
+        assertEq(recipients[1], feeRecipient2);
+        assertEq(recipients[2], feeRecipient3);
+        assertEq(recipients[3], feeRecipient4);
+        assertEq(recipients[4], feeRecipient5);
+        assertEq(sumOf(fees), 3000405020250060);
+        assertEq(fees[0], 3000405020250060 * 15 / 100 + 1);//first recipient gets rest of fee
+        assertEq(fees[1], 3000405020250060 * 30 / 100);
+        assertEq(fees[2], 3000405020250060 * 50 / 100);
+        assertEq(fees[3], uint256(3000405020250060) * 3 / 100);
+        assertEq(fees[4], uint256(3000405020250060) * 2 / 100);
+    }
 
     function testCalculateDepositFees_HugeTotalLargeCurrentSmallDeposit() public {
         // Arrange
@@ -318,5 +469,57 @@ contract FeeCalculatorTest is Test {
 
         // Assert
         assertEq(recipients[0], feeRecipient);
+    }
+
+    function sumOf(uint256[] memory numbers) public pure returns (uint256) {
+        uint256 sum = 0;
+        for (uint i = 0; i < numbers.length; i++) {
+            sum += numbers[i];
+        }
+        return sum;
+    }
+
+    function testFeeSetupFuzzy(address[] memory recipients, uint8 firstShare) public {
+        vm.assume(recipients.length <= 100);
+        vm.assume(recipients.length > 1);//at least two recipients
+        vm.assume(firstShare <= 100);
+        vm.assume(firstShare > 0);
+
+
+        uint256[] memory feeShares = new uint256[](recipients.length);
+
+        uint256 shareLeft = 100 - firstShare;
+        feeShares[0] = firstShare;
+        uint256 equalShare = shareLeft / (recipients.length-1);
+        uint256 leftShare = shareLeft % (recipients.length-1);
+
+        for(uint i=1; i < recipients.length; i++) {
+            feeShares[i] = equalShare;
+        }
+        feeShares[recipients.length-1] += leftShare;//last one gets additional share
+        feeCalculator.feeSetup(recipients, feeShares);
+
+        uint256 depositAmount = 100 * 1e18;
+        // Set up mock pool
+        mockPool.setTotalSupply(200 * 1e18);
+        mockToken.setTokenBalance(address(mockPool), 100 * 1e18);
+
+        // Act
+        (address[] memory recipients, uint256[] memory fees) = feeCalculator.calculateDepositFees(address(mockToken), address(mockPool), depositAmount);
+
+        // Assert
+        for(uint i=0; i < recipients.length; i++) {
+            assertEq(recipients[i], recipients[i]);
+        }
+
+        assertEq(sumOf(fees), 60763888888776388888);
+
+        assertApproxEqAbs(fees[0], 60763888888776388888 * uint256(firstShare) / 100,
+            recipients.length-1);//first fee might get the rest from division
+
+        for(uint i=1; i < recipients.length-1; i++) {
+            assertEq(fees[i], 60763888888776388888 * equalShare / 100);
+        }
+        assertEq(fees[recipients.length-1], 60763888888776388888 * (equalShare+leftShare) / 100);
     }
 }

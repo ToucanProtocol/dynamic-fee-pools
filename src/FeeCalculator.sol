@@ -57,6 +57,8 @@ contract FeeCalculator is IDepositFeeCalculator, IRedemptionFeeCalculator {
     }
 
     function getDepositFee(uint256 amount, uint256 current, uint256 total) private pure returns (uint256) {
+        require(total >= current);
+
         (uint256 a, uint256 b) = getRatios(amount, current, total);
         uint256 fee = calculateDepositFee(a, b, amount);
         return fee;

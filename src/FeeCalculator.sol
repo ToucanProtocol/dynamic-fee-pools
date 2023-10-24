@@ -2,7 +2,7 @@ pragma solidity ^0.8.13;
 
 import "./interfaces/IDepositFeeCalculator.sol";
 import "./interfaces/IRedemptionFeeCalculator.sol";
-import "./interfaces/IPool.sol";
+import "@openzeppelin/contracts/token/ERC20/IERC20.sol";
 
 contract FeeCalculator is IDepositFeeCalculator, IRedemptionFeeCalculator {
 
@@ -27,14 +27,12 @@ contract FeeCalculator is IDepositFeeCalculator, IRedemptionFeeCalculator {
     }
 
     function getTokenBalance(address pool, address tco2) private view returns (uint256) {
-        IPool poolInstance = IPool(pool);
-        uint256 tokenBalance = poolInstance.tokenBalances(tco2);
+        uint256 tokenBalance = IERC20(tco2).balanceOf(pool);
         return tokenBalance;
     }
 
     function getTotalSupply(address pool) private view returns (uint256) {
-        IPool poolInstance = IPool(pool);
-        uint256 totalSupply = poolInstance.totalSupply();
+        uint256 totalSupply = IERC20(pool).totalSupply();
         return totalSupply;
     }
 

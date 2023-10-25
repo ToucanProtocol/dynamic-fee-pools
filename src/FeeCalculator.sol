@@ -30,13 +30,17 @@ contract FeeCalculator is IDepositFeeCalculator, IRedemptionFeeCalculator {
     }
 
     function calculateDepositFees(address tco2, address pool, uint256 depositAmount) external override returns (address[] memory recipients, uint256[] memory feesDenominatedInPoolTokens) {
+        uint256 totalFee = getDepositFee(depositAmount, getTokenBalance(pool, tco2), getTotalSupply(pool));
+        return distributeFeeAmongShares(totalFee);
+    }
+
+    function distributeFeeAmongShares(uint256 totalFee) private view returns (address[] memory recipients, uint256[] memory feesDenominatedInPoolTokens) {
         require(_recipients.length == _shares.length, "Recipients and shares arrays must have the same length");
         require(_recipients.length > 0 , "Recipients and shares arrays must not be empty");
 
         recipients = new address[](_recipients.length);
         feesDenominatedInPoolTokens = new uint256[](_recipients.length);
 
-        uint256 totalFee = getDepositFee(depositAmount, getTokenBalance(pool, tco2), getTotalSupply(pool));
         uint256 restFee = totalFee;
 
         for (uint i=0; i<_recipients.length; i++) {

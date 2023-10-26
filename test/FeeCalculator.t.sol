@@ -519,7 +519,7 @@ contract FeeCalculatorTest is Test {
 
         for (uint256 i = 0; i < numberOfRedemptions; i++) {
             uint256 redemption = equalRedemption + (i==0 ? restRedemption : 0);
-            (recipients, fees) = feeCalculator.calculateDepositFees(address(mockToken), address(mockPool), redemption);
+            (recipients, fees) = feeCalculator.calculateRedemptionFee(address(mockToken), address(mockPool), redemption);
             feeFromDividedRedemptions += fees[0];
             total-=redemption;
             current-=redemption;

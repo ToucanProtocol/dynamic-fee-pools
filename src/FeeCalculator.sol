@@ -6,12 +6,20 @@ import "@openzeppelin/contracts/token/ERC20/IERC20.sol";
 
 contract FeeCalculator is IDepositFeeCalculator, IRedemptionFeeCalculator {
 
-    uint256 private constant depositFeeScale = 3;
+    uint256 private depositFeeScale = 3;
     uint256 private constant redemptionFeeDivider = 3;
     uint256 private constant tokenDenominator = 1e18;
     uint256 private constant ratioDenominator = 1e12;
-    uint256 private constant relativeFeeDenominator = ratioDenominator**3;
-    uint256 private constant relativeFeeCap = 3*relativeFeeDenominator/4;//relativeFeeDenominator;
+    uint256 public constant relativeFeeDenominator = ratioDenominator**3;
+    uint256 private relativeFeeCap = 3*relativeFeeDenominator/4;
+
+    function setRelativeFeeCap(uint256 _relativeFeeCap) public {
+        relativeFeeCap = _relativeFeeCap;
+    }
+
+    function setDepositFeeScale(uint256 _depositFeeScale) public {
+        depositFeeScale = _depositFeeScale;
+    }
 
     address[] private _recipients;
     uint256[] private _shares;
@@ -80,7 +88,7 @@ contract FeeCalculator is IDepositFeeCalculator, IRedemptionFeeCalculator {
         return (a, b);
     }
 
-    function calculateDepositFee(uint256 a, uint256 b, uint256 amount) private pure returns (uint256) {
+    function calculateDepositFee(uint256 a, uint256 b, uint256 amount) private view returns (uint256) {
         uint256 relativeFee = b-a==0 ? relativeFeeCap : depositFeeScale * (b**4 - a**4) / (b-a) / 4;
 
         if (relativeFee > relativeFeeCap) // cap the fee at 3/4
@@ -90,10 +98,12 @@ contract FeeCalculator is IDepositFeeCalculator, IRedemptionFeeCalculator {
 
         uint256 fee = (relativeFee * amount) / relativeFeeDenominator;
 
+        //require(fee <= amount, "Fee greater than deposit amount, aborting");
+
         return fee;
     }
 
-    function getDepositFee(uint256 amount, uint256 current, uint256 total) private pure returns (uint256) {
+    function getDepositFee(uint256 amount, uint256 current, uint256 total) private view returns (uint256) {
         require(total >= current);
 
         (uint256 a, uint256 b) = getRatios(amount, current, total, true);
@@ -101,13 +111,13 @@ contract FeeCalculator is IDepositFeeCalculator, IRedemptionFeeCalculator {
         return fee;
     }
 
-    function calculateRedemptionFee(uint256 a, uint256 b, uint256 amount) private pure returns (uint256) {
+    function calculateRedemptionFee(uint256 a, uint256 b, uint256 amount) private view returns (uint256) {
         uint256 relativeFee = (ratioDenominator-b)**3 / redemptionFeeDivider;//pow(1-b, 3)/3
         uint256 fee = (relativeFee * amount) / relativeFeeDenominator;
         return fee;
     }
 
-    function getRedemptionFee(uint256 amount, uint256 current, uint256 total) private pure returns (uint256) {
+    function getRedemptionFee(uint256 amount, uint256 current, uint256 total) private view returns (uint256) {
         require(total >= current);
         require(amount <= current);
 

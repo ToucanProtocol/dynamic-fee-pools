@@ -490,7 +490,6 @@ contract FeeCalculatorTest is Test {
 
     function testCalculateRedemptionFeesFuzzy_RedemptionDividedIntoMultipleChunksFeesGreaterOrEqualToOneRedemption(uint8 numberOfRedemptions, uint128 _redemptionAmount, uint128 _current, uint128 _total) public {
         vm.assume(0 < numberOfRedemptions);
-        //vm.assume(numberOfRedemptions <= 3);
         vm.assume(_total >= _current);
         vm.assume(_redemptionAmount <= _current);
         vm.assume(_redemptionAmount < 1e20 * 1e18);
@@ -528,8 +527,7 @@ contract FeeCalculatorTest is Test {
         }
 
         // Assert
-        assertGe(200*feeFromDividedRedemptions/100, oneTimeFee);//may be a bug but this one is not always true
-        //assertApproxEqRel(feeFromDividedRedemptions, oneTimeFee, 100 * 1e16);//max 50% difference between these fees
+        assertGe(feeFromDividedRedemptions, oneTimeFee);
     }
 
     function testCalculateDepositFeesFuzzy_DepositDividedIntoMultipleChunksFeesGreaterOrEqualToOneDeposit(uint8 numberOfDeposits, uint128 _depositAmount, uint128 _current, uint128 _total) public {

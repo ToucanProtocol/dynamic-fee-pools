@@ -488,6 +488,11 @@ contract FeeCalculatorTest is Test {
         assertEq(recipients[0], feeRecipient);
     }
 
+    function testCalculateRedemptionFeesFuzzy_RedemptionDividedIntoOneChunkFeesGreaterOrEqualToOneRedemption(uint128 _redemptionAmount, uint128 _current, uint128 _total) public {
+        //just a sanity check
+        testCalculateRedemptionFeesFuzzy_RedemptionDividedIntoMultipleChunksFeesGreaterOrEqualToOneRedemption(1, _redemptionAmount, _current, _total);
+    }
+
     function testCalculateRedemptionFeesFuzzy_RedemptionDividedIntoMultipleChunksFeesGreaterOrEqualToOneRedemption(uint8 numberOfRedemptions, uint128 _redemptionAmount, uint128 _current, uint128 _total) public {
         vm.assume(0 < numberOfRedemptions);
         vm.assume(_total >= _current);
@@ -527,12 +532,17 @@ contract FeeCalculatorTest is Test {
         }
 
         // Assert
-        assertGe(150*feeFromDividedRedemptions/100, oneTimeFee);//may be a bug but this one is not always true
+        uint256 maximumAllowedErrorPercentage = (numberOfRedemptions <= 1) ? 0 : 50;
+        assertGe((maximumAllowedErrorPercentage+100)*feeFromDividedRedemptions/100, oneTimeFee);//may be a bug but this one is not always true
+    }
+
+    function testCalculateDepositFeesFuzzy_DepositDividedIntoOneChunkFeesGreaterOrEqualToOneDeposit(uint128 _depositAmount, uint128 _current, uint128 _total) public {
+        //just a sanity check
+        testCalculateDepositFeesFuzzy_DepositDividedIntoMultipleChunksFeesGreaterOrEqualToOneDeposit(1, _depositAmount, _current, _total);
     }
 
     function testCalculateDepositFeesFuzzy_DepositDividedIntoMultipleChunksFeesGreaterOrEqualToOneDeposit(uint8 numberOfDeposits, uint128 _depositAmount, uint128 _current, uint128 _total) public {
         vm.assume(0 < numberOfDeposits);
-        //vm.assume(numberOfDeposits <= 3);
         vm.assume(_total >= _current);
 
         vm.assume(_depositAmount < 1e20 * 1e18);
@@ -571,8 +581,8 @@ contract FeeCalculatorTest is Test {
         }
 
         // Assert
-        assertGe(150*feeFromDividedDeposits/100, oneTimeFee);//may be a bug but this one is not always true
-        //assertApproxEqRel(feeFromDividedDeposits, oneTimeFee, 100 * 1e16);//max 50% difference between these fees
+        uint256 maximumAllowedErrorPercentage = (numberOfDeposits <= 2) ? 0 : 50;
+        assertGe((maximumAllowedErrorPercentage + 100)*feeFromDividedDeposits/100, oneTimeFee);//may be a bug but this one is not always true
     }
 
     function sumOf(uint256[] memory numbers) public pure returns (uint256) {

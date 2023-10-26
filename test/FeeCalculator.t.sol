@@ -548,8 +548,7 @@ contract FeeCalculatorTest is Test {
         vm.assume(_depositAmount < 1e20 * 1e18);
         vm.assume(_total < 1e20 * 1e18);
 
-        vm.assume(_depositAmount > 1e12);
-        vm.assume(_current > 1e12);
+        vm.assume(_depositAmount > 1e-6 * 1e18);
 
         uint256 depositAmount = _depositAmount;
         uint256 current = _current;

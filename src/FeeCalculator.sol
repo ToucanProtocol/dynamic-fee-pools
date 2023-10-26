@@ -11,7 +11,7 @@ contract FeeCalculator is IDepositFeeCalculator, IRedemptionFeeCalculator {
     uint256 private constant tokenDenominator = 1e18;
     uint256 private constant ratioDenominator = 1e12;
     uint256 private constant relativeFeeDenominator = ratioDenominator**3;
-    uint256 private constant relativeFeeCap = 3*relativeFeeDenominator/4;
+    uint256 private constant relativeFeeCap = 3*relativeFeeDenominator/4;//relativeFeeDenominator;
 
     address[] private _recipients;
     uint256[] private _shares;

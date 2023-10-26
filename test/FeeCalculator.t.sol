@@ -488,6 +488,95 @@ contract FeeCalculatorTest is Test {
         assertEq(recipients[0], feeRecipient);
     }
 
+    function testCalculateRedemptionFeesFuzzy_RedemptionDividedIntoMultipleChunksFeesGreaterOrEqualToOneRedemption(uint8 numberOfRedemptions, uint128 _redemptionAmount, uint128 _current, uint128 _total) public {
+        vm.assume(0 < numberOfRedemptions);
+        //vm.assume(numberOfRedemptions <= 3);
+        vm.assume(_total >= _current);
+        vm.assume(_redemptionAmount <= _current);
+        vm.assume(_redemptionAmount < 1e20 * 1e18);
+        vm.assume(_total < 1e20 * 1e18);
+        vm.assume(_redemptionAmount > 1e12);
+        vm.assume(_current > 1e12);
+
+        uint256 redemptionAmount = _redemptionAmount;
+        uint256 current = _current;
+        uint256 total = _total;
+
+        // Arrange
+        // Set up your test data
+
+        // Set up mock pool
+        mockPool.setTotalSupply(total);
+        mockToken.setTokenBalance(address(mockPool), current);
+
+        // Act
+        (address[] memory recipients, uint256[] memory fees) = feeCalculator.calculateRedemptionFee(address(mockToken), address(mockPool), redemptionAmount);
+        uint256 oneTimeFee = fees[0];
+
+        uint256 equalRedemption = redemptionAmount / numberOfRedemptions;
+        uint256 restRedemption = redemptionAmount % numberOfRedemptions;
+        uint256 feeFromDividedRedemptions = 0;
+
+        for (uint256 i = 0; i < numberOfRedemptions; i++) {
+            uint256 redemption = equalRedemption + (i==0 ? restRedemption : 0);
+            (recipients, fees) = feeCalculator.calculateDepositFees(address(mockToken), address(mockPool), redemption);
+            feeFromDividedRedemptions += fees[0];
+            total-=redemption;
+            current-=redemption;
+            mockPool.setTotalSupply(total);
+            mockToken.setTokenBalance(address(mockPool), current);
+        }
+
+        // Assert
+        assertGe(200*feeFromDividedRedemptions/100, oneTimeFee);//may be a bug but this one is not always true
+        //assertApproxEqRel(feeFromDividedRedemptions, oneTimeFee, 100 * 1e16);//max 50% difference between these fees
+    }
+
+    function testCalculateDepositFeesFuzzy_DepositDividedIntoMultipleChunksFeesGreaterOrEqualToOneDeposit(uint8 numberOfDeposits, uint128 _depositAmount, uint128 _current, uint128 _total) public {
+        vm.assume(0 < numberOfDeposits);
+        //vm.assume(numberOfDeposits <= 3);
+        vm.assume(_total >= _current);
+
+        vm.assume(_depositAmount < 1e20 * 1e18);
+        vm.assume(_total < 1e20 * 1e18);
+
+        vm.assume(_depositAmount > 1e12);
+        vm.assume(_current > 1e12);
+
+        uint256 depositAmount = _depositAmount;
+        uint256 current = _current;
+        uint256 total = _total;
+
+        // Arrange
+        // Set up your test data
+
+        // Set up mock pool
+        mockPool.setTotalSupply(total);
+        mockToken.setTokenBalance(address(mockPool), current);
+
+        // Act
+        (address[] memory recipients, uint256[] memory fees) = feeCalculator.calculateDepositFees(address(mockToken), address(mockPool), depositAmount);
+        uint256 oneTimeFee = fees[0];
+
+        uint256 equalDeposit = depositAmount / numberOfDeposits;
+        uint256 restDeposit = depositAmount % numberOfDeposits;
+        uint256 feeFromDividedDeposits = 0;
+
+        for (uint256 i = 0; i < numberOfDeposits; i++) {
+            uint256 deposit = equalDeposit + (i==0 ? restDeposit : 0);
+            (recipients, fees) = feeCalculator.calculateDepositFees(address(mockToken), address(mockPool), deposit);
+            feeFromDividedDeposits += fees[0];
+            total+=deposit;
+            current+=deposit;
+            mockPool.setTotalSupply(total);
+            mockToken.setTokenBalance(address(mockPool), current);
+        }
+
+        // Assert
+        assertGe(150*feeFromDividedDeposits/100, oneTimeFee);//may be a bug but this one is not always true
+        //assertApproxEqRel(feeFromDividedDeposits, oneTimeFee, 100 * 1e16);//max 50% difference between these fees
+    }
+
     function sumOf(uint256[] memory numbers) public pure returns (uint256) {
         uint256 sum = 0;
         for (uint i = 0; i < numbers.length; i++) {

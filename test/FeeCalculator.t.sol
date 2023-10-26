@@ -580,8 +580,9 @@ contract FeeCalculatorTest is Test {
         }
 
         // Assert
-        uint256 maximumAllowedErrorPercentage = (numberOfDeposits <= 2) ? 0 : 50;
-        assertGe((maximumAllowedErrorPercentage + 100)*feeFromDividedDeposits/100, oneTimeFee);//may be a bug but this one is not always true
+        uint256 maximumAllowedErrorPercentage = (numberOfDeposits <= 1) ? 0 : 1;
+        if(oneTimeFee + feeFromDividedDeposits > 1e-8 * 1e18) // we skip assertion for extremely small fees (basically zero fees) because of numerical errors
+            assertGe((maximumAllowedErrorPercentage + 100)*feeFromDividedDeposits/100, oneTimeFee);//we add 1% tolerance for numerical errors
     }
 
     function sumOf(uint256[] memory numbers) public pure returns (uint256) {

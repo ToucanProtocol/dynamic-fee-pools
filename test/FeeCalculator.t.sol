@@ -497,7 +497,7 @@ contract FeeCalculatorTest is Test {
 
     function testCalculateRedemptionFeesFuzzy_RedemptionDividedIntoMultipleChunksFeesGreaterOrEqualToOneRedemption(uint8 numberOfRedemptions, uint128 _redemptionAmount, uint128 _current, uint128 _total) public {
         feeCalculator.setRedemptionFeeDivider(1);
-        feeCalculator.setRelativeFeeCap(feeCalculator.relativeFeeDenominator());
+
         vm.assume(0 < numberOfRedemptions);
         vm.assume(_total >= _current);
         vm.assume(_redemptionAmount <= _current);
@@ -548,7 +548,6 @@ contract FeeCalculatorTest is Test {
 
     function testCalculateDepositFeesFuzzy_DepositDividedIntoMultipleChunksFeesGreaterOrEqualToOneDeposit(uint8 numberOfDeposits, uint128 _depositAmount, uint128 _current, uint128 _total) public {
         feeCalculator.setDepositFeeScale(1);
-        feeCalculator.setRelativeFeeCap(feeCalculator.relativeFeeDenominator());
 
         vm.assume(0 < numberOfDeposits);
         vm.assume(_total >= _current);

@@ -10,12 +10,8 @@ contract FeeCalculator is IDepositFeeCalculator, IRedemptionFeeCalculator {
     uint256 private redemptionFeeDivider = 3;
     uint256 private constant tokenDenominator = 1e18;
     uint256 private constant ratioDenominator = 1e12;
-    uint256 public constant relativeFeeDenominator = ratioDenominator**3;
-    uint256 private relativeFeeCap = relativeFeeDenominator;
-
-    function setRelativeFeeCap(uint256 _relativeFeeCap) public {
-        relativeFeeCap = _relativeFeeCap;
-    }
+    uint256 private constant relativeFeeDenominator = ratioDenominator**3;
+    uint256 private constant relativeFeeCap = relativeFeeDenominator;
 
     function setDepositFeeScale(uint256 _depositFeeScale) public {
         depositFeeScale = _depositFeeScale;

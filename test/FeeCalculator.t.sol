@@ -194,7 +194,7 @@ contract FeeCalculatorTest is Test {
         assertEq(fees[0], 72036833304441376295);
     }
 
-    function testCalculateDepositFees_DepositOfOneWei_ZeroFee() public {
+    function testCalculateDepositFees_DepositOfOneWei_100PercentFee() public {
         // Arrange
         // Set up your test data
         uint256 depositAmount = 1;
@@ -208,10 +208,10 @@ contract FeeCalculatorTest is Test {
 
         // Assert
         assertEq(recipients[0], feeRecipient);
-        assertEq(fees[0], 0);//fee gets round down to zero for extremely small deposit of one wei
+        assertEq(fees[0], depositAmount);
     }
 
-    function testCalculateDepositFees_DepositOfHundredWei_FeesWronglyCappedAt75Percent() public {
+    function testCalculateDepositFees_DepositOfHundredWei_FeesWronglyCappedAt100Percent() public {
         //Note! This is a bug, where a very small deposit to a very large pool
         //causes a == b because of precision limited by ratioDenominator in FeeCalculator
 
@@ -228,10 +228,10 @@ contract FeeCalculatorTest is Test {
 
         // Assert
         assertEq(recipients[0], feeRecipient);
-        assertEq(fees[0], 75);//most probably a bug
+        assertEq(fees[0], depositAmount);//most probably a bug
     }
 
-    function testCalculateDepositFees_FuzzyExtremelySmallDepositsToLargePool_FeesWronglyCappedAt75Percent(uint256 depositAmount) public {
+    function testCalculateDepositFees_FuzzyExtremelySmallDepositsToLargePool_FeesWronglyCappedAt100Percent(uint256 depositAmount) public {
         vm.assume(depositAmount <= 1e-7 * 1e18);
         vm.assume(depositAmount >= 10);
 
@@ -251,7 +251,7 @@ contract FeeCalculatorTest is Test {
 
         // Assert
         assertEq(recipients[0], feeRecipient);
-        assertEq(fees[0], (3 * depositAmount)/4);//most probably a bug
+        assertEq(fees[0], depositAmount);//most probably a bug
     }
 
     function testCalculateDepositFees_DepositOfHundredThousandsPartOfOne_NonzeroFee() public {
@@ -414,7 +414,7 @@ contract FeeCalculatorTest is Test {
         assertEq(fees[0], 0);
     }
 
-    function testCalculateDepositFees_ZeroTotalCappedFeesAt75Percent() public {
+    function testCalculateDepositFees_EmptyPool_FeeCappedAtDepositFeeScaleDividedByFour() public {
         // Arrange
         // Set up your test data
         uint256 depositAmount = 100*1e18;
@@ -428,10 +428,10 @@ contract FeeCalculatorTest is Test {
 
         // Assert
         assertEq(recipients[0], feeRecipient);
-        assertEq(fees[0], 75 * 1e18);
+        assertEq(fees[0], 75000000000000000000);// depositAmount*depositFeeScale/4
     }
 
-    function testCalculateDepositFees_TotalEqualCurrentFeesCappedAt75Percent() public {
+    function testCalculateDepositFees_TotalEqualCurrentFeesCappedAt100Percent() public {
         // Arrange
         // Set up your test data
         uint256 depositAmount = 100*1e18;
@@ -445,7 +445,7 @@ contract FeeCalculatorTest is Test {
 
         // Assert
         assertEq(recipients[0], feeRecipient);
-        assertEq(fees[0], 75 * 1e18);
+        assertEq(fees[0], depositAmount);
     }
 
     function testCalculateDepositFees_ZeroCurrentNormalFees() public {

@@ -11,7 +11,7 @@ contract FeeCalculator is IDepositFeeCalculator, IRedemptionFeeCalculator {
     uint256 private constant tokenDenominator = 1e18;
     uint256 private constant ratioDenominator = 1e12;
     uint256 public constant relativeFeeDenominator = ratioDenominator**3;
-    uint256 private relativeFeeCap = 3*relativeFeeDenominator/4;
+    uint256 private relativeFeeCap = relativeFeeDenominator;
 
     function setRelativeFeeCap(uint256 _relativeFeeCap) public {
         relativeFeeCap = _relativeFeeCap;
@@ -92,7 +92,7 @@ contract FeeCalculator is IDepositFeeCalculator, IRedemptionFeeCalculator {
     function calculateDepositFee(uint256 a, uint256 b, uint256 amount) private view returns (uint256) {
         uint256 relativeFee = b-a==0 ? relativeFeeCap : depositFeeScale * (b**4 - a**4) / (b-a) / 4;
 
-        if (relativeFee > relativeFeeCap) // cap the fee at 3/4
+        if (relativeFee > relativeFeeCap) // cap the fee at 100%
         {
             relativeFee = relativeFeeCap;
         }

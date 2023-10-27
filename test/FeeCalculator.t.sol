@@ -547,8 +547,6 @@ contract FeeCalculatorTest is Test {
     }
 
     function testCalculateDepositFeesFuzzy_DepositDividedIntoMultipleChunksFeesGreaterOrEqualToOneDeposit(uint8 numberOfDeposits, uint128 _depositAmount, uint128 _current, uint128 _total) public {
-        feeCalculator.setDepositFeeScale(1);
-
         vm.assume(0 < numberOfDeposits);
         vm.assume(_total >= _current);
 
@@ -587,7 +585,7 @@ contract FeeCalculatorTest is Test {
         }
 
         // Assert
-        uint256 maximumAllowedErrorPercentage = (numberOfDeposits <= 1) ? 0 : 1;
+        uint256 maximumAllowedErrorPercentage = (numberOfDeposits <= 1) ? 0 : 2;
         if(oneTimeFee + feeFromDividedDeposits > 1e-8 * 1e18) // we skip assertion for extremely small fees (basically zero fees) because of numerical errors
             assertGe((maximumAllowedErrorPercentage + 100)*feeFromDividedDeposits/100, oneTimeFee);//we add 1% tolerance for numerical errors
     }

@@ -101,9 +101,7 @@ contract FeeCalculator is IDepositFeeCalculator, IRedemptionFeeCalculator {
         }
 
         uint256 fee = (relativeFee * amount) / relativeFeeDenominator;
-
-        //require(fee <= amount, "Fee greater than deposit amount, aborting");
-
+        require(fee <= amount, "Fee must be lower or equal to deposit amount");
         return fee;
     }
 
@@ -118,6 +116,7 @@ contract FeeCalculator is IDepositFeeCalculator, IRedemptionFeeCalculator {
     function calculateRedemptionFee(uint256 a, uint256 b, uint256 amount) private view returns (uint256) {
         uint256 relativeFee = (ratioDenominator-b)**3 / redemptionFeeDivider;//pow(1-b, 3)/3
         uint256 fee = (relativeFee * amount) / relativeFeeDenominator;
+        require(fee <= amount, "Fee must be lower or equal to redemption amount");
         return fee;
     }
 

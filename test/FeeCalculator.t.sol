@@ -100,6 +100,23 @@ contract FeeCalculatorTest is Test {
         assertEq(fees[0], 42930597295197661532);
     }
 
+    function testCalculateRedemptionFeesNormalCase() public {
+        // Arrange
+        // Set up your test data
+        uint256 redemptionAmount = 100*1e18;
+
+        // Set up mock pool
+        mockPool.setTotalSupply(1000*1e18);
+        mockToken.setTokenBalance(address(mockPool), 500*1e18);
+
+        // Act
+        (address[] memory recipients, uint256[] memory fees) = feeCalculator.calculateRedemptionFee(address(mockToken), address(mockPool), redemptionAmount);
+
+        // Assert
+        assertEq(recipients[0], feeRecipient);
+        assertEq(fees[0], 5715592135358939186);
+    }
+
     function testCalculateDepositFeesNormalCase_TwoFeeRecipientsSplitEqually() public {
         // Arrange
         // Set up your test data

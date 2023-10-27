@@ -494,12 +494,14 @@ contract FeeCalculatorTest is Test {
     }
 
     function testCalculateRedemptionFeesFuzzy_RedemptionDividedIntoMultipleChunksFeesGreaterOrEqualToOneRedemption(uint8 numberOfRedemptions, uint128 _redemptionAmount, uint128 _current, uint128 _total) public {
+        feeCalculator.setRedemptionFeeDivider(1);
+        feeCalculator.setRelativeFeeCap(feeCalculator.relativeFeeDenominator());
         vm.assume(0 < numberOfRedemptions);
         vm.assume(_total >= _current);
         vm.assume(_redemptionAmount <= _current);
         vm.assume(_redemptionAmount < 1e20 * 1e18);
         vm.assume(_total < 1e20 * 1e18);
-        vm.assume(_redemptionAmount > 1e12);
+        vm.assume(_redemptionAmount > 1e-6 * 1e18);
         vm.assume(_current > 1e12);
 
         uint256 redemptionAmount = _redemptionAmount;
@@ -532,8 +534,9 @@ contract FeeCalculatorTest is Test {
         }
 
         // Assert
-        uint256 maximumAllowedErrorPercentage = (numberOfRedemptions <= 1) ? 0 : 50;
-        assertGe((maximumAllowedErrorPercentage+100)*feeFromDividedRedemptions/100, oneTimeFee);//may be a bug but this one is not always true
+        uint256 maximumAllowedErrorPercentage = (numberOfRedemptions <= 1) ? 0 : 1;
+        if(oneTimeFee + feeFromDividedRedemptions > 1e-8 * 1e18) // we skip assertion for extremely small fees (basically zero fees) because of numerical errors
+            assertGe((maximumAllowedErrorPercentage + 100)*feeFromDividedRedemptions/100, oneTimeFee);//we add 1% tolerance for numerical errors
     }
 
     function testCalculateDepositFeesFuzzy_DepositDividedIntoOneChunkFeesGreaterOrEqualToOneDeposit(uint128 _depositAmount, uint128 _current, uint128 _total) public {

@@ -7,7 +7,7 @@ import "@openzeppelin/contracts/token/ERC20/IERC20.sol";
 contract FeeCalculator is IDepositFeeCalculator, IRedemptionFeeCalculator {
 
     uint256 private depositFeeScale = 3;
-    uint256 private constant redemptionFeeDivider = 3;
+    uint256 private redemptionFeeDivider = 3;
     uint256 private constant tokenDenominator = 1e18;
     uint256 private constant ratioDenominator = 1e12;
     uint256 public constant relativeFeeDenominator = ratioDenominator**3;
@@ -19,6 +19,10 @@ contract FeeCalculator is IDepositFeeCalculator, IRedemptionFeeCalculator {
 
     function setDepositFeeScale(uint256 _depositFeeScale) public {
         depositFeeScale = _depositFeeScale;
+    }
+
+    function setRedemptionFeeDivider(uint256 _redemptionFeeDivider) public {
+        redemptionFeeDivider = _redemptionFeeDivider;
     }
 
     address[] private _recipients;

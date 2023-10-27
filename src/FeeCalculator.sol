@@ -30,7 +30,7 @@ contract FeeCalculator is IDepositFeeCalculator, IRedemptionFeeCalculator {
 
     function feeSetup(address[] memory recipients, uint256[] memory shares) external {
         require(recipients.length == shares.length, "Recipients and shares arrays must have the same length");
-        require(recipients.length > 0);
+        require(recipients.length > 0, "Recipients and shares arrays must not be empty");
 
         uint256 totalShares = 0;
         for (uint i = 0; i < shares.length; i++) {
@@ -48,9 +48,6 @@ contract FeeCalculator is IDepositFeeCalculator, IRedemptionFeeCalculator {
     }
 
     function distributeFeeAmongShares(uint256 totalFee) private view returns (address[] memory recipients, uint256[] memory feesDenominatedInPoolTokens) {
-        require(_recipients.length == _shares.length, "Recipients and shares arrays must have the same length");
-        require(_recipients.length > 0 , "Recipients and shares arrays must not be empty");
-
         recipients = new address[](_recipients.length);
         feesDenominatedInPoolTokens = new uint256[](_recipients.length);
 

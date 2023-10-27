@@ -488,6 +488,109 @@ contract FeeCalculatorTest is Test {
         assertEq(recipients[0], feeRecipient);
     }
 
+    function testCalculateRedemptionFeesFuzzy_RedemptionDividedIntoOneChunkFeesGreaterOrEqualToOneRedemption(uint128 _redemptionAmount, uint128 _current, uint128 _total) public {
+        //just a sanity check
+        testCalculateRedemptionFeesFuzzy_RedemptionDividedIntoMultipleChunksFeesGreaterOrEqualToOneRedemption(1, _redemptionAmount, _current, _total);
+    }
+
+    function testCalculateRedemptionFeesFuzzy_RedemptionDividedIntoMultipleChunksFeesGreaterOrEqualToOneRedemption(uint8 numberOfRedemptions, uint128 _redemptionAmount, uint128 _current, uint128 _total) public {
+        feeCalculator.setRedemptionFeeDivider(1);
+        feeCalculator.setRelativeFeeCap(feeCalculator.relativeFeeDenominator());
+        vm.assume(0 < numberOfRedemptions);
+        vm.assume(_total >= _current);
+        vm.assume(_redemptionAmount <= _current);
+        vm.assume(_redemptionAmount < 1e20 * 1e18);
+        vm.assume(_total < 1e20 * 1e18);
+        vm.assume(_redemptionAmount > 1e-6 * 1e18);
+        vm.assume(_current > 1e12);
+
+        uint256 redemptionAmount = _redemptionAmount;
+        uint256 current = _current;
+        uint256 total = _total;
+
+        // Arrange
+        // Set up your test data
+
+        // Set up mock pool
+        mockPool.setTotalSupply(total);
+        mockToken.setTokenBalance(address(mockPool), current);
+
+        // Act
+        (address[] memory recipients, uint256[] memory fees) = feeCalculator.calculateRedemptionFee(address(mockToken), address(mockPool), redemptionAmount);
+        uint256 oneTimeFee = fees[0];
+
+        uint256 equalRedemption = redemptionAmount / numberOfRedemptions;
+        uint256 restRedemption = redemptionAmount % numberOfRedemptions;
+        uint256 feeFromDividedRedemptions = 0;
+
+        for (uint256 i = 0; i < numberOfRedemptions; i++) {
+            uint256 redemption = equalRedemption + (i==0 ? restRedemption : 0);
+            (recipients, fees) = feeCalculator.calculateRedemptionFee(address(mockToken), address(mockPool), redemption);
+            feeFromDividedRedemptions += fees[0];
+            total-=redemption;
+            current-=redemption;
+            mockPool.setTotalSupply(total);
+            mockToken.setTokenBalance(address(mockPool), current);
+        }
+
+        // Assert
+        uint256 maximumAllowedErrorPercentage = (numberOfRedemptions <= 1) ? 0 : 1;
+        if(oneTimeFee + feeFromDividedRedemptions > 1e-8 * 1e18) // we skip assertion for extremely small fees (basically zero fees) because of numerical errors
+            assertGe((maximumAllowedErrorPercentage + 100)*feeFromDividedRedemptions/100, oneTimeFee);//we add 1% tolerance for numerical errors
+    }
+
+    function testCalculateDepositFeesFuzzy_DepositDividedIntoOneChunkFeesGreaterOrEqualToOneDeposit(uint128 _depositAmount, uint128 _current, uint128 _total) public {
+        //just a sanity check
+        testCalculateDepositFeesFuzzy_DepositDividedIntoMultipleChunksFeesGreaterOrEqualToOneDeposit(1, _depositAmount, _current, _total);
+    }
+
+    function testCalculateDepositFeesFuzzy_DepositDividedIntoMultipleChunksFeesGreaterOrEqualToOneDeposit(uint8 numberOfDeposits, uint128 _depositAmount, uint128 _current, uint128 _total) public {
+        feeCalculator.setDepositFeeScale(1);
+        feeCalculator.setRelativeFeeCap(feeCalculator.relativeFeeDenominator());
+
+        vm.assume(0 < numberOfDeposits);
+        vm.assume(_total >= _current);
+
+        vm.assume(_depositAmount < 1e20 * 1e18);
+        vm.assume(_total < 1e20 * 1e18);
+
+        vm.assume(_depositAmount > 1e-6 * 1e18);
+
+        uint256 depositAmount = _depositAmount;
+        uint256 current = _current;
+        uint256 total = _total;
+
+        // Arrange
+        // Set up your test data
+
+        // Set up mock pool
+        mockPool.setTotalSupply(total);
+        mockToken.setTokenBalance(address(mockPool), current);
+
+        // Act
+        (address[] memory recipients, uint256[] memory fees) = feeCalculator.calculateDepositFees(address(mockToken), address(mockPool), depositAmount);
+        uint256 oneTimeFee = fees[0];
+
+        uint256 equalDeposit = depositAmount / numberOfDeposits;
+        uint256 restDeposit = depositAmount % numberOfDeposits;
+        uint256 feeFromDividedDeposits = 0;
+
+        for (uint256 i = 0; i < numberOfDeposits; i++) {
+            uint256 deposit = equalDeposit + (i==0 ? restDeposit : 0);
+            (recipients, fees) = feeCalculator.calculateDepositFees(address(mockToken), address(mockPool), deposit);
+            feeFromDividedDeposits += fees[0];
+            total+=deposit;
+            current+=deposit;
+            mockPool.setTotalSupply(total);
+            mockToken.setTokenBalance(address(mockPool), current);
+        }
+
+        // Assert
+        uint256 maximumAllowedErrorPercentage = (numberOfDeposits <= 1) ? 0 : 1;
+        if(oneTimeFee + feeFromDividedDeposits > 1e-8 * 1e18) // we skip assertion for extremely small fees (basically zero fees) because of numerical errors
+            assertGe((maximumAllowedErrorPercentage + 100)*feeFromDividedDeposits/100, oneTimeFee);//we add 1% tolerance for numerical errors
+    }
+
     function sumOf(uint256[] memory numbers) public pure returns (uint256) {
         uint256 sum = 0;
         for (uint i = 0; i < numbers.length; i++) {

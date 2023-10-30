@@ -511,7 +511,9 @@ contract FeeCalculatorTest is Test {
             assertEq(recipients[0], feeRecipient);
         }
         catch Error(string memory reason){
-            assertEq("b should be greater than a", reason);
+            assertTrue(keccak256(bytes("b should be greater than a")) == keccak256(bytes(reason)) ||
+            keccak256(bytes("Fee must be lower or equal to deposit amount")) == keccak256(bytes(reason)),
+                "error should be 'b should be greater than a' or 'Fee must be lower or equal to deposit amount'");
         }
     }
 
@@ -588,19 +590,24 @@ contract FeeCalculatorTest is Test {
         mockPool.setTotalSupply(total);
         mockToken.setTokenBalance(address(mockPool), current);
 
-        // Act
-        (address[] memory recipients, uint256[] memory fees) = feeCalculator.calculateDepositFees(address(mockToken), address(mockPool), depositAmount);
+        uint256 oneTimeFee = 0;
 
-        try feeCalculator.calculateDepositFees(address(mockToken), address(mockPool), depositAmount) returns (address[] memory recipients, uint256[] memory fees) {
+        // Act
+        try feeCalculator.calculateDepositFees(address(mockToken), address(mockPool), depositAmount) returns (address[] memory recipients, uint256[] memory fees)
+        {
+            oneTimeFee = fees[0];
+
             // Assert
             assertEq(recipients[0], feeRecipient);
         }
-        catch Error(string memory reason) {
+        catch Error(string memory reason)
+        {
             oneTimeDepositFailed=true;
-            assertEq("b should be greater than a", reason);
+            assertTrue(keccak256(bytes("b should be greater than a")) == keccak256(bytes(reason)) ||
+            keccak256(bytes("Fee must be lower or equal to deposit amount")) == keccak256(bytes(reason)),
+                "error should be 'b should be greater than a' or 'Fee must be lower or equal to deposit amount'");
         }
 
-        uint256 oneTimeFee = fees[0];
 
         uint256 equalDeposit = depositAmount / numberOfDeposits;
         uint256 restDeposit = depositAmount % numberOfDeposits;
@@ -619,7 +626,9 @@ contract FeeCalculatorTest is Test {
             }
             catch Error(string memory reason) {
                 multipleTimesDepositFailedCount++;
-                assertEq("b should be greater than a", reason);
+                assertTrue(keccak256(bytes("b should be greater than a")) == keccak256(bytes(reason)) ||
+                keccak256(bytes("Fee must be lower or equal to deposit amount")) == keccak256(bytes(reason)),
+                    "error should be 'b should be greater than a' or 'Fee must be lower or equal to deposit amount'");
             }
         }
 

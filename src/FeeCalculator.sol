@@ -30,7 +30,7 @@ contract FeeCalculator is IDepositFeeCalculator, IRedemptionFeeCalculator {
 
     function feeSetup(address[] memory recipients, uint256[] memory shares) external {
         require(recipients.length == shares.length, "Recipients and shares arrays must have the same length");
-        require(recipients.length > 0);
+        require(recipients.length > 0, "Recipients and shares arrays must not be empty");
 
         uint256 totalShares = 0;
         for (uint i = 0; i < shares.length; i++) {
@@ -48,9 +48,6 @@ contract FeeCalculator is IDepositFeeCalculator, IRedemptionFeeCalculator {
     }
 
     function distributeFeeAmongShares(uint256 totalFee) private view returns (address[] memory recipients, uint256[] memory feesDenominatedInPoolTokens) {
-        require(_recipients.length == _shares.length, "Recipients and shares arrays must have the same length");
-        require(_recipients.length > 0 , "Recipients and shares arrays must not be empty");
-
         recipients = new address[](_recipients.length);
         feesDenominatedInPoolTokens = new uint256[](_recipients.length);
 
@@ -101,9 +98,7 @@ contract FeeCalculator is IDepositFeeCalculator, IRedemptionFeeCalculator {
         }
 
         uint256 fee = (relativeFee * amount) / relativeFeeDenominator;
-
-        //require(fee <= amount, "Fee greater than deposit amount, aborting");
-
+        require(fee <= amount, "Fee must be lower or equal to deposit amount");
         return fee;
     }
 
@@ -118,6 +113,7 @@ contract FeeCalculator is IDepositFeeCalculator, IRedemptionFeeCalculator {
     function calculateRedemptionFee(uint256 a, uint256 b, uint256 amount) private view returns (uint256) {
         uint256 relativeFee = (ratioDenominator-b)**3 / redemptionFeeDivider;//pow(1-b, 3)/3
         uint256 fee = (relativeFee * amount) / relativeFeeDenominator;
+        require(fee <= amount, "Fee must be lower or equal to redemption amount");
         return fee;
     }
 

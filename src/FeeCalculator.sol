@@ -11,6 +11,7 @@ contract FeeCalculator is IDepositFeeCalculator, IRedemptionFeeCalculator {
     uint256 private constant tokenDenominator = 1e18;
     uint256 private constant ratioDenominator = 1e12;
     uint256 private constant relativeFeeDenominator = ratioDenominator**3;
+    uint256 private constant minimumRedemption = tokenDenominator / 10; // 0.1 token
 
     function setDepositFeeScale(uint256 _depositFeeScale) public {
         depositFeeScale = _depositFeeScale;
@@ -58,8 +59,11 @@ contract FeeCalculator is IDepositFeeCalculator, IRedemptionFeeCalculator {
         feesDenominatedInPoolTokens[0] += restFee;//we give rest of the fee (if any) to the first recipient
     }
 
-    function calculateRedemptionFee(address tco2, address pool, uint256 depositAmount) external override returns (address[] memory recipients, uint256[] memory feesDenominatedInPoolTokens) {
-        uint256 totalFee = getRedemptionFee(depositAmount, getTokenBalance(pool, tco2), getTotalSupply(pool));
+    function calculateRedemptionFee(address tco2, address pool, uint256 redemptionAmount) external override returns (address[] memory recipients, uint256[] memory feesDenominatedInPoolTokens) {
+        require(redemptionAmount >= minimumRedemption, "Redemption amount must be greater than or equal to minimum redemption");
+        require(redemptionAmount % minimumRedemption == 0, "Redemption amount must be a natural multiple of minimum redemption");
+
+        uint256 totalFee = getRedemptionFee(redemptionAmount, getTokenBalance(pool, tco2), getTotalSupply(pool));
         return distributeFeeAmongShares(totalFee);
     }
 
@@ -111,9 +115,16 @@ contract FeeCalculator is IDepositFeeCalculator, IRedemptionFeeCalculator {
     function getRedemptionFee(uint256 amount, uint256 current, uint256 total) private view returns (uint256) {
         require(total >= current);
         require(amount <= current);
+        uint256 fee = 0;
+        uint256 numberOfRedemptions = amount/minimumRedemption;
 
-        (uint256 a, uint256 b) = getRatios(amount, current, total, false);
-        uint256 fee = calculateRedemptionFee(a, b, amount);
+        for (uint256 i = 0; i < numberOfRedemptions; i++) {
+            (uint256 a, uint256 b) = getRatios(minimumRedemption, current, total, false);
+            fee += calculateRedemptionFee(a, b, minimumRedemption);
+            current -= minimumRedemption;
+            total -= minimumRedemption;
+        }
+
         return fee;
     }
 }

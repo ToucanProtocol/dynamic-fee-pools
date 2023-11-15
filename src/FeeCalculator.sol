@@ -113,6 +113,16 @@ contract FeeCalculator is IDepositFeeCalculator, IRedemptionFeeCalculator {
         require(amount <= current);
 
         (uint256 a, uint256 b) = getRatios(amount, current, total, false);
+
+        uint256 ta = current_asset;
+        uint256 tb = current_asset - amount;
+
+        //0.3 * (tb * log10(b) - ta * log10(a))
+
+        //b = 1 if b == 0 else math.log10(b)
+        //in_asset = 0.3*(tb*b-ta*math.log10(a))
+        //uint256 fee = 0.3*(tb*b-ta*math.log10(a));
+
         uint256 fee = calculateRedemptionFee(a, b, amount);
         return fee;
     }

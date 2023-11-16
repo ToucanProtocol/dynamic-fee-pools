@@ -8,6 +8,9 @@ import { UD60x18, ud, intoUint256 } from "@prb/math/src/UD60x18.sol";
 contract FeeCalculator is IDepositFeeCalculator, IRedemptionFeeCalculator {
 
     uint256 private depositFeeScale = 2;
+
+    UD60x18 private zero = ud(0);
+    UD60x18 private one = ud(1e18);
     uint256 private constant tokenDenominator = 1e18;
     uint256 private constant ratioDenominator = 1e12;
     uint256 private constant relativeFeeDenominator = ratioDenominator**3;

@@ -523,7 +523,6 @@ contract FeeCalculatorTest is Test {
     }
 
     function testCalculateRedemptionFeesFuzzy_RedemptionDividedIntoMultipleChunksFeesGreaterOrEqualToOneRedemption(uint8 numberOfRedemptions, uint128 _redemptionAmount, uint128 _current, uint128 _total) public {
-        feeCalculator.setRedemptionFeeDivider(1);
 
         vm.assume(0 < numberOfRedemptions);
         vm.assume(_total >= _current);

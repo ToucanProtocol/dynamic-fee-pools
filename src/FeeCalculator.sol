@@ -143,6 +143,9 @@ contract FeeCalculator is IDepositFeeCalculator, IRedemptionFeeCalculator {
         {
             if(feeVariablePartA > fee_float)
             {
+                if(feeVariablePartA == fee_float + ud(1))
+                    fee_float = fee_float + ud(1);
+                else
                     console.log("feeVariablePartA > fee_float:\n%d\n>\n%d", intoUint256(feeVariablePartA), intoUint256(fee_float));
             }
             fee_float = fee_float - feeVariablePartA;
@@ -152,6 +155,9 @@ contract FeeCalculator is IDepositFeeCalculator, IRedemptionFeeCalculator {
         {
             if(feeVariablePartB > fee_float)
             {
+                if(feeVariablePartB == fee_float + ud(1))
+                    fee_float = fee_float + ud(1);
+                else
                     console.log("feeVariablePartB > fee_float:\n%d\n>\n%d", intoUint256(feeVariablePartB), intoUint256(fee_float));
             }
 

@@ -122,6 +122,7 @@ contract FeeCalculator is IDepositFeeCalculator, IRedemptionFeeCalculator {
         UD60x18 minus_log_b = db == zero ? zero : (one / db).log10();
 
         UD60x18 fee_float = redemptionFeeScale * (ta * minus_log_a - tb * minus_log_b);
+        //TODO: shift towards Y-axis by redemptionFeeShift and move up from X-axis by redemptionFeeConstant
 
         uint256 fee = intoUint256(fee_float);
 

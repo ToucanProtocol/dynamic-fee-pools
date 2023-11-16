@@ -1,5 +1,6 @@
 pragma solidity ^0.8.13;
 
+import "forge-std/console.sol";
 import "./interfaces/IDepositFeeCalculator.sol";
 import "./interfaces/IRedemptionFeeCalculator.sol";
 import "@openzeppelin/contracts/token/ERC20/IERC20.sol";
@@ -140,17 +141,30 @@ contract FeeCalculator is IDepositFeeCalculator, IRedemptionFeeCalculator {
 
         if(is_log_a_negative)
         {
+            if(feeVariablePartA > fee_float)
+            {
+                    console.log("feeVariablePartA > fee_float:\n%d\n>\n%d", intoUint256(feeVariablePartA), intoUint256(fee_float));
+            }
             fee_float = fee_float - feeVariablePartA;
         }
 
         if(is_log_b_negative)
         {
+            if(feeVariablePartB > fee_float)
+            {
+                    console.log("feeVariablePartB > fee_float:\n%d\n>\n%d", intoUint256(feeVariablePartB), intoUint256(fee_float));
+            }
+
             fee_float = fee_float - feeVariablePartB;
         }
 
         uint256 fee = intoUint256(fee_float);
 
-        require(fee <= amount, "Fee must be lower or equal to redemption amount");
+        if(fee > amount)
+        {
+            console.log("Fee > amount:\n%d\n>\n%d", fee, amount);
+            require(fee <= amount, "Fee must be lower or equal to redemption amount");
+        }
 
         return fee;
     }

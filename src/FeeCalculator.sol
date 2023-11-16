@@ -105,29 +105,28 @@ contract FeeCalculator is IDepositFeeCalculator, IRedemptionFeeCalculator {
         return fee;
     }
 
-    function calculateRedemptionFee(uint256 a, uint256 b, uint256 amount) private view returns (uint256) {
-        uint256 relativeFee = (ratioDenominator-b)**3 / redemptionFeeDivider;//pow(1-b, 3)/3
-        uint256 fee = (relativeFee * amount) / relativeFeeDenominator;
-        require(fee <= amount, "Fee must be lower or equal to redemption amount");
-        return fee;
-    }
-
     function getRedemptionFee(uint256 amount, uint256 current, uint256 total) private view returns (uint256) {
         require(total >= current);
         require(amount <= current);
 
         (uint256 a, uint256 b) = getRatios(amount, current, total, false);
 
-        uint256 ta = current_asset;
-        uint256 tb = current_asset - amount;
+        UD60x18 da = ud(a * (1e18 / ratioDenominator));
+        UD60x18 db = ud(b * (1e18 / ratioDenominator));
 
-        //0.3 * (tb * log10(b) - ta * log10(a))
+        UD60x18 ta = ud(current);
+        UD60x18 tb = ud(current - amount);
 
-        //b = 1 if b == 0 else math.log10(b)
-        //in_asset = 0.3*(tb*b-ta*math.log10(a))
-        //uint256 fee = 0.3*(tb*b-ta*math.log10(a));
+        //used this property: `log_b(a) = -log_b(1/a)` to not use negative values
+        UD60x18 minus_log_a = (one / da).log10();
+        UD60x18 minus_log_b = db == zero ? zero : (one / db).log10();
 
-        uint256 fee = calculateRedemptionFee(a, b, amount);
+        UD60x18 fee_float = redemptionFeeScale * (ta * minus_log_a - tb * minus_log_b);
+
+        uint256 fee = intoUint256(fee_float);
+
+        require(fee <= amount, "Fee must be lower or equal to redemption amount");
+
         return fee;
     }
 }

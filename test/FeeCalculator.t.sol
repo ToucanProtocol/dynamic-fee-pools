@@ -3,6 +3,7 @@ pragma solidity ^0.8.13;
 
 import {Test, console2} from "forge-std/Test.sol";
 import {FeeCalculator} from "../src/FeeCalculator.sol";
+import { UD60x18, ud, intoUint256 } from "@prb/math/src/UD60x18.sol";
 import "@openzeppelin/contracts/token/ERC20/IERC20.sol";
 
 contract MockPool is IERC20 {
@@ -66,6 +67,12 @@ contract MockToken is IERC20 {
 }
 
 contract FeeCalculatorTest is Test {
+    UD60x18 private zero = ud(0);
+    UD60x18 private one = ud(1e18);
+    UD60x18 private redemptionFeeScale = ud(0.3 * 1e18);
+    UD60x18 private redemptionFeeShift = ud(0.1 * 1e18);//-log10(0+0.1)=1 -> 10^-1
+    UD60x18 private redemptionFeeConstant = redemptionFeeScale.mul((one+redemptionFeeShift).log10()); //0.0413926851582251=log10(1+0.1)
+
     FeeCalculator public feeCalculator;
     MockPool public mockPool;
     MockToken public mockToken;
@@ -117,6 +124,40 @@ contract FeeCalculatorTest is Test {
         // Assert
         assertEq(recipients[0], feeRecipient);
         assertEq(fees[0], 5715592135358939186);
+    }
+
+    function testCalculateRedemptionFees_ZeroMonopolization_MaximumFees() public {
+        // Arrange
+        // Set up your test data
+        uint256 redemptionAmount = 1 * 1e18;
+
+        // Set up mock pool
+        mockPool.setTotalSupply(1e6 * 1e18);
+        mockToken.setTokenBalance(address(mockPool), 1*1e18);
+
+        // Act
+        (address[] memory recipients, uint256[] memory fees) = feeCalculator.calculateRedemptionFee(address(mockToken), address(mockPool), redemptionAmount);
+
+        // Assert
+        assertEq(recipients[0], feeRecipient);
+        assertEq(fees[0], intoUint256((redemptionFeeScale + redemptionFeeConstant).mul(ud(redemptionAmount))) );
+    }
+
+    function testCalculateRedemptionFees_FullMonopolization_ZeroFees() public {
+        // Arrange
+        // Set up your test data
+        uint256 redemptionAmount = 1 * 1e18;
+
+        // Set up mock pool
+        mockPool.setTotalSupply(1e6 * 1e18);
+        mockToken.setTokenBalance(address(mockPool), 1e6 * 1e18);
+
+        // Act
+        (address[] memory recipients, uint256[] memory fees) = feeCalculator.calculateRedemptionFee(address(mockToken), address(mockPool), redemptionAmount);
+
+        // Assert
+        assertEq(recipients[0], feeRecipient);
+        assertEq(fees[0], 0);
     }
 
     function testCalculateDepositFeesNormalCase_TwoFeeRecipientsSplitEqually() public {

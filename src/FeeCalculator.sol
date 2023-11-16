@@ -3,6 +3,7 @@ pragma solidity ^0.8.13;
 import "./interfaces/IDepositFeeCalculator.sol";
 import "./interfaces/IRedemptionFeeCalculator.sol";
 import "@openzeppelin/contracts/token/ERC20/IERC20.sol";
+import { UD60x18, ud, intoUint256 } from "@prb/math/src/UD60x18.sol";
 
 contract FeeCalculator is IDepositFeeCalculator, IRedemptionFeeCalculator {
 

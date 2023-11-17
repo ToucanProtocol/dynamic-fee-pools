@@ -120,6 +120,20 @@ contract FeeCalculator is IDepositFeeCalculator, IRedemptionFeeCalculator {
         return fee;
     }
 
+    function getLogVariableRedemptionFeePart(UD60x18 dominance, UD60x18 current) private view returns (UD60x18, bool)
+    {
+        UD60x18 shifted_d = dominance + redemptionFeeShift;
+
+        bool is_log_negative = shifted_d < one;
+
+        //used this property: `log_b(a) = -log_b(1/a)` to not use negative values
+        UD60x18 positive_log = dominance == zero ? zero : (is_log_negative==true ? (one / shifted_d) : shifted_d).log10();
+
+        UD60x18 feeVariablePart = redemptionFeeScale.mul(current.mul(positive_log));
+
+        return (feeVariablePart, is_log_negative);
+    }
+
     function getRedemptionFee(uint256 amount, uint256 current, uint256 total) private view returns (uint256) {
         require(total >= current);
         require(amount <= current);
@@ -129,24 +143,15 @@ contract FeeCalculator is IDepositFeeCalculator, IRedemptionFeeCalculator {
         UD60x18 da = ud(a * (1e18 / ratioDenominator));
         UD60x18 db = ud(b * (1e18 / ratioDenominator));
 
+        UD60x18 amount_float = ud(amount);
         UD60x18 ta = ud(current);
-        UD60x18 tb = ud(current - amount);
-
-        UD60x18 shifted_da = da + redemptionFeeShift;
-        UD60x18 shifted_db = db + redemptionFeeShift;
-
-        bool is_log_a_negative = shifted_da < one;
-        bool is_log_b_negative = shifted_db < one;
-
-        //used this property: `log_b(a) = -log_b(1/a)` to not use negative values
-        UD60x18 positive_log_a = da == zero ? zero : (is_log_a_negative==true ? (one / shifted_da) : shifted_da).log10();
-        UD60x18 positive_log_b = db == zero ? zero : (is_log_b_negative==true ? (one / shifted_db) : shifted_db).log10();
+        UD60x18 tb = ta - amount_float;
 
         //redemption_fee = scale * (tb * log10(b+shift) - ta * log10(a+shift)) + constant*amount;
-        UD60x18 fee_float = redemptionFeeConstant.mul(ud(amount)); //we start with always positive constant
+        UD60x18 fee_float = redemptionFeeConstant.mul(amount_float); //we start with always positive constant
 
-        UD60x18 feeVariablePartA = redemptionFeeScale.mul(ta.mul(positive_log_a));
-        UD60x18 feeVariablePartB = redemptionFeeScale.mul(tb.mul(positive_log_b));
+        (UD60x18 feeVariablePartA, bool is_log_a_negative) = getLogVariableRedemptionFeePart(da, ta);
+        (UD60x18 feeVariablePartB, bool is_log_b_negative) = getLogVariableRedemptionFeePart(db, tb);
 
         if(!is_log_a_negative)
             fee_float = fee_float + feeVariablePartA;

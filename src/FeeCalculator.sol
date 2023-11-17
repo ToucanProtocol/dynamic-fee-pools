@@ -8,10 +8,11 @@ import { UD60x18, ud, intoUint256 } from "@prb/math/src/UD60x18.sol";
 
 contract FeeCalculator is IDepositFeeCalculator, IRedemptionFeeCalculator {
 
-    uint256 private depositFeeScale = 2;
-
     UD60x18 private zero = ud(0);
     UD60x18 private one = ud(1e18);
+
+    UD60x18 private depositFeeScale = ud(0.18 * 1e18);
+    UD60x18 private depositFeeRatioScale = ud(0.8 * 1e18);
 
     UD60x18 private redemptionFeeScale = ud(0.3 * 1e18);
     UD60x18 private redemptionFeeShift = ud(0.1 * 1e18);//-log10(0+0.1)=1 -> 10^-1
@@ -20,10 +21,6 @@ contract FeeCalculator is IDepositFeeCalculator, IRedemptionFeeCalculator {
     uint256 private constant tokenDenominator = 1e18;
     uint256 private constant ratioDenominator = 1e12;
     uint256 private constant relativeFeeDenominator = ratioDenominator**3;
-
-    function setDepositFeeScale(uint256 _depositFeeScale) public {
-        depositFeeScale = _depositFeeScale;
-    }
 
     address[] private _recipients;
     uint256[] private _shares;
@@ -89,20 +86,37 @@ contract FeeCalculator is IDepositFeeCalculator, IRedemptionFeeCalculator {
         return (a, b);
     }
 
-    function calculateDepositFee(uint256 a, uint256 b, uint256 amount) private view returns (uint256) {
-        require(b > a, "b should be greater than a");
-
-        uint256 relativeFee = depositFeeScale * (b**4 - a**4) / (b-a) / 4;
-        uint256 fee = (relativeFee * amount) / relativeFeeDenominator;
-        require(fee <= amount, "Fee must be lower or equal to deposit amount");
-        return fee;
-    }
-
     function getDepositFee(uint256 amount, uint256 current, uint256 total) private view returns (uint256) {
         require(total >= current);
 
         (uint256 a, uint256 b) = getRatios(amount, current, total, true);
-        uint256 fee = calculateDepositFee(a, b, amount);
+
+        UD60x18 da = ud(a * (1e18 / ratioDenominator));
+        UD60x18 db = ud(b * (1e18 / ratioDenominator));
+
+        UD60x18 ta = ud(current);
+        UD60x18 tb = ud(current + amount);
+
+        //(log10(1 - a * N)*ta - log10(1 - b * N)*tb) * M
+        //used this property: `log_b(a) = -log_b(1/a)` to not use negative values
+
+        UD60x18 tb_log_b = tb.mul((one/(one - db.mul(depositFeeRatioScale))));
+        UD60x18 ta_log_a = ta.mul((one/(one - da.mul(depositFeeRatioScale))));
+
+        UD60x18 fee_float;
+
+        if(tb_log_b > ta_log_a)
+            fee_float = depositFeeScale.mul(tb_log_b - ta_log_a);
+        else
+            fee_float = depositFeeScale.mul(ta_log_a - tb_log_b);
+
+        uint256 fee = intoUint256(fee_float);
+
+        if(fee > amount)
+        {
+            console.log("Fee > amount:\n%d\n>\n%d", fee, amount);
+            require(fee <= amount, "Fee must be lower or equal to deposit amount");
+        }
         return fee;
     }
 

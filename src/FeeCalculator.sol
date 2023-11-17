@@ -12,7 +12,7 @@ contract FeeCalculator is IDepositFeeCalculator, IRedemptionFeeCalculator {
     UD60x18 private one = ud(1e18);
 
     UD60x18 private depositFeeScale = ud(0.18 * 1e18);
-    UD60x18 private depositFeeRatioScale = ud(0.8 * 1e18);
+    UD60x18 private depositFeeRatioScale = ud(0.99 * 1e18);
 
     UD60x18 private redemptionFeeScale = ud(0.3 * 1e18);
     UD60x18 private redemptionFeeShift = ud(0.1 * 1e18);//-log10(0+0.1)=1 -> 10^-1

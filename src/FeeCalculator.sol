@@ -150,8 +150,12 @@ contract FeeCalculator is IDepositFeeCalculator, IRedemptionFeeCalculator {
         //redemption_fee = scale * (tb * log10(b+shift) - ta * log10(a+shift)) + constant*amount;
         UD60x18 fee_float = redemptionFeeConstant.mul(amount_float); //we start with always positive constant
 
+        console.log("fee const = \n%d", intoUint256(fee_float));
+
         (UD60x18 feeVariablePartA, bool is_log_a_negative) = getLogVariableRedemptionFeePart(da, ta);
+        console.log("fee var %o a = \n%d", is_log_a_negative, intoUint256(feeVariablePartA));
         (UD60x18 feeVariablePartB, bool is_log_b_negative) = getLogVariableRedemptionFeePart(db, tb);
+        console.log("fee var %o b = \n%d", is_log_b_negative, intoUint256(feeVariablePartB));
 
         if(!is_log_a_negative)
             fee_float = fee_float + feeVariablePartA;

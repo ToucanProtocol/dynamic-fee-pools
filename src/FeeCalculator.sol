@@ -127,7 +127,7 @@ contract FeeCalculator is IDepositFeeCalculator, IRedemptionFeeCalculator {
         bool is_log_negative = shifted_d < one;
 
         //used this property: `log_b(a) = -log_b(1/a)` to not use negative values
-        UD60x18 positive_log = dominance == zero ? zero : (is_log_negative==true ? (one / shifted_d) : shifted_d).log10();
+        UD60x18 positive_log = (is_log_negative==true ? (one / shifted_d) : shifted_d).log10();
 
         UD60x18 feeVariablePart = redemptionFeeScale.mul(current.mul(positive_log));
 

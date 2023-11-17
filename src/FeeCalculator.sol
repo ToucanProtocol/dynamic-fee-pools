@@ -100,8 +100,11 @@ contract FeeCalculator is IDepositFeeCalculator, IRedemptionFeeCalculator {
         //(log10(1 - a * N)*ta - log10(1 - b * N)*tb) * M
         //used this property: `log_b(a) = -log_b(1/a)` to not use negative values
 
-        UD60x18 tb_log_b = tb.mul(((one - db.mul(depositFeeRatioScale)).inv()));
-        UD60x18 ta_log_a = ta.mul(((one - da.mul(depositFeeRatioScale)).inv()));
+        UD60x18 one_minus_a = one - da.mul(depositFeeRatioScale);
+        UD60x18 one_minus_b = one - db.mul(depositFeeRatioScale);
+
+        UD60x18 ta_log_a = ta.mul(one_minus_a.inv().log10());
+        UD60x18 tb_log_b = tb.mul(one_minus_b.inv().log10());
 
         UD60x18 fee_float;
 

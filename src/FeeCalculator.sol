@@ -75,33 +75,33 @@ contract FeeCalculator is IDepositFeeCalculator, IRedemptionFeeCalculator {
         return totalSupply;
     }
 
-    function getRatios(uint256 amount, uint256 current, uint256 total, bool isDeposit) private pure returns (uint256, uint256)
+    function getRatios(UD60x18 amount, UD60x18 current, UD60x18 total, bool isDeposit) private view returns (UD60x18, UD60x18)
     {
-        uint256 a = total == 0 ? 0 : (ratioDenominator * current) / total;
-        uint256 b;
+        UD60x18 a = total == zero ? zero : current / total;
+        UD60x18 b;
+
         if(isDeposit)
-            b = (total + amount) == 0 ? 0 : (ratioDenominator * (current + amount)) / (total + amount);
+            b = (total + amount) == zero ? zero : (current + amount) / (total + amount);
         else
-            b = (total - amount) == 0 ? 0 : (ratioDenominator * (current - amount)) / (total - amount);
+            b = (total - amount) == zero ? zero : (current - amount) / (total - amount);
+
         return (a, b);
     }
 
     function getDepositFee(uint256 amount, uint256 current, uint256 total) private view returns (uint256) {
         require(total >= current);
 
-        (uint256 a, uint256 b) = getRatios(amount, current, total, true);
-
-        UD60x18 da = ud(a * (1e18 / ratioDenominator));
-        UD60x18 db = ud(b * (1e18 / ratioDenominator));
-
+        UD60x18 amount_float = ud(amount);
         UD60x18 ta = ud(current);
-        UD60x18 tb = ud(current + amount);
+        UD60x18 tb = ta + amount_float;
+
+        (UD60x18 da, UD60x18 db) = getRatios(amount_float, ta, ud(total), true);
 
         //(log10(1 - a * N)*ta - log10(1 - b * N)*tb) * M
         //used this property: `log_b(a) = -log_b(1/a)` to not use negative values
 
-        UD60x18 tb_log_b = tb.mul((one/(one - db.mul(depositFeeRatioScale))));
-        UD60x18 ta_log_a = ta.mul((one/(one - da.mul(depositFeeRatioScale))));
+        UD60x18 tb_log_b = tb.mul(((one - db.mul(depositFeeRatioScale)).inv()));
+        UD60x18 ta_log_a = ta.mul(((one - da.mul(depositFeeRatioScale)).inv()));
 
         UD60x18 fee_float;
 
@@ -127,7 +127,7 @@ contract FeeCalculator is IDepositFeeCalculator, IRedemptionFeeCalculator {
         bool is_log_negative = shifted_d < one;
 
         //used this property: `log_b(a) = -log_b(1/a)` to not use negative values
-        UD60x18 positive_log = (is_log_negative==true ? (one / shifted_d) : shifted_d).log10();
+        UD60x18 positive_log = (is_log_negative==true ? shifted_d.inv() : shifted_d).log10();
 
         UD60x18 feeVariablePart = redemptionFeeScale.mul(current.mul(positive_log));
 
@@ -138,14 +138,11 @@ contract FeeCalculator is IDepositFeeCalculator, IRedemptionFeeCalculator {
         require(total >= current);
         require(amount <= current);
 
-        (uint256 a, uint256 b) = getRatios(amount, current, total, false);
-
-        UD60x18 da = ud(a * (1e18 / ratioDenominator));
-        UD60x18 db = ud(b * (1e18 / ratioDenominator));
-
         UD60x18 amount_float = ud(amount);
         UD60x18 ta = ud(current);
         UD60x18 tb = ta - amount_float;
+
+        (UD60x18 da, UD60x18 db) = getRatios(amount_float, ta, ud(total), false);
 
         //redemption_fee = scale * (tb * log10(b+shift) - ta * log10(a+shift)) + constant*amount;
         UD60x18 fee_float = redemptionFeeConstant.mul(amount_float); //we start with always positive constant

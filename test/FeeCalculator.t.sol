@@ -472,7 +472,7 @@ contract FeeCalculatorTest is Test {
         assertEq(fees[0], 1551604479562604);
     }
 
-    function testCalculateDepositFees_ZeroDeposit_ZeroFee() public {
+    function testCalculateDepositFees_ZeroDeposit_ExceptionShouldBeThrown() public {
         // Arrange
         // Set up your test data
         uint256 depositAmount = 0;
@@ -482,10 +482,15 @@ contract FeeCalculatorTest is Test {
         mockToken.setTokenBalance(address(mockPool), 500*1e18);
 
         // Act
-        (address[] memory recipients, uint256[] memory fees) = feeCalculator.calculateDepositFees(address(mockToken), address(mockPool), depositAmount);
-        // Assert
-        assertEq(recipients[0], feeRecipient);
-        assertEq(fees[0], 0);
+        try feeCalculator.calculateDepositFees(address(mockToken), address(mockPool), depositAmount) returns (address[] memory recipients, uint256[] memory fees) {
+            // Assert
+            assertEq(recipients[0], feeRecipient);
+            assertEq(fees[0], 0);
+            fail("Exception should be thrown");
+        }
+        catch Error(string memory reason) {
+            assertEq("Fee must be greater than 0", reason);
+        }
     }
 
     function testCalculateDepositFees_EmptyPool_FeeCappedAt36Percent() public {

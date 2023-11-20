@@ -274,7 +274,7 @@ contract FeeCalculatorTest is Test {
         }
         catch Error(string memory reason)
         {
-            assertEq("b should be greater than a", reason);
+            assertEq("Fee must be greater than 0", reason);
         }
     }
 
@@ -298,7 +298,7 @@ contract FeeCalculatorTest is Test {
             fail("Exception should be thrown");
         }
         catch Error(string memory reason) {
-            assertEq("b should be greater than a", reason);
+            assertEq("Fee must be greater than 0", reason);
         }
     }
 
@@ -325,7 +325,7 @@ contract FeeCalculatorTest is Test {
             fail("Exception should be thrown");
         }
         catch Error(string memory reason) {
-            assertEq("b should be greater than a", reason);
+            assertEq("Fee must be greater than 0", reason);
         }
     }
 
@@ -561,9 +561,9 @@ contract FeeCalculatorTest is Test {
             assertEq(recipients[0], feeRecipient);
         }
         catch Error(string memory reason){
-            assertTrue(keccak256(bytes("b should be greater than a")) == keccak256(bytes(reason)) ||
+            assertTrue(keccak256(bytes("Fee must be greater than 0")) == keccak256(bytes(reason)) ||
             keccak256(bytes("Fee must be lower or equal to deposit amount")) == keccak256(bytes(reason)),
-                "error should be 'b should be greater than a' or 'Fee must be lower or equal to deposit amount'");
+                "error should be 'Fee must be greater than 0' or 'Fee must be lower or equal to deposit amount'");
         }
     }
 
@@ -652,9 +652,9 @@ contract FeeCalculatorTest is Test {
         catch Error(string memory reason)
         {
             oneTimeDepositFailed=true;
-            assertTrue(keccak256(bytes("b should be greater than a")) == keccak256(bytes(reason)) ||
+            assertTrue(keccak256(bytes("Fee must be greater than 0")) == keccak256(bytes(reason)) ||
             keccak256(bytes("Fee must be lower or equal to deposit amount")) == keccak256(bytes(reason)),
-                "error should be 'b should be greater than a' or 'Fee must be lower or equal to deposit amount'");
+                "error should be 'Fee must be greater than 0' or 'Fee must be lower or equal to deposit amount'");
         }
 
 
@@ -675,9 +675,9 @@ contract FeeCalculatorTest is Test {
             }
             catch Error(string memory reason) {
                 multipleTimesDepositFailedCount++;
-                assertTrue(keccak256(bytes("b should be greater than a")) == keccak256(bytes(reason)) ||
+                assertTrue(keccak256(bytes("Fee must be greater than 0")) == keccak256(bytes(reason)) ||
                 keccak256(bytes("Fee must be lower or equal to deposit amount")) == keccak256(bytes(reason)),
-                    "error should be 'b should be greater than a' or 'Fee must be lower or equal to deposit amount'");
+                    "error should be 'Fee must be greater than 0' or 'Fee must be lower or equal to deposit amount'");
             }
         }
 

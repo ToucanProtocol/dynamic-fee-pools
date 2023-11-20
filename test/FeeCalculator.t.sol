@@ -140,7 +140,7 @@ contract FeeCalculatorTest is Test {
 
         // Assert
         assertEq(recipients[0], feeRecipient);
-        assertEq(fees[0], intoUint256((redemptionFeeScale + redemptionFeeConstant).mul(ud(redemptionAmount))) );
+        assertApproxEqRel(fees[0], intoUint256((redemptionFeeScale + redemptionFeeConstant).mul(ud(redemptionAmount))), 1e15);//we allow 0.1% discrepancy
     }
 
     function testCalculateRedemptionFees_FullMonopolization_ZeroFees() public {

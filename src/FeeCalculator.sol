@@ -127,6 +127,8 @@ contract FeeCalculator is IDepositFeeCalculator, IRedemptionFeeCalculator {
             console.log("Fee > amount:\n%d\n>\n%d", fee, amount);
             require(fee <= amount, "Fee must be lower or equal to deposit amount");
         }
+
+        require(fee > 0, "Fee must be greater than 0");
         return fee;
     }
 

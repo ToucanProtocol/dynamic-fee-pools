@@ -447,12 +447,12 @@ contract FeeCalculatorTest is Test {
         assertEq(recipients[2], feeRecipient3);
         assertEq(recipients[3], feeRecipient4);
         assertEq(recipients[4], feeRecipient5);
-        assertEq(sumOf(fees), 1000135006750020*depositFeeScale);
-        assertEq(fees[0], 1000135006750020*depositFeeScale * 15 / 100 + 1);//first recipient gets rest of fee
-        assertEq(fees[1], 1000135006750020*depositFeeScale * 30 / 100);
-        assertEq(fees[2], 1000135006750020*depositFeeScale * 50 / 100);
-        assertEq(fees[3], uint256(1000135006750020*depositFeeScale) * 3 / 100);
-        assertEq(fees[4], uint256(1000135006750020*depositFeeScale) * 2 / 100);
+        assertEq(sumOf(fees), 15880809772898785);
+        assertEq(fees[0], uint256(15880809772898785) * 15 / 100 + 3);//first recipient gets rest of fee
+        assertEq(fees[1], uint256(15880809772898785) * 30 / 100);
+        assertEq(fees[2], uint256(15880809772898785) * 50 / 100);
+        assertEq(fees[3], uint256(15880809772898785) * 3 / 100);
+        assertEq(fees[4], uint256(15880809772898785) * 2 / 100);
     }
 
     function testCalculateDepositFees_HugeTotalLargeCurrentSmallDeposit() public {

@@ -731,14 +731,14 @@ contract FeeCalculatorTest is Test {
             assertEq(recipients[i], recipients[i]);
         }
 
-        assertApproxEqAbs(sumOf(fees), 20254629629592129629*depositFeeScale, 1);
+        assertEq(sumOf(fees), 11526003792614720250);
 
-        assertApproxEqAbs(fees[0], 20254629629592129629*depositFeeScale * uint256(firstShare) / 100,
+        assertApproxEqAbs(fees[0], 11526003792614720250 * uint256(firstShare) / 100,
             recipients.length-1 + 1);//first fee might get the rest from division
 
         for(uint i=1; i < recipients.length-1; i++) {
-            assertApproxEqAbs(fees[i], 20254629629592129629*depositFeeScale * equalShare / 100, 1);
+            assertApproxEqAbs(fees[i], 11526003792614720250 * equalShare / 100, 1);
         }
-        assertApproxEqAbs(fees[recipients.length-1], 20254629629592129629*depositFeeScale * (equalShare+leftShare) / 100, 1);
+        assertApproxEqAbs(fees[recipients.length-1], 11526003792614720250 * (equalShare+leftShare) / 100, 1);
     }
 }

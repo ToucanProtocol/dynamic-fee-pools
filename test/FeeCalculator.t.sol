@@ -203,9 +203,9 @@ contract FeeCalculatorTest is Test {
         // Assert
         assertEq(recipients[0], feeRecipient1);
         assertEq(recipients[1], feeRecipient2);
-        assertApproxEqAbs(sumOf(fees), 14310199098399220510*depositFeeScale, 1);
-        assertApproxEqAbs(fees[0], 14310199098399220510*depositFeeScale/2, 1);
-        assertApproxEqAbs(fees[1], 14310199098399220510*depositFeeScale/2, 1);
+        assertEq(sumOf(fees), 9718378209069523938);
+        assertEq(fees[0], 9718378209069523938/2);
+        assertEq(fees[1], 9718378209069523938/2);
     }
 
     function testCalculateDepositFeesNormalCase_TwoFeeRecipientsSplit30To70() public {

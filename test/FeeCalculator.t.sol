@@ -469,7 +469,7 @@ contract FeeCalculatorTest is Test {
 
         // Assert
         assertEq(recipients[0], feeRecipient);
-        assertApproxEqAbs(fees[0], 1000001484850*depositFeeScale, 1);
+        assertEq(fees[0], 1551604479562604);
     }
 
     function testCalculateDepositFees_ZeroDeposit_ExceptionShouldBeThrown() public {

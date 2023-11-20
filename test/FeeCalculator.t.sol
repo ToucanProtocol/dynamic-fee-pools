@@ -160,7 +160,7 @@ contract FeeCalculatorTest is Test {
         assertEq(fees[0], 0);
     }
 
-    function testCalculateRedemptionFees_CurrentSlightLessThanTotal_AmountSuperSmall_ShouldResultInZeroFees() public {
+    function testCalculateRedemptionFees_CurrentSlightLessThanTotal_AmountSuperSmall_ShouldResultInException() public {
         //this test was producing negative redemption fees before rounding extremely small negative redemption fees to zero
         // Arrange
         // Set up your test data
@@ -171,11 +171,17 @@ contract FeeCalculatorTest is Test {
         mockToken.setTokenBalance(address(mockPool), 11102230246251565403820829061134812052);//1.11e37
 
         // Act
-        (address[] memory recipients, uint256[] memory fees) = feeCalculator.calculateRedemptionFee(address(mockToken), address(mockPool), redemptionAmount);
-
-        // Assert
-        assertEq(recipients[0], feeRecipient);
-        assertEq(fees[0], 0);
+        try feeCalculator.calculateRedemptionFee(address(mockToken), address(mockPool), redemptionAmount) returns (address[] memory recipients, uint256[] memory fees)
+        {
+            // Assert
+            assertEq(recipients[0], feeRecipient);
+            assertEq(fees[0], 0);
+            fail("Exception should be thrown");
+        }
+        catch Error(string memory reason)
+        {
+            assertEq("Fee must be greater than 0", reason);
+        }
     }
 
     function testCalculateDepositFeesNormalCase_TwoFeeRecipientsSplitEqually() public {

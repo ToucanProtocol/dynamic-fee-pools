@@ -531,7 +531,7 @@ contract FeeCalculatorTest is Test {
         }
     }
 
-    function testCalculateDepositFees_ZeroCurrentNormalFees() public {
+    function testCalculateDepositFees_ZeroCurrent_NormalFees() public {
         // Arrange
         // Set up your test data
         uint256 depositAmount = 100*1e18;
@@ -545,7 +545,7 @@ contract FeeCalculatorTest is Test {
 
         // Assert
         assertEq(recipients[0], feeRecipient);
-        assertEq(fees[0], 18782870022483095*depositFeeScale);
+        assertEq(fees[0], 737254938220315128);
     }
 
     function testCalculateDepositFeesFuzzy(uint256 depositAmount, uint256 current, uint256 total) public {

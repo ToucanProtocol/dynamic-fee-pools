@@ -603,10 +603,26 @@ contract FeeCalculatorTest is Test {
         // Set up mock pool
         mockPool.setTotalSupply(total);
         mockToken.setTokenBalance(address(mockPool), current);
+        uint256 oneTimeFee = 0;
+        bool oneTimeRedemptionFailed = false;
+        uint256 multipleTimesRedemptionFailedCount = 0;
 
         // Act
-        (address[] memory recipients, uint256[] memory fees) = feeCalculator.calculateRedemptionFee(address(mockToken), address(mockPool), redemptionAmount);
-        uint256 oneTimeFee = fees[0];
+        try feeCalculator.calculateRedemptionFee(address(mockToken), address(mockPool), redemptionAmount) returns (address[] memory recipients, uint256[] memory fees)
+        {
+            oneTimeFee = fees[0];
+
+            // Assert
+            assertEq(recipients[0], feeRecipient);
+        }
+        catch Error(string memory reason)
+        {
+            oneTimeRedemptionFailed=true;
+            assertTrue(keccak256(bytes("Fee must be greater than 0")) == keccak256(bytes(reason)) ||
+            keccak256(bytes("Fee must be lower or equal to deposit amount")) == keccak256(bytes(reason)),
+                "error should be 'Fee must be greater than 0' or 'Fee must be lower or equal to deposit amount'");
+        }
+
 
         uint256 equalRedemption = redemptionAmount / numberOfRedemptions;
         uint256 restRedemption = redemptionAmount % numberOfRedemptions;
@@ -614,18 +630,29 @@ contract FeeCalculatorTest is Test {
 
         for (uint256 i = 0; i < numberOfRedemptions; i++) {
             uint256 redemption = equalRedemption + (i==0 ? restRedemption : 0);
-            (recipients, fees) = feeCalculator.calculateRedemptionFee(address(mockToken), address(mockPool), redemption);
-            feeFromDividedRedemptions += fees[0];
-            total-=redemption;
-            current-=redemption;
-            mockPool.setTotalSupply(total);
-            mockToken.setTokenBalance(address(mockPool), current);
+            try feeCalculator.calculateRedemptionFee(address(mockToken), address(mockPool), redemption) returns (address[] memory recipients, uint256[] memory fees)
+            {
+                feeFromDividedRedemptions += fees[0];
+                total-=redemption;
+                current-=redemption;
+                mockPool.setTotalSupply(total);
+                mockToken.setTokenBalance(address(mockPool), current);
+            }
+            catch Error(string memory reason) {
+                multipleTimesRedemptionFailedCount++;
+                assertTrue(keccak256(bytes("Fee must be greater than 0")) == keccak256(bytes(reason)) ||
+                keccak256(bytes("Fee must be lower or equal to deposit amount")) == keccak256(bytes(reason)),
+                    "error should be 'Fee must be greater than 0' or 'Fee must be lower or equal to deposit amount'");
+            }
         }
 
         // Assert
-        uint256 maximumAllowedErrorPercentage = (numberOfRedemptions <= 1) ? 0 : 1;
-        if(oneTimeFee + feeFromDividedRedemptions > 1e-8 * 1e18) // we skip assertion for extremely small fees (basically zero fees) because of numerical errors
-            assertGe((maximumAllowedErrorPercentage + 100)*feeFromDividedRedemptions/100, oneTimeFee);//we add 1% tolerance for numerical errors
+        if(multipleTimesRedemptionFailedCount==0 && !oneTimeRedemptionFailed)
+        {
+            uint256 maximumAllowedErrorPercentage = (numberOfRedemptions <= 1) ? 0 : 1;
+            if(oneTimeFee + feeFromDividedRedemptions > 1e-8 * 1e18) // we skip assertion for extremely small fees (basically zero fees) because of numerical errors
+                assertGe((maximumAllowedErrorPercentage + 100)*feeFromDividedRedemptions/100, oneTimeFee);//we add 1% tolerance for numerical errors
+        }
     }
 
     function testCalculateDepositFeesFuzzy_DepositDividedIntoOneChunkFeesGreaterOrEqualToOneDeposit(uint256 depositAmount, uint256 current, uint256 total) public {

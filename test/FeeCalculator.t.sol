@@ -401,12 +401,12 @@ contract FeeCalculatorTest is Test {
         assertEq(recipients[2], feeRecipient3);
         assertEq(recipients[3], feeRecipient4);
         assertEq(recipients[4], feeRecipient5);
-        assertEq(sumOf(fees), 1000135006750020*depositFeeScale);
-        assertEq(fees[0], 1000135006750020*depositFeeScale * 20 / 100);
-        assertEq(fees[1], 1000135006750020*depositFeeScale * 20 / 100);
-        assertEq(fees[2], 1000135006750020*depositFeeScale * 20 / 100);
-        assertEq(fees[3], 1000135006750020*depositFeeScale * 20 / 100);
-        assertEq(fees[4], 1000135006750020*depositFeeScale * 20 / 100);
+        assertEq(sumOf(fees), 15880809772898785);
+        assertEq(fees[0], uint256(15880809772898785) * 20 / 100);
+        assertEq(fees[1], uint256(15880809772898785) * 20 / 100);
+        assertEq(fees[2], uint256(15880809772898785) * 20 / 100);
+        assertEq(fees[3], uint256(15880809772898785) * 20 / 100);
+        assertEq(fees[4], uint256(15880809772898785) * 20 / 100);
     }
 
     function testCalculateDepositFees_DepositOfOne_NormalFee_FiveRecipientsComplicatedSplit() public {

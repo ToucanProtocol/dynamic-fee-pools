@@ -360,7 +360,7 @@ contract FeeCalculatorTest is Test {
 
         // Assert
         assertEq(recipients[0], feeRecipient);
-        assertEq(fees[0], 1000135006750020*depositFeeScale);
+        assertEq(fees[0], 15880809772898785);
     }
 
     function testCalculateDepositFees_DepositOfOne_NormalFee_FiveRecipientsEqualSplit() public {

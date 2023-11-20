@@ -303,7 +303,7 @@ contract FeeCalculatorTest is Test {
     }
 
     function testCalculateDepositFees_FuzzyExtremelySmallDepositsToLargePool_ShouldThrowError(uint256 depositAmount) public {
-        vm.assume(depositAmount <= 1e-7 * 1e18);
+        vm.assume(depositAmount <= 1e-14 * 1e18);
         vm.assume(depositAmount >= 10);
 
         //Note! This is a bug, where a very small deposit to a very large pool
@@ -314,8 +314,8 @@ contract FeeCalculatorTest is Test {
 
 
         // Set up mock pool
-        mockPool.setTotalSupply(1e5 * 1e18);
-        mockToken.setTokenBalance(address(mockPool), 1e4 * 1e18);
+        mockPool.setTotalSupply(1e12 * 1e18);
+        mockToken.setTokenBalance(address(mockPool), 1e9 * 1e18);
 
 
         try feeCalculator.calculateDepositFees(address(mockToken), address(mockPool), depositAmount) returns (address[] memory recipients, uint256[] memory fees) {

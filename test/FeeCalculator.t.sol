@@ -488,7 +488,7 @@ contract FeeCalculatorTest is Test {
         assertEq(fees[0], 0);
     }
 
-    function testCalculateDepositFees_EmptyPool_FeeCappedAtDepositFeeScaleDividedByFour() public {
+    function testCalculateDepositFees_EmptyPool_FeeCappedAt36Percent() public {
         // Arrange
         // Set up your test data
         uint256 depositAmount = 100*1e18;
@@ -502,7 +502,7 @@ contract FeeCalculatorTest is Test {
 
         // Assert
         assertEq(recipients[0], feeRecipient);
-        assertEq(fees[0], depositAmount*depositFeeScale/4);
+        assertEq(fees[0], 36 * 1e18);
     }
 
     function testCalculateDepositFees_TotalEqualCurrent_FeeCappedAt36Percent() public {

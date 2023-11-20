@@ -161,6 +161,7 @@ contract FeeCalculatorTest is Test {
     }
 
     function testCalculateRedemptionFees_CurrentSlightLessThanTotal_AmountSuperSmall_ShouldResultInZeroFees() public {
+        //this test was producing negative redemption fees before rounding extremely small negative redemption fees to zero
         // Arrange
         // Set up your test data
         uint256 redemptionAmount = 186843141273221600445448244614;//1.868e29

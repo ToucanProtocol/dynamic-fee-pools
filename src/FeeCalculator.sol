@@ -5,18 +5,22 @@ import "./interfaces/IDepositFeeCalculator.sol";
 import "./interfaces/IRedemptionFeeCalculator.sol";
 import "@openzeppelin/contracts/token/ERC20/IERC20.sol";
 import { UD60x18, ud, intoUint256 } from "@prb/math/src/UD60x18.sol";
+import { SD59x18, sd, intoUint256, convert } from "@prb/math/src/SD59x18.sol";
 
 contract FeeCalculator is IDepositFeeCalculator, IRedemptionFeeCalculator {
 
     UD60x18 private zero = ud(0);
     UD60x18 private one = ud(1e18);
 
+    SD59x18 private zero_signed = sd(0);
+    SD59x18 private one_signed = sd(1e18);
+
     UD60x18 private depositFeeScale = ud(0.18 * 1e18);
     UD60x18 private depositFeeRatioScale = ud(0.99 * 1e18);
 
-    UD60x18 private redemptionFeeScale = ud(0.3 * 1e18);
-    UD60x18 private redemptionFeeShift = ud(0.1 * 1e18);//-log10(0+0.1)=1 -> 10^-1
-    UD60x18 private redemptionFeeConstant = redemptionFeeScale.mul((one+redemptionFeeShift).log10()); //0.0413926851582251=log10(1+0.1)
+    SD59x18 private redemptionFeeScale = sd(0.3 * 1e18);
+    SD59x18 private redemptionFeeShift = sd(0.1 * 1e18);//-log10(0+0.1)=1 -> 10^-1
+    SD59x18 private redemptionFeeConstant = redemptionFeeScale.mul((one_signed+redemptionFeeShift).log10()); //0.0413926851582251=log10(1+0.1)
 
     uint256 private constant tokenDenominator = 1e18;
     uint256 private constant ratioDenominator = 1e12;
@@ -75,15 +79,18 @@ contract FeeCalculator is IDepositFeeCalculator, IRedemptionFeeCalculator {
         return totalSupply;
     }
 
-    function getRatios(UD60x18 amount, UD60x18 current, UD60x18 total, bool isDeposit) private view returns (UD60x18, UD60x18)
+    function getRatiosDeposit(UD60x18 amount, UD60x18 current, UD60x18 total) private view returns (UD60x18, UD60x18)
     {
         UD60x18 a = total == zero ? zero : current / total;
-        UD60x18 b;
+        UD60x18 b = (total + amount) == zero ? zero : (current + amount) / (total + amount);
 
-        if(isDeposit)
-            b = (total + amount) == zero ? zero : (current + amount) / (total + amount);
-        else
-            b = (total - amount) == zero ? zero : (current - amount) / (total - amount);
+        return (a, b);
+    }
+
+    function getRatiosRedemption(SD59x18 amount, SD59x18 current, SD59x18 total) private view returns (SD59x18, SD59x18)
+    {
+        SD59x18 a = total == zero_signed ? zero_signed : current / total;
+        SD59x18 b = (total - amount) == zero_signed ? zero_signed : (current - amount) / (total - amount);
 
         return (a, b);
     }
@@ -95,7 +102,7 @@ contract FeeCalculator is IDepositFeeCalculator, IRedemptionFeeCalculator {
         UD60x18 ta = ud(current);
         UD60x18 tb = ta + amount_float;
 
-        (UD60x18 da, UD60x18 db) = getRatios(amount_float, ta, ud(total), true);
+        (UD60x18 da, UD60x18 db) = getRatiosDeposit(amount_float, ta, ud(total));
 
         //(log10(1 - a * N)*ta - log10(1 - b * N)*tb) * M
         //used this property: `log_b(a) = -log_b(1/a)` to not use negative values
@@ -123,69 +130,24 @@ contract FeeCalculator is IDepositFeeCalculator, IRedemptionFeeCalculator {
         return fee;
     }
 
-    function getLogVariableRedemptionFeePart(UD60x18 dominance, UD60x18 current) private view returns (UD60x18, bool)
-    {
-        UD60x18 shifted_d = dominance + redemptionFeeShift;
-
-        bool is_log_negative = shifted_d < one;
-
-        //used this property: `log_b(a) = -log_b(1/a)` to not use negative values
-        UD60x18 positive_log = (is_log_negative==true ? shifted_d.inv() : shifted_d).log10();
-
-        UD60x18 feeVariablePart = redemptionFeeScale.mul(current.mul(positive_log));
-
-        return (feeVariablePart, is_log_negative);
-    }
-
     function getRedemptionFee(uint256 amount, uint256 current, uint256 total) private view returns (uint256) {
         require(total >= current);
         require(amount <= current);
 
-        UD60x18 amount_float = ud(amount);
-        UD60x18 ta = ud(current);
-        UD60x18 tb = ta - amount_float;
+        SD59x18 amount_float = sd(int256(amount));
+        SD59x18 ta = sd(int256(current));
+        SD59x18 tb = ta - amount_float;
 
-        (UD60x18 da, UD60x18 db) = getRatios(amount_float, ta, ud(total), false);
+        (SD59x18 da, SD59x18 db) = getRatiosRedemption(amount_float, ta, sd(int256(total)));
 
         //redemption_fee = scale * (tb * log10(b+shift) - ta * log10(a+shift)) + constant*amount;
-        UD60x18 fee_float = redemptionFeeConstant.mul(amount_float); //we start with always positive constant
 
-        console.log("fee const = \n%d", intoUint256(fee_float));
 
-        (UD60x18 feeVariablePartA, bool is_log_a_negative) = getLogVariableRedemptionFeePart(da, ta);
-        console.log("fee var %o a = \n%d", is_log_a_negative, intoUint256(feeVariablePartA));
-        (UD60x18 feeVariablePartB, bool is_log_b_negative) = getLogVariableRedemptionFeePart(db, tb);
-        console.log("fee var %o b = \n%d", is_log_b_negative, intoUint256(feeVariablePartB));
+        SD59x18 i_a = ta.mul(da.add(redemptionFeeShift).log10());
+        SD59x18 i_b = tb.mul(db.add(redemptionFeeShift).log10());
+        SD59x18 fee_float = redemptionFeeScale.mul(i_b.sub(i_a)).add(redemptionFeeConstant);
 
-        if(!is_log_a_negative)
-            fee_float = fee_float + feeVariablePartA;
-        if(!is_log_b_negative)
-            fee_float = fee_float + feeVariablePartB;
-
-        if(is_log_a_negative)
-        {
-            if(feeVariablePartA > fee_float)
-            {
-                if(feeVariablePartA == fee_float + ud(1))
-                    fee_float = fee_float + ud(1);
-                else
-                    console.log("feeVariablePartA > fee_float:\n%d\n>\n%d", intoUint256(feeVariablePartA), intoUint256(fee_float));
-            }
-            fee_float = fee_float - feeVariablePartA;
-        }
-
-        if(is_log_b_negative)
-        {
-            if(feeVariablePartB > fee_float)
-            {
-                if(feeVariablePartB == fee_float + ud(1))
-                    fee_float = fee_float + ud(1);
-                else
-                    console.log("feeVariablePartB > fee_float:\n%d\n>\n%d", intoUint256(feeVariablePartB), intoUint256(fee_float));
-            }
-
-            fee_float = fee_float - feeVariablePartB;
-        }
+        require(fee_float >= zero_signed, "Fee must be greater or equal to 0");
 
         uint256 fee = intoUint256(fee_float);
 

@@ -145,7 +145,7 @@ contract FeeCalculator is IDepositFeeCalculator, IRedemptionFeeCalculator {
 
         SD59x18 i_a = ta.mul(da.add(redemptionFeeShift).log10());
         SD59x18 i_b = tb.mul(db.add(redemptionFeeShift).log10());
-        SD59x18 fee_float = redemptionFeeScale.mul(i_b.sub(i_a)).add(redemptionFeeConstant);
+        SD59x18 fee_float = redemptionFeeScale.mul(i_b.sub(i_a)).add(redemptionFeeConstant*amount_float);
 
         require(fee_float >= zero_signed, "Fee must be greater or equal to 0");
 

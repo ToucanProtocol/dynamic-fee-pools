@@ -123,7 +123,7 @@ contract FeeCalculatorTest is Test {
 
         // Assert
         assertEq(recipients[0], feeRecipient);
-        assertEq(fees[0], 5715592135358939186);
+        assertEq(fees[0], 2833521467902860250);
     }
 
     function testCalculateRedemptionFees_ZeroMonopolization_MaximumFees() public {

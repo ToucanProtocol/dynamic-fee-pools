@@ -21,7 +21,7 @@ This is a Solidity contract that calculates deposit and redemption fees for a gi
 
 ## How to Use
 
-1. Deploy the contract on an Ethereum network.
+1. Deploy the contract on a Polygon network.
 2. Call `feeSetup` function to set up the fee distribution among recipients.
 3. Call `calculateDepositFees` function to calculate the deposit fees for a given amount.
 4. Call `calculateRedemptionFee` function to calculate the redemption fees for a given amount.

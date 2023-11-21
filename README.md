@@ -44,13 +44,13 @@ where
 `M = 0.18 ; N=0.99`
 
 ### Fee function for redemption
-Relative fee values are between 0% (exclusive) and ~34.14% (inclusive).
+Relative fee values are between 0% (exclusive) and ~31.24% (inclusive).
 Functional form for absolute fee is as follows:
 
 `Fee = scale * (tb * log10(b+shift) - ta * log10(a+shift)) + C*amount`
 
 where
-`scale=0.3 ; shift=0.1 ; C=scale*log10(1+shift)=0.0413926851582251`
+`scale=0.3 ; shift=0.1 ; C=scale*log10(1+shift)=scale*0.0413926851582251=0.0124178055474675`
 
 
 ## How to Use

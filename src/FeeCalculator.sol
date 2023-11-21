@@ -1,3 +1,8 @@
+// SPDX-FileCopyrightText: 2023 Neutral Labs Inc.
+//
+// SPDX-License-Identifier: UNLICENSED
+
+// If you encounter a vulnerability or an issue, please contact <info@neutralx.com>
 pragma solidity ^0.8.13;
 
 import "./interfaces/IDepositFeeCalculator.sol";
@@ -5,6 +10,10 @@ import "./interfaces/IRedemptionFeeCalculator.sol";
 import "@openzeppelin/contracts/token/ERC20/IERC20.sol";
 import {SD59x18, sd, intoUint256} from "@prb/math/src/SD59x18.sol";
 
+/// @title FeeCalculator
+/// @author Neutral Labs Inc.
+/// @notice This contract calculates deposit and redemption fees for a given pool.
+/// @dev It implements IDepositFeeCalculator and IRedemptionFeeCalculator interfaces.
 contract FeeCalculator is IDepositFeeCalculator, IRedemptionFeeCalculator {
     SD59x18 private zero = sd(0);
     SD59x18 private one = sd(1e18);
@@ -19,6 +28,9 @@ contract FeeCalculator is IDepositFeeCalculator, IRedemptionFeeCalculator {
     address[] private _recipients;
     uint256[] private _shares;
 
+    /// @notice Sets up the fee distribution among recipients.
+    /// @param recipients The addresses of the fee recipients.
+    /// @param shares The share of the fee each recipient should receive.
     function feeSetup(address[] memory recipients, uint256[] memory shares) external {
         require(recipients.length == shares.length, "Recipients and shares arrays must have the same length");
         require(recipients.length > 0, "Recipients and shares arrays must not be empty");
@@ -33,6 +45,12 @@ contract FeeCalculator is IDepositFeeCalculator, IRedemptionFeeCalculator {
         _shares = shares;
     }
 
+    /// @notice Calculates the deposit fees for a given amount.
+    /// @param tco2 The address of the TCO2 token.
+    /// @param pool The address of the pool.
+    /// @param depositAmount The amount to be deposited.
+    /// @return recipients The addresses of the fee recipients.
+    /// @return feesDenominatedInPoolTokens The amount of fees each recipient should receive.
     function calculateDepositFees(address tco2, address pool, uint256 depositAmount) external override returns (address[] memory recipients, uint256[] memory feesDenominatedInPoolTokens) {
         require(depositAmount > 0, "depositAmount must be > 0");
 
@@ -40,6 +58,10 @@ contract FeeCalculator is IDepositFeeCalculator, IRedemptionFeeCalculator {
         return distributeFeeAmongShares(totalFee);
     }
 
+    /// @notice Distributes the total fee among the recipients according to their shares.
+    /// @param totalFee The total fee to be distributed.
+    /// @return recipients The addresses of the fee recipients.
+    /// @return feesDenominatedInPoolTokens The amount of fees each recipient should receive.
     function distributeFeeAmongShares(uint256 totalFee) private view returns (address[] memory recipients, uint256[] memory feesDenominatedInPoolTokens) {
         feesDenominatedInPoolTokens = new uint256[](_recipients.length);
 
@@ -55,6 +77,12 @@ contract FeeCalculator is IDepositFeeCalculator, IRedemptionFeeCalculator {
         feesDenominatedInPoolTokens[0] += restFee;//we give rest of the fee (if any) to the first recipient
     }
 
+    /// @notice Calculates the redemption fees for a given amount.
+    /// @param tco2 The address of the TCO2 token.
+    /// @param pool The address of the pool.
+    /// @param depositAmount The amount to be redeemed.
+    /// @return recipients The addresses of the fee recipients.
+    /// @return feesDenominatedInPoolTokens The amount of fees each recipient should receive.
     function calculateRedemptionFee(address tco2, address pool, uint256 depositAmount) external override returns (address[] memory recipients, uint256[] memory feesDenominatedInPoolTokens) {
         require(depositAmount > 0, "depositAmount must be > 0");
 
@@ -62,16 +90,28 @@ contract FeeCalculator is IDepositFeeCalculator, IRedemptionFeeCalculator {
         return distributeFeeAmongShares(totalFee);
     }
 
+    /// @notice Gets the balance of the TCO2 token in a given pool.
+    /// @param pool The address of the pool.
+    /// @param tco2 The address of the TCO2 token.
+    /// @return The balance of the TCO2 token in the pool.
     function getTokenBalance(address pool, address tco2) private view returns (uint256) {
         uint256 tokenBalance = IERC20(tco2).balanceOf(pool);
         return tokenBalance;
     }
 
+    /// @notice Gets the total supply of a given pool.
+    /// @param pool The address of the pool.
+    /// @return The total supply of the pool.
     function getTotalSupply(address pool) private view returns (uint256) {
         uint256 totalSupply = IERC20(pool).totalSupply();
         return totalSupply;
     }
 
+    /// @notice Calculates the ratios for deposit fee calculation.
+    /// @param amount The amount to be deposited.
+    /// @param current The current balance of the pool.
+    /// @param total The total supply of the pool.
+    /// @return The calculated ratios.
     function getRatiosDeposit(SD59x18 amount, SD59x18 current, SD59x18 total) private view returns (SD59x18, SD59x18)
     {
         SD59x18 a = total == zero ? zero : current / total;
@@ -80,6 +120,11 @@ contract FeeCalculator is IDepositFeeCalculator, IRedemptionFeeCalculator {
         return (a, b);
     }
 
+    /// @notice Calculates the ratios for redemption fee calculation.
+    /// @param amount The amount to be redeemed.
+    /// @param current The current balance of the pool.
+    /// @param total The total supply of the pool.
+    /// @return The calculated ratios.
     function getRatiosRedemption(SD59x18 amount, SD59x18 current, SD59x18 total) private view returns (SD59x18, SD59x18)
     {
         SD59x18 a = total == zero ? zero : current / total;
@@ -88,6 +133,11 @@ contract FeeCalculator is IDepositFeeCalculator, IRedemptionFeeCalculator {
         return (a, b);
     }
 
+    /// @notice Calculates the deposit fee for a given amount.
+    /// @param amount The amount to be deposited.
+    /// @param current The current balance of the pool.
+    /// @param total The total supply of the pool.
+    /// @return The calculated deposit fee.
     function getDepositFee(uint256 amount, uint256 current, uint256 total) private view returns (uint256) {
         require(total >= current);
 
@@ -110,6 +160,11 @@ contract FeeCalculator is IDepositFeeCalculator, IRedemptionFeeCalculator {
         return fee;
     }
 
+    /// @notice Calculates the redemption fee for a given amount.
+    /// @param amount The amount to be redeemed.
+    /// @param current The current balance of the pool.
+    /// @param total The total supply of the pool.
+    /// @return The calculated redemption fee.
     function getRedemptionFee(uint256 amount, uint256 current, uint256 total) private view returns (uint256) {
         require(total >= current);
         require(amount <= current);

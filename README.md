@@ -1,66 +1,118 @@
-## Foundry
+<div align="center">
 
-**Foundry is a blazing fast, portable and modular toolkit for Ethereum application development written in Rust.**
+# FeeCalculator :moneybag:
 
-Foundry consists of:
+A robust Solidity contract for calculating deposit and redemption fees for a biochar ReFi pool.
 
--   **Forge**: Ethereum testing framework (like Truffle, Hardhat and DappTools).
--   **Cast**: Swiss army knife for interacting with EVM smart contracts, sending transactions and getting chain data.
--   **Anvil**: Local Ethereum node, akin to Ganache, Hardhat Network.
--   **Chisel**: Fast, utilitarian, and verbose solidity REPL.
+[![Solidity](https://img.shields.io/badge/Solidity-^0.8.13-blue.svg)](https://soliditylang.org/)
+[![OpenZeppelin](https://img.shields.io/badge/OpenZeppelin-Contracts-green.svg)](https://openzeppelin.com/contracts/)
+[![PRBMath](https://img.shields.io/badge/PRBMath-Library-orange.svg)](https://github.com/hifi-finance/prb-math)
 
-## Documentation
+</div>
 
-https://book.getfoundry.sh/
+## :sparkles: Features
 
-## Usage
+FeeCalculator implements `IDepositFeeCalculator` and `IRedemptionFeeCalculator` interfaces, providing the following features:
 
-### Build
+- **Fee Distribution:** Set up the fee distribution among recipients.
+- **Deposit Fees Calculation:** Calculate the deposit fees for a given amount and distribute the total fee among the recipients according to their shares.
+- **Redemption Fees Calculation:** Calculate the redemption fees for a given amount.
+- **Pool Information Retrieval:** Get the balance of the TCO2 token in a given pool, and the total supply of a given pool.
+- **Ratios Calculation:** Calculate the ratios for deposit and redemption fee calculation.
+- **Fee Calculation:** Calculate the deposit and redemption fee for a given amount.
 
-```shell
-$ forge build
+## :hammer_and_wrench: How to Test
+
+Run the following command in your terminal:
+
+```bash
+forge test -vv --via-ir
 ```
 
-### Test
+# Fee Structure :chart_with_upwards_trend:
 
-```shell
-$ forge test
-```
+The fee function is designed to discourage monopolizing the pool with one asset. It imposes higher fees for deposits of assets that already dominate the pool, and lower fees for deposits of assets that are not in the pool. Conversely, redeeming an asset that monopolizes the pool is cheap, while redeeming an asset that makes up a small percentage of the pool is expensive.
 
-### Format
+The fee functions for both operations are based on dominance coefficients `a` and `b`, which designate the ratio of how dominant a particular asset is before (`a`) and after (`b`) the operation.
 
-```shell
-$ forge fmt
-```
+## Mathematical Expressions
 
-### Gas Snapshots
+### Dominance Coefficients
 
-```shell
-$ forge snapshot
-```
+`a = current_asset_volume / total_pool_volume`
 
-### Anvil
+`b = (current_asset_volume +/- deposit/redemption amount ) / (total_pool_volume +/- deposit/redemption amount)`
 
-```shell
-$ anvil
-```
+### Current and Future Amounts of a Particular Asset in the Pool
 
-### Deploy
+`ta = current_asset_volume`
 
-```shell
-$ forge script script/Counter.s.sol:CounterScript --rpc-url <your_rpc_url> --private-key <your_private_key>
-```
+`tb = current_asset_volume +/- deposit/redemption amount`
 
-### Cast
+### Fee Function for Deposit
 
-```shell
-$ cast <subcommand>
-```
+Relative fee values are between 0% (exclusive) and 36% (inclusive).
 
-### Help
+Functional form for absolute fee is as follows:
 
-```shell
-$ forge --help
-$ anvil --help
-$ cast --help
-```
+`Fee = M * (ta * log10(1 - a * N) - tb * log10(1 - b * N))`
+
+where
+`M = 0.18 ; N=0.99`
+
+### Fee Function for Redemption
+
+Relative fee values are between 0% (exclusive) and ~31.24% (inclusive).
+
+Functional form for absolute fee is as follows:
+
+`Fee = scale * (tb * log10(b+shift) - ta * log10(a+shift)) + C*amount`
+
+where
+`scale=0.3 ; shift=0.1 ; C=scale*log10(1+shift)=scale*0.0413926851582251=0.0124178055474675`
+
+## Fee Function Graphs
+
+The following graphs illustrate the fee functions for deposit and redemption.
+
+### Deposit Fee Function Graph
+
+![Deposit Fee Function Graph](https://github.com/neutral-protocol/dynamic-fee-pools/assets/11928766/8247198c-a620-4533-aede-fa827a3cfc46)
+
+In this graph, the X-axis represents the dominance of an asset, and the Y-axis represents the relative fee for deposit.
+
+### Redemption Fee Function Graph
+
+![Redemption Fee Function Graph](https://github.com/neutral-protocol/dynamic-fee-pools/assets/11928766/e308e855-b89e-4311-b182-28f81bc3ab94)
+
+In this graph, the X-axis represents the dominance of an asset, and the Y-axis represents the relative fee for redemption.
+
+These graphs help visualize how the fee changes based on the dominance of an asset in the pool. As the dominance of an asset increases, so does the fee for depositing more of that asset. Conversely, as the dominance of an asset decreases, so does the fee for redeeming that asset.
+
+This fee structure is designed to maintain a balanced composition in the pool and discourage monopolization by any single asset.
+
+### Conclusion
+
+The FeeCalculator contract uses these mathematical models to calculate fees for deposit and redemption operations. By understanding these functions, users can make informed decisions about their transactions to optimize their costs.
+
+Remember, the goal is to maintain a balanced pool composition and discourage monopolization by any single asset.
+
+
+
+
+## How to Use
+
+1. Deploy the contract on a Polygon network.
+2. Call `feeSetup` function to set up the fee distribution among recipients.
+3. Call `calculateDepositFees` function to calculate the deposit fees for a given amount.
+4. Call `calculateRedemptionFee` function to calculate the redemption fees for a given amount.
+
+## Requirements
+
+- Solidity ^0.8.13
+- OpenZeppelin Contracts
+- PRBMath
+
+## License
+
+This project is unlicensed.

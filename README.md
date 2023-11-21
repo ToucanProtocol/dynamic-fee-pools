@@ -43,6 +43,10 @@ Functional form for absolute fee is as follows:
 where
 `M = 0.18 ; N=0.99`
 
+Fee graph, where X is dominance of an asset and Y is a relative fee for deposit
+
+![image](https://github.com/neutral-protocol/dynamic-fee-pools/assets/11928766/8247198c-a620-4533-aede-fa827a3cfc46)
+
 
 ### Fee function for redemption
 Relative fee values are between 0% (exclusive) and ~31.24% (inclusive).

@@ -16,10 +16,6 @@ contract FeeCalculator is IDepositFeeCalculator, IRedemptionFeeCalculator {
     SD59x18 private redemptionFeeShift = sd(0.1 * 1e18);//-log10(0+0.1)=1 -> 10^-1
     SD59x18 private redemptionFeeConstant = redemptionFeeScale * (one + redemptionFeeShift).log10(); //0.0413926851582251=log10(1+0.1)
 
-    uint256 private constant tokenDenominator = 1e18;
-    uint256 private constant ratioDenominator = 1e12;
-    uint256 private constant relativeFeeDenominator = ratioDenominator ** 3;
-
     address[] private _recipients;
     uint256[] private _shares;
 

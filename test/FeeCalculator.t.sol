@@ -495,7 +495,7 @@ contract FeeCalculatorTest is Test {
             fail("Exception should be thrown");
         }
         catch Error(string memory reason) {
-            assertEq("Fee must be greater than 0", reason);
+            assertEq("depositAmount must be > 0", reason);
         }
     }
 
@@ -556,6 +556,7 @@ contract FeeCalculatorTest is Test {
         //vm.assume(current > 0);
         vm.assume(total >= current);
         vm.assume(depositAmount < 1e20 * 1e18);
+        vm.assume(depositAmount > 0);
         vm.assume(total < 1e20 * 1e18);
 
         // Arrange

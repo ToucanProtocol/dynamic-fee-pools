@@ -8,5 +8,9 @@
     <mapping directory="$PROJECT_DIR$/lib/openzeppelin-contracts/lib/erc4626-tests" vcs="Git" />
     <mapping directory="$PROJECT_DIR$/lib/openzeppelin-contracts/lib/forge-std" vcs="Git" />
     <mapping directory="$PROJECT_DIR$/lib/openzeppelin-contracts/lib/forge-std/lib/ds-test" vcs="Git" />
+    <mapping directory="$PROJECT_DIR$/lib/prb-math" vcs="Git" />
+    <mapping directory="$PROJECT_DIR$/lib/prb-math/lib/forge-std" vcs="Git" />
+    <mapping directory="$PROJECT_DIR$/lib/prb-math/lib/forge-std/lib/ds-test" vcs="Git" />
+    <mapping directory="$PROJECT_DIR$/lib/prb-math/lib/prb-test" vcs="Git" />
   </component>
 </project>

@@ -34,6 +34,8 @@ contract FeeCalculator is IDepositFeeCalculator, IRedemptionFeeCalculator {
     }
 
     function calculateDepositFees(address tco2, address pool, uint256 depositAmount) external override returns (address[] memory recipients, uint256[] memory feesDenominatedInPoolTokens) {
+        require(depositAmount > 0, "depositAmount must be > 0");
+
         uint256 totalFee = getDepositFee(depositAmount, getTokenBalance(pool, tco2), getTotalSupply(pool));
         return distributeFeeAmongShares(totalFee);
     }
@@ -55,6 +57,8 @@ contract FeeCalculator is IDepositFeeCalculator, IRedemptionFeeCalculator {
     }
 
     function calculateRedemptionFee(address tco2, address pool, uint256 depositAmount) external override returns (address[] memory recipients, uint256[] memory feesDenominatedInPoolTokens) {
+        require(depositAmount > 0, "depositAmount must be > 0");
+
         uint256 totalFee = getRedemptionFee(depositAmount, getTokenBalance(pool, tco2), getTotalSupply(pool));
         return distributeFeeAmongShares(totalFee);
     }
@@ -72,7 +76,7 @@ contract FeeCalculator is IDepositFeeCalculator, IRedemptionFeeCalculator {
     function getRatiosDeposit(SD59x18 amount, SD59x18 current, SD59x18 total) private view returns (SD59x18, SD59x18)
     {
         SD59x18 a = total == zero ? zero : current / total;
-        SD59x18 b = (total + amount) == zero ? zero : (current + amount) / (total + amount);
+        SD59x18 b = (current + amount) / (total + amount);
 
         return (a, b);
     }

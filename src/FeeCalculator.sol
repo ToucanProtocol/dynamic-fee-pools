@@ -41,18 +41,17 @@ contract FeeCalculator is IDepositFeeCalculator, IRedemptionFeeCalculator {
     }
 
     function distributeFeeAmongShares(uint256 totalFee) private view returns (address[] memory recipients, uint256[] memory feesDenominatedInPoolTokens) {
-        recipients = new address[](_recipients.length);
         feesDenominatedInPoolTokens = new uint256[](_recipients.length);
 
         uint256 restFee = totalFee;
 
         for (uint i = 0; i < _recipients.length; i++) {
-            recipients[i] = _recipients[i];
             feesDenominatedInPoolTokens[i] = (totalFee * _shares[i]) / 100;
             restFee -= feesDenominatedInPoolTokens[i];
         }
 
         require(restFee >= 0);
+        recipients = _recipients;
         feesDenominatedInPoolTokens[0] += restFee;//we give rest of the fee (if any) to the first recipient
     }
 

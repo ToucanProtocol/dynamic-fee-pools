@@ -1,6 +1,10 @@
 name: test
 
-on: workflow_dispatch
+on:
+  push:
+    branches: [ "main" ]
+  pull_request:
+    branches: [ "main" ]
 
 env:
   FOUNDRY_PROFILE: ci
@@ -19,16 +23,14 @@ jobs:
 
       - name: Install Foundry
         uses: foundry-rs/foundry-toolchain@v1
-        with:
-          version: nightly
 
       - name: Run Forge build
         run: |
           forge --version
-          forge build --sizes
+          forge build --sizes --via-ir
         id: build
 
       - name: Run Forge tests
         run: |
-          forge test -vvv
+          forge test -vvv --via-ir
         id: test

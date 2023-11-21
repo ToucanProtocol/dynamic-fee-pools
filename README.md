@@ -1,41 +1,58 @@
-# FeeCalculator
+<div align="center">
 
-This is a Solidity contract that calculates deposit and redemption fees for a given pool. It implements `IDepositFeeCalculator` and `IRedemptionFeeCalculator` interfaces.
+# FeeCalculator :moneybag:
 
-## Features
+A robust Solidity contract for calculating deposit and redemption fees for a biochar ReFi pool.
 
-- Set up the fee distribution among recipients.
-- Calculate the deposit fees for a given amount.
-- Distribute the total fee among the recipients according to their shares.
-- Calculate the redemption fees for a given amount.
-- Get the balance of the TCO2 token in a given pool.
-- Get the total supply of a given pool.
-- Calculate the ratios for deposit fee calculation.
-- Calculate the ratios for redemption fee calculation.
-- Calculate the deposit fee for a given amount.
-- Calculate the redemption fee for a given amount.
+[![Solidity](https://img.shields.io/badge/Solidity-^0.8.13-blue.svg)](https://soliditylang.org/)
+[![OpenZeppelin](https://img.shields.io/badge/OpenZeppelin-Contracts-green.svg)](https://openzeppelin.com/contracts/)
+[![PRBMath](https://img.shields.io/badge/PRBMath-Library-orange.svg)](https://github.com/hifi-finance/prb-math)
 
-## How to Test
-`forge test -vv --via-ir`
+</div>
 
-## Fee structure
-Fee function is different in deposit and redemption but similar in behavior. Generally it is designed to punish monopolizing the pool with one asset harder the more monopolized it is. In other words doing a deposit of asset that already makes up e.g. 80% of the pool will result in higher fees, whereas doing a deposit with an asset that is not in the pool will result in lower fees. With redemption the situation is reversed, redeeming an asset that monopolizes the pool (thus improving pool composition) is cheap but redeeming an asset that consist of a very small percentage of the pool will be expensive.
-Fee functions in both operations are based on dominance coefficients a and b, which designates the ratio of how dominant a particular asset is before (`a`) and after (`b`) operation.
+## :sparkles: Features
+
+FeeCalculator implements `IDepositFeeCalculator` and `IRedemptionFeeCalculator` interfaces, providing the following features:
+
+- **Fee Distribution:** Set up the fee distribution among recipients.
+- **Deposit Fees Calculation:** Calculate the deposit fees for a given amount and distribute the total fee among the recipients according to their shares.
+- **Redemption Fees Calculation:** Calculate the redemption fees for a given amount.
+- **Pool Information Retrieval:** Get the balance of the TCO2 token in a given pool, and the total supply of a given pool.
+- **Ratios Calculation:** Calculate the ratios for deposit and redemption fee calculation.
+- **Fee Calculation:** Calculate the deposit and redemption fee for a given amount.
+
+## :hammer_and_wrench: How to Test
+
+Run the following command in your terminal:
+
+```bash
+forge test -vv --via-ir
+```
+
+# Fee Structure :chart_with_upwards_trend:
+
+The fee function is designed to discourage monopolizing the pool with one asset. It imposes higher fees for deposits of assets that already dominate the pool, and lower fees for deposits of assets that are not in the pool. Conversely, redeeming an asset that monopolizes the pool is cheap, while redeeming an asset that makes up a small percentage of the pool is expensive.
+
+The fee functions for both operations are based on dominance coefficients `a` and `b`, which designate the ratio of how dominant a particular asset is before (`a`) and after (`b`) the operation.
+
+## Mathematical Expressions
+
+### Dominance Coefficients
 
 `a = current_asset_volume / total_pool_volume`
 
 `b = (current_asset_volume +/- deposit/redemption amount ) / (total_pool_volume +/- deposit/redemption amount)`
 
-
-Another value that is used in functions is current `ta` (before operation) and future `tb` (after operation) amount of a particular asset in the pool
+### Current and Future Amounts of a Particular Asset in the Pool
 
 `ta = current_asset_volume`
 
 `tb = current_asset_volume +/- deposit/redemption amount`
 
+### Fee Function for Deposit
 
-### Fee function for deposit
 Relative fee values are between 0% (exclusive) and 36% (inclusive).
+
 Functional form for absolute fee is as follows:
 
 `Fee = M * (ta * log10(1 - a * N) - tb * log10(1 - b * N))`
@@ -43,13 +60,10 @@ Functional form for absolute fee is as follows:
 where
 `M = 0.18 ; N=0.99`
 
-Fee graph, where X is dominance of an asset and Y is a relative fee for deposit
+### Fee Function for Redemption
 
-![image](https://github.com/neutral-protocol/dynamic-fee-pools/assets/11928766/8247198c-a620-4533-aede-fa827a3cfc46)
-
-
-### Fee function for redemption
 Relative fee values are between 0% (exclusive) and ~31.24% (inclusive).
+
 Functional form for absolute fee is as follows:
 
 `Fee = scale * (tb * log10(b+shift) - ta * log10(a+shift)) + C*amount`
@@ -57,9 +71,34 @@ Functional form for absolute fee is as follows:
 where
 `scale=0.3 ; shift=0.1 ; C=scale*log10(1+shift)=scale*0.0413926851582251=0.0124178055474675`
 
-Fee graph, where X is dominance of an asset and Y is a relative fee for redemption
+## Fee Function Graphs
 
-![image](https://github.com/neutral-protocol/dynamic-fee-pools/assets/11928766/e308e855-b89e-4311-b182-28f81bc3ab94)
+The following graphs illustrate the fee functions for deposit and redemption.
+
+### Deposit Fee Function Graph
+
+![Deposit Fee Function Graph](https://github.com/neutral-protocol/dynamic-fee-pools/assets/11928766/8247198c-a620-4533-aede-fa827a3cfc46)
+
+In this graph, the X-axis represents the dominance of an asset, and the Y-axis represents the relative fee for deposit.
+
+### Redemption Fee Function Graph
+
+![Redemption Fee Function Graph](https://github.com/neutral-protocol/dynamic-fee-pools/assets/11928766/e308e855-b89e-4311-b182-28f81bc3ab94)
+
+In this graph, the X-axis represents the dominance of an asset, and the Y-axis represents the relative fee for redemption.
+
+These graphs help visualize how the fee changes based on the dominance of an asset in the pool. As the dominance of an asset increases, so does the fee for depositing more of that asset. Conversely, as the dominance of an asset decreases, so does the fee for redeeming that asset.
+
+This fee structure is designed to maintain a balanced composition in the pool and discourage monopolization by any single asset.
+
+### Conclusion
+
+The FeeCalculator contract uses these mathematical models to calculate fees for deposit and redemption operations. By understanding these functions, users can make informed decisions about their transactions to optimize their costs.
+
+Remember, the goal is to maintain a balanced pool composition and discourage monopolization by any single asset.
+
+
+
 
 ## How to Use
 

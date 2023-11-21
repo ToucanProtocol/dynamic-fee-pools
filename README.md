@@ -1,66 +1,37 @@
-## Foundry
+# FeeCalculator
 
-**Foundry is a blazing fast, portable and modular toolkit for Ethereum application development written in Rust.**
+This is a Solidity contract that calculates deposit and redemption fees for a given pool. It implements `IDepositFeeCalculator` and `IRedemptionFeeCalculator` interfaces.
 
-Foundry consists of:
+## Features
 
--   **Forge**: Ethereum testing framework (like Truffle, Hardhat and DappTools).
--   **Cast**: Swiss army knife for interacting with EVM smart contracts, sending transactions and getting chain data.
--   **Anvil**: Local Ethereum node, akin to Ganache, Hardhat Network.
--   **Chisel**: Fast, utilitarian, and verbose solidity REPL.
+- Set up the fee distribution among recipients.
+- Calculate the deposit fees for a given amount.
+- Distribute the total fee among the recipients according to their shares.
+- Calculate the redemption fees for a given amount.
+- Get the balance of the TCO2 token in a given pool.
+- Get the total supply of a given pool.
+- Calculate the ratios for deposit fee calculation.
+- Calculate the ratios for redemption fee calculation.
+- Calculate the deposit fee for a given amount.
+- Calculate the redemption fee for a given amount.
 
-## Documentation
+## How to Test
+`forge test -vv --via-ir`
 
-https://book.getfoundry.sh/
 
-## Usage
+## How to Use
 
-### Build
+1. Deploy the contract on an Ethereum network.
+2. Call `feeSetup` function to set up the fee distribution among recipients.
+3. Call `calculateDepositFees` function to calculate the deposit fees for a given amount.
+4. Call `calculateRedemptionFee` function to calculate the redemption fees for a given amount.
 
-```shell
-$ forge build
-```
+## Requirements
 
-### Test
+- Solidity ^0.8.13
+- OpenZeppelin Contracts
+- PRBMath
 
-```shell
-$ forge test
-```
+## License
 
-### Format
-
-```shell
-$ forge fmt
-```
-
-### Gas Snapshots
-
-```shell
-$ forge snapshot
-```
-
-### Anvil
-
-```shell
-$ anvil
-```
-
-### Deploy
-
-```shell
-$ forge script script/Counter.s.sol:CounterScript --rpc-url <your_rpc_url> --private-key <your_private_key>
-```
-
-### Cast
-
-```shell
-$ cast <subcommand>
-```
-
-### Help
-
-```shell
-$ forge --help
-$ anvil --help
-$ cast --help
-```
+This project is unlicensed.

@@ -23,7 +23,7 @@ contract FeeCalculator is IDepositFeeCalculator, IRedemptionFeeCalculator {
     SD59x18 private singleAssetDepositRelativeFee = sd(0.1 * 1e18);
 
     SD59x18 private redemptionFeeScale = sd(0.3 * 1e18);
-    SD59x18 private redemptionFeeShift = sd(0.1 * 1e18);//-log10(0+0.1)=1 -> 10^-1
+    SD59x18 private redemptionFeeShift = sd(0.1 * 1e18); //-log10(0+0.1)=1 -> 10^-1
     SD59x18 private redemptionFeeConstant = redemptionFeeScale * (one + redemptionFeeShift).log10(); //0.0413926851582251=log10(1+0.1)
     SD59x18 private singleAssetRedemptionRelativeFee = sd(0.1 * 1e18);
 
@@ -38,7 +38,7 @@ contract FeeCalculator is IDepositFeeCalculator, IRedemptionFeeCalculator {
         require(recipients.length > 0, "Recipients and shares arrays must not be empty");
 
         uint256 totalShares = 0;
-        for (uint i = 0; i < shares.length; i++) {
+        for (uint256 i = 0; i < shares.length; i++) {
             totalShares += shares[i];
         }
         require(totalShares == 100, "Total shares must equal 100");
@@ -53,7 +53,11 @@ contract FeeCalculator is IDepositFeeCalculator, IRedemptionFeeCalculator {
     /// @param depositAmount The amount to be deposited.
     /// @return recipients The addresses of the fee recipients.
     /// @return feesDenominatedInPoolTokens The amount of fees each recipient should receive.
-    function calculateDepositFees(address tco2, address pool, uint256 depositAmount) external override returns (address[] memory recipients, uint256[] memory feesDenominatedInPoolTokens) {
+    function calculateDepositFees(address tco2, address pool, uint256 depositAmount)
+        external
+        override
+        returns (address[] memory recipients, uint256[] memory feesDenominatedInPoolTokens)
+    {
         require(depositAmount > 0, "depositAmount must be > 0");
 
         uint256 totalFee = getDepositFee(depositAmount, getTokenBalance(pool, tco2), getTotalSupply(pool));
@@ -68,19 +72,23 @@ contract FeeCalculator is IDepositFeeCalculator, IRedemptionFeeCalculator {
     /// @param totalFee The total fee to be distributed.
     /// @return recipients The addresses of the fee recipients.
     /// @return feesDenominatedInPoolTokens The amount of fees each recipient should receive.
-    function distributeFeeAmongShares(uint256 totalFee) private view returns (address[] memory recipients, uint256[] memory feesDenominatedInPoolTokens) {
+    function distributeFeeAmongShares(uint256 totalFee)
+        private
+        view
+        returns (address[] memory recipients, uint256[] memory feesDenominatedInPoolTokens)
+    {
         feesDenominatedInPoolTokens = new uint256[](_recipients.length);
 
         uint256 restFee = totalFee;
 
-        for (uint i = 0; i < _recipients.length; i++) {
+        for (uint256 i = 0; i < _recipients.length; i++) {
             feesDenominatedInPoolTokens[i] = (totalFee * _shares[i]) / 100;
             restFee -= feesDenominatedInPoolTokens[i];
         }
 
         require(restFee >= 0);
         recipients = _recipients;
-        feesDenominatedInPoolTokens[0] += restFee;//we give rest of the fee (if any) to the first recipient
+        feesDenominatedInPoolTokens[0] += restFee; //we give rest of the fee (if any) to the first recipient
     }
 
     /// @notice Calculates the redemption fees for a given amount.
@@ -89,7 +97,11 @@ contract FeeCalculator is IDepositFeeCalculator, IRedemptionFeeCalculator {
     /// @param depositAmount The amount to be redeemed.
     /// @return recipients The addresses of the fee recipients.
     /// @return feesDenominatedInPoolTokens The amount of fees each recipient should receive.
-    function calculateRedemptionFee(address tco2, address pool, uint256 depositAmount) external override returns (address[] memory recipients, uint256[] memory feesDenominatedInPoolTokens) {
+    function calculateRedemptionFee(address tco2, address pool, uint256 depositAmount)
+        external
+        override
+        returns (address[] memory recipients, uint256[] memory feesDenominatedInPoolTokens)
+    {
         require(depositAmount > 0, "depositAmount must be > 0");
 
         uint256 totalFee = getRedemptionFee(depositAmount, getTokenBalance(pool, tco2), getTotalSupply(pool));
@@ -122,8 +134,7 @@ contract FeeCalculator is IDepositFeeCalculator, IRedemptionFeeCalculator {
     /// @param current The current balance of the pool.
     /// @param total The total supply of the pool.
     /// @return The calculated ratios.
-    function getRatiosDeposit(SD59x18 amount, SD59x18 current, SD59x18 total) private view returns (SD59x18, SD59x18)
-    {
+    function getRatiosDeposit(SD59x18 amount, SD59x18 current, SD59x18 total) private view returns (SD59x18, SD59x18) {
         SD59x18 a = total == zero ? zero : current / total;
         SD59x18 b = (current + amount) / (total + amount);
 
@@ -135,7 +146,10 @@ contract FeeCalculator is IDepositFeeCalculator, IRedemptionFeeCalculator {
     /// @param current The current balance of the pool.
     /// @param total The total supply of the pool.
     /// @return The calculated ratios.
-    function getRatiosRedemption(SD59x18 amount, SD59x18 current, SD59x18 total) private view returns (SD59x18, SD59x18)
+    function getRatiosRedemption(SD59x18 amount, SD59x18 current, SD59x18 total)
+        private
+        view
+        returns (SD59x18, SD59x18)
     {
         SD59x18 a = total == zero ? zero : current / total;
         SD59x18 b = (total - amount) == zero ? zero : (current - amount) / (total - amount);
@@ -153,9 +167,10 @@ contract FeeCalculator is IDepositFeeCalculator, IRedemptionFeeCalculator {
 
         SD59x18 amount_float = sd(int256(amount));
 
-        if(current==total)//single asset (or no assets) special case
-        {
-            uint256 fee = intoUint256(amount_float.mul(singleAssetDepositRelativeFee));
+        if (
+            current == total //single asset (or no assets) special case
+        ) {
+            uint256 fee = intoUint256(amount_float * singleAssetDepositRelativeFee);
             return fee;
         }
 
@@ -184,9 +199,10 @@ contract FeeCalculator is IDepositFeeCalculator, IRedemptionFeeCalculator {
 
         SD59x18 amount_float = sd(int256(amount));
 
-        if(current==total)//single asset (or no assets) special case
-        {
-            uint256 fee = intoUint256(amount_float.mul(singleAssetRedemptionRelativeFee));
+        if (
+            current == total //single asset (or no assets) special case
+        ) {
+            uint256 fee = intoUint256(amount_float * (singleAssetRedemptionRelativeFee));
             return fee;
         }
 
@@ -200,13 +216,13 @@ contract FeeCalculator is IDepositFeeCalculator, IRedemptionFeeCalculator {
         SD59x18 i_b = tb * (db + redemptionFeeShift).log10();
         SD59x18 fee_float = redemptionFeeScale * (i_b - i_a) + redemptionFeeConstant * amount_float;
 
-        if (fee_float < zero)
-        {
-            if (fee_float / amount_float < sd(1e-6 * 1e18))
+        if (fee_float < zero) {
+            if (fee_float / amount_float < sd(1e-6 * 1e18)) {
                 //fee_float=zero_signed;//if the fee is negative but is less than 0.0001% of amount than it's basically 0
                 require(fee_float > zero, "Fee must be greater than 0");
-            else
+            } else {
                 require(fee_float > zero, "Total failure. Fee must be greater than 0 or at least close to it.");
+            }
         }
 
         uint256 fee = intoUint256(fee_float);

@@ -15,5 +15,7 @@ interface IDepositFeeCalculator {
     /// @param depositAmount The amount to be deposited.
     /// @return recipients The addresses of the fee recipients.
     /// @return feesDenominatedInPoolTokens The amount of fees each recipient should receive.
-    function calculateDepositFees(address tco2, address pool, uint256 depositAmount) external returns (address[] memory recipients, uint256[] memory feesDenominatedInPoolTokens);
+    function calculateDepositFees(address tco2, address pool, uint256 depositAmount)
+        external
+        returns (address[] memory recipients, uint256[] memory feesDenominatedInPoolTokens);
 }

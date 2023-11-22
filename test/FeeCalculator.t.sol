@@ -174,11 +174,17 @@ contract FeeCalculatorTest is Test {
         mockToken.setTokenBalance(address(mockPool), 1e6 * 1e18);
 
         // Act
-        (address[] memory recipients, uint256[] memory fees) = feeCalculator.calculateRedemptionFee(address(mockToken), address(mockPool), redemptionAmount);
-
-        // Assert
-        assertEq(recipients[0], feeRecipient);
-        assertEq(fees[0], 0);
+        try feeCalculator.calculateRedemptionFee(address(mockToken), address(mockPool), redemptionAmount) returns (address[] memory recipients, uint256[] memory fees)
+        {
+            // Assert
+            assertEq(recipients[0], feeRecipient);
+            assertEq(fees[0], 0);
+            fail("Exception should be thrown");
+        }
+        catch Error(string memory reason)
+        {
+            assertEq("Fee must be greater than 0", reason);
+        }
     }
 
     function testCalculateRedemptionFees_CurrentSlightLessThanTotal_AmountSuperSmall_ShouldResultInException() public {

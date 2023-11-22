@@ -95,6 +95,7 @@ contract FeeCalculator is IDepositFeeCalculator, IRedemptionFeeCalculator {
         uint256 totalFee = getRedemptionFee(depositAmount, getTokenBalance(pool, tco2), getTotalSupply(pool));
 
         require(totalFee <= depositAmount, "Fee must be lower or equal to redemption amount");
+        require(totalFee > 0, "Fee must be greater than 0");
 
         return distributeFeeAmongShares(totalFee);
     }

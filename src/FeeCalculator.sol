@@ -20,10 +20,12 @@ contract FeeCalculator is IDepositFeeCalculator, IRedemptionFeeCalculator {
 
     SD59x18 private depositFeeScale = sd(0.18 * 1e18);
     SD59x18 private depositFeeRatioScale = sd(0.99 * 1e18);
+    SD59x18 private singleAssetDepositRelativeFee = sd(0.1 * 1e18);
 
     SD59x18 private redemptionFeeScale = sd(0.3 * 1e18);
     SD59x18 private redemptionFeeShift = sd(0.1 * 1e18);//-log10(0+0.1)=1 -> 10^-1
     SD59x18 private redemptionFeeConstant = redemptionFeeScale * (one + redemptionFeeShift).log10(); //0.0413926851582251=log10(1+0.1)
+    SD59x18 private singleAssetRedemptionRelativeFee = sd(0.1 * 1e18);
 
     address[] private _recipients;
     uint256[] private _shares;
@@ -55,6 +57,10 @@ contract FeeCalculator is IDepositFeeCalculator, IRedemptionFeeCalculator {
         require(depositAmount > 0, "depositAmount must be > 0");
 
         uint256 totalFee = getDepositFee(depositAmount, getTokenBalance(pool, tco2), getTotalSupply(pool));
+
+        require(totalFee <= depositAmount, "Fee must be lower or equal to deposit amount");
+        require(totalFee > 0, "Fee must be greater than 0");
+
         return distributeFeeAmongShares(totalFee);
     }
 
@@ -87,6 +93,9 @@ contract FeeCalculator is IDepositFeeCalculator, IRedemptionFeeCalculator {
         require(depositAmount > 0, "depositAmount must be > 0");
 
         uint256 totalFee = getRedemptionFee(depositAmount, getTokenBalance(pool, tco2), getTotalSupply(pool));
+
+        require(totalFee <= depositAmount, "Fee must be lower or equal to redemption amount");
+
         return distributeFeeAmongShares(totalFee);
     }
 
@@ -142,6 +151,13 @@ contract FeeCalculator is IDepositFeeCalculator, IRedemptionFeeCalculator {
         require(total >= current);
 
         SD59x18 amount_float = sd(int256(amount));
+
+        if(current==total)//single asset (or no assets) special case
+        {
+            uint256 fee = intoUint256(amount_float.mul(singleAssetDepositRelativeFee));
+            return fee;
+        }
+
         SD59x18 ta = sd(int256(current));
         SD59x18 tb = ta + amount_float;
 
@@ -153,10 +169,6 @@ contract FeeCalculator is IDepositFeeCalculator, IRedemptionFeeCalculator {
         SD59x18 fee_float = depositFeeScale * (ta_log_a - tb_log_b);
 
         uint256 fee = intoUint256(fee_float);
-
-        require(fee <= amount, "Fee must be lower or equal to deposit amount");
-        require(fee > 0, "Fee must be greater than 0");
-
         return fee;
     }
 
@@ -170,6 +182,13 @@ contract FeeCalculator is IDepositFeeCalculator, IRedemptionFeeCalculator {
         require(amount <= current);
 
         SD59x18 amount_float = sd(int256(amount));
+
+        if(current==total)//single asset (or no assets) special case
+        {
+            uint256 fee = intoUint256(amount_float.mul(singleAssetRedemptionRelativeFee));
+            return fee;
+        }
+
         SD59x18 ta = sd(int256(current));
         SD59x18 tb = ta - amount_float;
 
@@ -190,9 +209,6 @@ contract FeeCalculator is IDepositFeeCalculator, IRedemptionFeeCalculator {
         }
 
         uint256 fee = intoUint256(fee_float);
-
-        require(fee <= amount, "Fee must be lower or equal to redemption amount");
-
         return fee;
     }
 }

@@ -147,13 +147,30 @@ contract FeeCalculatorTest is Test {
         assertApproxEqRel(fees[0], intoUint256((redemptionFeeScale + redemptionFeeConstant).mul(ud(redemptionAmount))), 1e15);//we allow 0.1% discrepancy
     }
 
-    function testCalculateRedemptionFees_FullMonopolization_ZeroFees() public {
+    function testCalculateRedemptionFees_FullMonopolization_FeesCappedAt10Percent() public {
         // Arrange
         // Set up your test data
         uint256 redemptionAmount = 1 * 1e18;
 
         // Set up mock pool
         mockPool.setTotalSupply(1e6 * 1e18);
+        mockToken.setTokenBalance(address(mockPool), 1e6 * 1e18);
+
+        // Act
+        (address[] memory recipients, uint256[] memory fees) = feeCalculator.calculateRedemptionFee(address(mockToken), address(mockPool), redemptionAmount);
+
+        // Assert
+        assertEq(recipients[0], feeRecipient);
+        assertEq(fees[0], redemptionAmount/10);
+    }
+
+    function testCalculateRedemptionFees_AlmostFullMonopolization_ZeroFees() public {
+        // Arrange
+        // Set up your test data
+        uint256 redemptionAmount = 1 * 1e18;
+
+        // Set up mock pool
+        mockPool.setTotalSupply(1e6 * 1e18 + 1);
         mockToken.setTokenBalance(address(mockPool), 1e6 * 1e18);
 
         // Act
@@ -503,7 +520,7 @@ contract FeeCalculatorTest is Test {
         }
     }
 
-    function testCalculateDepositFees_EmptyPool_FeeCappedAt36Percent() public {
+    function testCalculateDepositFees_EmptyPool_FeeCappedAt10Percent() public {
         // Arrange
         // Set up your test data
         uint256 depositAmount = 100*1e18;
@@ -517,10 +534,44 @@ contract FeeCalculatorTest is Test {
 
         // Assert
         assertEq(recipients[0], feeRecipient);
-        assertEq(fees[0], 36 * 1e18);
+        assertEq(fees[0], depositAmount/10);
     }
 
-    function testCalculateDepositFees_TotalEqualCurrent_FeeCappedAt36Percent() public {
+    function testCalculateDepositFees_AlmostEmptyPool_FeeAlmostCappedAt36Percent() public {
+        // Arrange
+        // Set up your test data
+        uint256 depositAmount = 100*1e18;
+
+        // Set up mock pool
+        mockPool.setTotalSupply(1);
+        mockToken.setTokenBalance(address(mockPool), 0);
+
+        // Act
+        (address[] memory recipients, uint256[] memory fees) = feeCalculator.calculateDepositFees(address(mockToken), address(mockPool), depositAmount);
+
+        // Assert
+        assertEq(recipients[0], feeRecipient);
+        assertEq(fees[0], 35999999999999999154);
+    }
+
+    function testCalculateRedemptionFees_TotalEqualCurrent_FeeCappedAt10Percent() public {
+        // Arrange
+        // Set up your test data
+        uint256 redemptionAmount = 100;
+
+        // Set up mock pool
+        mockPool.setTotalSupply(1000);
+        mockToken.setTokenBalance(address(mockPool), 1000);
+
+        // Act
+        (address[] memory recipients, uint256[] memory fees) = feeCalculator.calculateRedemptionFee(address(mockToken), address(mockPool), redemptionAmount);
+
+        // Assert
+        assertEq(recipients[0], feeRecipient);
+        assertEq(fees[0], redemptionAmount/10);
+    }
+
+    function testCalculateDepositFees_TotalEqualCurrent_FeeCappedAt10Percent() public {
         // Arrange
         // Set up your test data
         uint256 depositAmount = 100*1e18;
@@ -534,7 +585,24 @@ contract FeeCalculatorTest is Test {
 
         // Assert
         assertEq(recipients[0], feeRecipient);
-        assertEq(fees[0], 36*1e18);
+        assertEq(fees[0], depositAmount/10);
+    }
+
+    function testCalculateDepositFees_TotalAlmostEqualCurrent_FeeAlmostCappedAt36Percent() public {
+        // Arrange
+        // Set up your test data
+        uint256 depositAmount = 100*1e18;
+
+        // Set up mock pool
+        mockPool.setTotalSupply(1000);
+        mockToken.setTokenBalance(address(mockPool), 999);
+
+        // Act
+        (address[] memory recipients, uint256[] memory fees) = feeCalculator.calculateDepositFees(address(mockToken), address(mockPool), depositAmount);
+
+        // Assert
+        assertEq(recipients[0], feeRecipient);
+        assertEq(fees[0], 35999999999999999161);
     }
 
     function testCalculateDepositFees_ZeroCurrent_NormalFees() public {

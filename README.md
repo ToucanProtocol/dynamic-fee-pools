@@ -35,6 +35,16 @@ The fee function is designed to discourage monopolizing the pool with one asset.
 
 The fee functions for both operations are based on dominance coefficients `a` and `b`, which designate the ratio of how dominant a particular asset is before (`a`) and after (`b`) the operation.
 
+## Single Asset or No Assets in the Pool
+In the case where there is only one asset in the pool or the pool is empty, the fee structure is simplified to a flat rate. This is designed to encourage diversification in the pool and discourage monopolization by a single asset.
+
+For both deposit and redemption operations, a flat fee of 10% is applied. This means that regardless of the amount deposited or redeemed, the fee will always be 10% of that amount.
+This flat fee structure serves two purposes:
+1. Simplicity: It provides a straightforward and predictable fee calculation for users when there is only one asset or no assets in the pool.
+2. Encouragement of Diversification: The flat fee encourages users to diversify the assets in the pool. If there are multiple assets in the pool, the fee calculation becomes more complex (as described in the sections below), potentially leading to lower fees for less dominant assets.
+
+Remember, the goal of this fee structure is to maintain a balanced composition in the pool and discourage monopolization by any single asset.
+
 ## Mathematical Expressions
 
 ### Dominance Coefficients

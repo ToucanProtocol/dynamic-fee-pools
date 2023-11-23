@@ -86,7 +86,6 @@ contract FeeCalculator is IDepositFeeCalculator, IRedemptionFeeCalculator {
             restFee -= feesDenominatedInPoolTokens[i];
         }
 
-        require(restFee >= 0);
         recipients = _recipients;
         feesDenominatedInPoolTokens[0] += restFee; //we give rest of the fee (if any) to the first recipient
     }

@@ -96,6 +96,13 @@ contract FeeCalculatorTest is Test {
         feeCalculator.feeSetup(recipients, feeShares);
     }
 
+    function testFeeSetupEmpty() public {
+        address[] memory recipients = new address[](0);
+        uint256[] memory feeShares = new uint256[](0);
+        vm.expectRevert("Total shares must equal 100");
+        feeCalculator.feeSetup(recipients, feeShares);
+    }
+
     function testCalculateDepositFeesNormalCase() public {
         // Arrange
         // Set up your test data

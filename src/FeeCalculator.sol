@@ -35,7 +35,6 @@ contract FeeCalculator is IDepositFeeCalculator, IRedemptionFeeCalculator {
     /// @param shares The share of the fee each recipient should receive.
     function feeSetup(address[] memory recipients, uint256[] memory shares) external {
         require(recipients.length == shares.length, "Recipients and shares arrays must have the same length");
-        require(recipients.length > 0, "Recipients and shares arrays must not be empty");
 
         uint256 totalShares = 0;
         for (uint256 i = 0; i < shares.length; i++) {

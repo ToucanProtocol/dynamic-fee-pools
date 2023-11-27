@@ -206,9 +206,10 @@ contract FeeCalculator is IDepositFeeCalculator, IRedemptionFeeCalculator {
 
         console.logUint(intoUint256(da));
         console.logUint(intoUint256(db));
+        console.logUint(intoUint256(da-db));
 
         if (
-            current == total || da == db //single asset (or no assets) or dominance of single asset is very high special case
+            current == total //single asset (or no assets)
         ) {
             uint256 fee = intoUint256(amount_float * (singleAssetRedemptionRelativeFee));
             return fee;
@@ -220,12 +221,8 @@ contract FeeCalculator is IDepositFeeCalculator, IRedemptionFeeCalculator {
         SD59x18 fee_float = redemptionFeeScale * (i_b - i_a) + redemptionFeeConstant * amount_float;
 
         if (fee_float < zero) {
-            if (fee_float / amount_float < sd(1e-6 * 1e18)) {
-                //fee_float=zero_signed;//if the fee is negative but is less than 0.0001% of amount than it's basically 0
-                require(fee_float > zero, "Fee must be greater than 0");
-            } else {
-                require(fee_float > zero, "Total failure. Fee must be greater than 0 or at least close to it.");
-            }
+            uint256 fee = intoUint256(amount_float * (singleAssetRedemptionRelativeFee));
+            return fee;
         }
 
         uint256 fee = intoUint256(fee_float);

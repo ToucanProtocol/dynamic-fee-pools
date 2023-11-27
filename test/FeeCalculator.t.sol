@@ -620,6 +620,24 @@ contract FeeCalculatorTest is Test {
         assertEq(fees[0], depositAmount/10);
     }
 
+    function testCalculateRedemptionFees_NegativeCase() public {
+        // Arrange
+        // Set up your test data
+        uint256 depositAmount = 2323662174650;
+
+        // Set up mock pool
+        mockPool.setTotalSupply(56636794628913227180683983236);
+        mockToken.setTokenBalance(address(mockPool), 55661911070827884041095553095);
+
+        // Act
+        (address[] memory recipients, uint256[] memory fees) =
+                            feeCalculator.calculateRedemptionFee(address(mockToken), address(mockPool), depositAmount);
+
+        // Assert
+        assertEq(recipients[0], feeRecipient);
+        assertEq(fees[0], depositAmount/10);
+    }
+
     function testCalculateDepositFeesFuzzy(uint256 depositAmount, uint256 current, uint256 total) public {
         //vm.assume(depositAmount > 0);
         //vm.assume(total > 0);

@@ -37,7 +37,7 @@ contract MockPool is IERC20 {
         return true;
     }
 
-    function balanceOf(address account) external view returns (uint256) {
+    function balanceOf(address account) external pure returns (uint256) {
         return 0;
     }
 }
@@ -65,7 +65,7 @@ contract MockToken is IERC20 {
         return true;
     }
 
-    function totalSupply() external view returns (uint256) {
+    function totalSupply() external pure returns (uint256) {
         return 0;
     }
 }

@@ -54,6 +54,7 @@ contract FeeCalculator is IDepositFeeCalculator, IRedemptionFeeCalculator {
     /// @return feesDenominatedInPoolTokens The amount of fees each recipient should receive.
     function calculateDepositFees(address tco2, address pool, uint256 depositAmount)
         external
+        view
         override
         returns (address[] memory recipients, uint256[] memory feesDenominatedInPoolTokens)
     {
@@ -97,6 +98,7 @@ contract FeeCalculator is IDepositFeeCalculator, IRedemptionFeeCalculator {
     /// @return feesDenominatedInPoolTokens The amount of fees each recipient should receive.
     function calculateRedemptionFee(address tco2, address pool, uint256 depositAmount)
         external
+        view
         override
         returns (address[] memory recipients, uint256[] memory feesDenominatedInPoolTokens)
     {

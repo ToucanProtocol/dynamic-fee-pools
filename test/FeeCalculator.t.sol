@@ -132,7 +132,7 @@ contract FeeCalculatorTest is Test {
 
         // Act
         (address[] memory recipients, uint256[] memory fees) =
-            feeCalculator.calculateRedemptionFee(address(mockToken), address(mockPool), redemptionAmount);
+            feeCalculator.calculateRedemptionFees(address(mockToken), address(mockPool), redemptionAmount);
 
         // Assert
         assertEq(recipients[0], feeRecipient);
@@ -150,7 +150,7 @@ contract FeeCalculatorTest is Test {
 
         // Act
         (address[] memory recipients, uint256[] memory fees) =
-            feeCalculator.calculateRedemptionFee(address(mockToken), address(mockPool), redemptionAmount);
+            feeCalculator.calculateRedemptionFees(address(mockToken), address(mockPool), redemptionAmount);
 
         // Assert
         assertEq(recipients[0], feeRecipient);
@@ -170,7 +170,7 @@ contract FeeCalculatorTest is Test {
 
         // Act
         (address[] memory recipients, uint256[] memory fees) =
-            feeCalculator.calculateRedemptionFee(address(mockToken), address(mockPool), redemptionAmount);
+            feeCalculator.calculateRedemptionFees(address(mockToken), address(mockPool), redemptionAmount);
 
         // Assert
         assertEq(recipients[0], feeRecipient);
@@ -188,7 +188,7 @@ contract FeeCalculatorTest is Test {
 
         // Act
         vm.expectRevert("Fee must be greater than 0");
-        feeCalculator.calculateRedemptionFee(address(mockToken), address(mockPool), redemptionAmount);
+        feeCalculator.calculateRedemptionFees(address(mockToken), address(mockPool), redemptionAmount);
     }
 
     function testCalculateRedemptionFees_CurrentSlightLessThanTotal_AmountSuperSmall_ShouldResultInException() public {
@@ -203,7 +203,7 @@ contract FeeCalculatorTest is Test {
 
         // Act
         vm.expectRevert("Fee must be greater than 0");
-        feeCalculator.calculateRedemptionFee(address(mockToken), address(mockPool), redemptionAmount);
+        feeCalculator.calculateRedemptionFees(address(mockToken), address(mockPool), redemptionAmount);
     }
 
     function testCalculateDepositFeesNormalCase_TwoFeeRecipientsSplitEqually() public {
@@ -544,7 +544,7 @@ contract FeeCalculatorTest is Test {
 
         // Act
         vm.expectRevert("redemptionAmount must be > 0");
-        feeCalculator.calculateRedemptionFee(address(mockToken), address(mockPool), redemptionAmount);
+        feeCalculator.calculateRedemptionFees(address(mockToken), address(mockPool), redemptionAmount);
     }
 
     function testCalculateRedemptionFees_TotalEqualCurrent_FeeCappedAt10Percent() public {
@@ -558,7 +558,7 @@ contract FeeCalculatorTest is Test {
 
         // Act
         (address[] memory recipients, uint256[] memory fees) =
-            feeCalculator.calculateRedemptionFee(address(mockToken), address(mockPool), redemptionAmount);
+            feeCalculator.calculateRedemptionFees(address(mockToken), address(mockPool), redemptionAmount);
 
         // Assert
         assertEq(recipients[0], feeRecipient);
@@ -690,7 +690,7 @@ contract FeeCalculatorTest is Test {
         uint256 multipleTimesRedemptionFailedCount = 0;
 
         // Act
-        try feeCalculator.calculateRedemptionFee(address(mockToken), address(mockPool), redemptionAmount) returns (
+        try feeCalculator.calculateRedemptionFees(address(mockToken), address(mockPool), redemptionAmount) returns (
             address[] memory recipients, uint256[] memory fees
         ) {
             oneTimeFee = fees[0];
@@ -712,7 +712,7 @@ contract FeeCalculatorTest is Test {
 
         for (uint256 i = 0; i < numberOfRedemptions; i++) {
             uint256 redemption = equalRedemption + (i == 0 ? restRedemption : 0);
-            try feeCalculator.calculateRedemptionFee(address(mockToken), address(mockPool), redemption) returns (
+            try feeCalculator.calculateRedemptionFees(address(mockToken), address(mockPool), redemption) returns (
                 address[] memory recipients, uint256[] memory fees
             ) {
                 feeFromDividedRedemptions += fees[0];

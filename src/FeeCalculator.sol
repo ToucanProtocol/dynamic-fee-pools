@@ -96,7 +96,7 @@ contract FeeCalculator is IDepositFeeCalculator, IRedemptionFeeCalculator {
     /// @param redemptionAmount The amount to be redeemed.
     /// @return recipients The addresses of the fee recipients.
     /// @return feesDenominatedInPoolTokens The amount of fees each recipient should receive.
-    function calculateRedemptionFee(address tco2, address pool, uint256 redemptionAmount)
+    function calculateRedemptionFees(address tco2, address pool, uint256 redemptionAmount)
         external
         view
         override

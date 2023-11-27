@@ -515,7 +515,10 @@ contract FeeCalculatorTest is Test {
             assertEq(fees[0], 0);
             fail("Exception should be thrown");
         } catch Error(string memory reason) {
-            assertEq("The total volume in the pool must be greater than or equal to the volume for an individual asset", reason);
+            assertEq(
+                "The total volume in the pool must be greater than or equal to the volume for an individual asset",
+                reason
+            );
         }
     }
 
@@ -537,7 +540,10 @@ contract FeeCalculatorTest is Test {
             assertEq(fees[0], 0);
             fail("Exception should be thrown");
         } catch Error(string memory reason) {
-            assertEq("The total volume in the pool must be greater than or equal to the volume for an individual asset", reason);
+            assertEq(
+                "The total volume in the pool must be greater than or equal to the volume for an individual asset",
+                reason
+            );
         }
     }
 
@@ -932,12 +938,9 @@ contract FeeCalculatorTest is Test {
         uint256[] memory _feeShares = new uint256[](0);
 
         // Act
-        try feeCalculator.feeSetup(_recipients, _feeShares)
-        {
+        try feeCalculator.feeSetup(_recipients, _feeShares) {
             fail("Exception should be thrown");
-        }
-        catch Error(string memory reason)
-        {
+        } catch Error(string memory reason) {
             // Assert
             assertEq("Total shares must equal 100", reason);
         }
@@ -957,12 +960,9 @@ contract FeeCalculatorTest is Test {
         _feeShares[2] = 60;
 
         // Act
-        try feeCalculator.feeSetup(_recipients, _feeShares)
-        {
+        try feeCalculator.feeSetup(_recipients, _feeShares) {
             fail("Exception should be thrown");
-        }
-        catch Error(string memory reason)
-        {
+        } catch Error(string memory reason) {
             // Assert
             assertEq("Recipients and shares arrays must have the same length", reason);
         }
@@ -984,12 +984,9 @@ contract FeeCalculatorTest is Test {
         _feeShares[2] = 60;
 
         // Act
-        try feeCalculator.feeSetup(_recipients, _feeShares)
-        {
+        try feeCalculator.feeSetup(_recipients, _feeShares) {
             fail("Exception should be thrown");
-        }
-        catch Error(string memory reason)
-        {
+        } catch Error(string memory reason) {
             // Assert
             assertEq("Total shares must equal 100", reason);
         }

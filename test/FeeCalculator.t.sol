@@ -187,16 +187,8 @@ contract FeeCalculatorTest is Test {
         mockToken.setTokenBalance(address(mockPool), 1e6 * 1e18);
 
         // Act
-        try feeCalculator.calculateRedemptionFee(address(mockToken), address(mockPool), redemptionAmount) returns (
-            address[] memory recipients, uint256[] memory fees
-        ) {
-            // Assert
-            assertEq(recipients[0], feeRecipient);
-            assertEq(fees[0], 0);
-            fail("Exception should be thrown");
-        } catch Error(string memory reason) {
-            assertEq("Fee must be greater than 0", reason);
-        }
+        vm.expectRevert("Fee must be greater than 0");
+        feeCalculator.calculateRedemptionFee(address(mockToken), address(mockPool), redemptionAmount);
     }
 
     function testCalculateRedemptionFees_CurrentSlightLessThanTotal_AmountSuperSmall_ShouldResultInException() public {
@@ -210,16 +202,8 @@ contract FeeCalculatorTest is Test {
         mockToken.setTokenBalance(address(mockPool), 11102230246251565403820829061134812052); //1.11e37
 
         // Act
-        try feeCalculator.calculateRedemptionFee(address(mockToken), address(mockPool), redemptionAmount) returns (
-            address[] memory recipients, uint256[] memory fees
-        ) {
-            // Assert
-            assertEq(recipients[0], feeRecipient);
-            assertEq(fees[0], 0);
-            fail("Exception should be thrown");
-        } catch Error(string memory reason) {
-            assertEq("Fee must be greater than 0", reason);
-        }
+        vm.expectRevert("Fee must be greater than 0");
+        feeCalculator.calculateRedemptionFee(address(mockToken), address(mockPool), redemptionAmount);
     }
 
     function testCalculateDepositFeesNormalCase_TwoFeeRecipientsSplitEqually() public {
@@ -312,16 +296,8 @@ contract FeeCalculatorTest is Test {
         mockToken.setTokenBalance(address(mockPool), 1e4 * 1e18);
 
         // Act
-        try feeCalculator.calculateDepositFees(address(mockToken), address(mockPool), depositAmount) returns (
-            address[] memory recipients, uint256[] memory fees
-        ) {
-            // Assert
-            assertEq(recipients[0], feeRecipient);
-            assertEq(fees[0], depositAmount);
-            fail("Exception should be thrown");
-        } catch Error(string memory reason) {
-            assertEq("Fee must be greater than 0", reason);
-        }
+        vm.expectRevert("Fee must be greater than 0");
+        feeCalculator.calculateDepositFees(address(mockToken), address(mockPool), depositAmount);
     }
 
     function testCalculateDepositFees_DepositOfHundredWei_ShouldThrowError() public {
@@ -337,16 +313,8 @@ contract FeeCalculatorTest is Test {
         mockToken.setTokenBalance(address(mockPool), 1e4 * 1e18);
 
         // Act
-        try feeCalculator.calculateDepositFees(address(mockToken), address(mockPool), depositAmount) returns (
-            address[] memory recipients, uint256[] memory fees
-        ) {
-            // Assert
-            assertEq(recipients[0], feeRecipient);
-            assertEq(fees[0], depositAmount);
-            fail("Exception should be thrown");
-        } catch Error(string memory reason) {
-            assertEq("Fee must be greater than 0", reason);
-        }
+        vm.expectRevert("Fee must be greater than 0");
+        feeCalculator.calculateDepositFees(address(mockToken), address(mockPool), depositAmount);
     }
 
     function testCalculateDepositFees_FuzzyExtremelySmallDepositsToLargePool_ShouldThrowError(uint256 depositAmount)
@@ -365,16 +333,8 @@ contract FeeCalculatorTest is Test {
         mockPool.setTotalSupply(1e12 * 1e18);
         mockToken.setTokenBalance(address(mockPool), 1e9 * 1e18);
 
-        try feeCalculator.calculateDepositFees(address(mockToken), address(mockPool), depositAmount) returns (
-            address[] memory recipients, uint256[] memory fees
-        ) {
-            // Assert
-            assertEq(recipients[0], feeRecipient);
-            assertEq(fees[0], depositAmount);
-            fail("Exception should be thrown");
-        } catch Error(string memory reason) {
-            assertEq("Fee must be greater than 0", reason);
-        }
+        vm.expectRevert("Fee must be greater than 0");
+        feeCalculator.calculateDepositFees(address(mockToken), address(mockPool), depositAmount);
     }
 
     function testCalculateDepositFees_DepositOfHundredThousandsPartOfOne_NonzeroFee() public {
@@ -533,16 +493,8 @@ contract FeeCalculatorTest is Test {
         mockToken.setTokenBalance(address(mockPool), 500 * 1e18);
 
         // Act
-        try feeCalculator.calculateDepositFees(address(mockToken), address(mockPool), depositAmount) returns (
-            address[] memory recipients, uint256[] memory fees
-        ) {
-            // Assert
-            assertEq(recipients[0], feeRecipient);
-            assertEq(fees[0], 0);
-            fail("Exception should be thrown");
-        } catch Error(string memory reason) {
-            assertEq("depositAmount must be > 0", reason);
-        }
+        vm.expectRevert("depositAmount must be > 0");
+        feeCalculator.calculateDepositFees(address(mockToken), address(mockPool), depositAmount);
     }
 
     function testCalculateDepositFees_EmptyPool_FeeCappedAt10Percent() public {

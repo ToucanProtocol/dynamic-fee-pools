@@ -529,7 +529,7 @@ contract FeeCalculatorTest is Test {
         mockToken.setTokenBalance(address(mockPool), 1500 * 1e18);
 
         // Act
-        try feeCalculator.calculateRedemptionFee(address(mockToken), address(mockPool), depositAmount) returns (
+        try feeCalculator.calculateRedemptionFees(address(mockToken), address(mockPool), depositAmount) returns (
             address[] memory recipients, uint256[] memory fees
         ) {
             // Assert
@@ -551,7 +551,7 @@ contract FeeCalculatorTest is Test {
         mockToken.setTokenBalance(address(mockPool), 500 * 1e18);
 
         // Act
-        try feeCalculator.calculateRedemptionFee(address(mockToken), address(mockPool), depositAmount) returns (
+        try feeCalculator.calculateRedemptionFees(address(mockToken), address(mockPool), depositAmount) returns (
             address[] memory recipients, uint256[] memory fees
         ) {
             // Assert
@@ -573,7 +573,7 @@ contract FeeCalculatorTest is Test {
         mockToken.setTokenBalance(address(mockPool), 500 * 1e18);
 
         // Act
-        try feeCalculator.calculateRedemptionFee(address(mockToken), address(mockPool), depositAmount) returns (
+        try feeCalculator.calculateRedemptionFees(address(mockToken), address(mockPool), depositAmount) returns (
             address[] memory recipients, uint256[] memory fees
         ) {
             // Assert
@@ -581,7 +581,7 @@ contract FeeCalculatorTest is Test {
             assertEq(fees[0], 0);
             fail("Exception should be thrown");
         } catch Error(string memory reason) {
-            assertEq("depositAmount must be > 0", reason);
+            assertEq("redemptionAmount must be > 0", reason);
         }
     }
 
@@ -939,7 +939,7 @@ contract FeeCalculatorTest is Test {
         catch Error(string memory reason)
         {
             // Assert
-            assertEq("Recipients and shares arrays must not be empty", reason);
+            assertEq("Total shares must equal 100", reason);
         }
     }
 

@@ -170,51 +170,6 @@ contract FeeCalculatorTest is Test {
         assertEq(fees[0], redemptionAmount / 10);
     }
 
-    function testCalculateRedemptionFees_AlmostFullMonopolization_ZeroFees() public {
-        // Arrange
-        // Set up your test data
-        uint256 redemptionAmount = 1 * 1e18;
-
-        // Set up mock pool
-        mockPool.setTotalSupply(1e6 * 1e18 + 1);
-        mockToken.setTokenBalance(address(mockPool), 1e6 * 1e18);
-
-        // Act
-        try feeCalculator.calculateRedemptionFee(address(mockToken), address(mockPool), redemptionAmount) returns (
-            address[] memory recipients, uint256[] memory fees
-        ) {
-            // Assert
-            assertEq(recipients[0], feeRecipient);
-            assertEq(fees[0], 0);
-            fail("Exception should be thrown");
-        } catch Error(string memory reason) {
-            assertEq("Fee must be greater than 0", reason);
-        }
-    }
-
-    function testCalculateRedemptionFees_CurrentSlightLessThanTotal_AmountSuperSmall_ShouldResultInException() public {
-        //this test was producing negative redemption fees before rounding extremely small negative redemption fees to zero
-        // Arrange
-        // Set up your test data
-        uint256 redemptionAmount = 186843141273221600445448244614; //1.868e29
-
-        // Set up mock pool
-        mockPool.setTotalSupply(11102230246251565404236316680908203126); //1.11e37
-        mockToken.setTokenBalance(address(mockPool), 11102230246251565403820829061134812052); //1.11e37
-
-        // Act
-        try feeCalculator.calculateRedemptionFee(address(mockToken), address(mockPool), redemptionAmount) returns (
-            address[] memory recipients, uint256[] memory fees
-        ) {
-            // Assert
-            assertEq(recipients[0], feeRecipient);
-            assertEq(fees[0], 0);
-            fail("Exception should be thrown");
-        } catch Error(string memory reason) {
-            assertEq("Fee must be greater than 0", reason);
-        }
-    }
-
     function testCalculateDepositFeesNormalCase_TwoFeeRecipientsSplitEqually() public {
         // Arrange
         // Set up your test data
@@ -644,6 +599,25 @@ contract FeeCalculatorTest is Test {
         // Assert
         assertEq(recipients[0], feeRecipient);
         assertEq(fees[0], 737254938220315128);
+    }
+
+    function testCalculateRedemptionFees_HugeTotalLargeCurrentSmallDeposit() public {
+        // Arrange
+        // Set up your test data
+        uint256 depositAmount = 10000 * 1e18;
+
+        // Set up mock pool
+        uint256 supply = 100000 * 1e18;
+        mockPool.setTotalSupply(100000 * 1e18);
+        mockToken.setTokenBalance(address(mockPool), supply-1);
+
+        // Act
+        (address[] memory recipients, uint256[] memory fees) =
+                            feeCalculator.calculateRedemptionFee(address(mockToken), address(mockPool), depositAmount);
+
+        // Assert
+        assertEq(recipients[0], feeRecipient);
+        assertEq(fees[0], depositAmount/10);
     }
 
     function testCalculateDepositFeesFuzzy(uint256 depositAmount, uint256 current, uint256 total) public {

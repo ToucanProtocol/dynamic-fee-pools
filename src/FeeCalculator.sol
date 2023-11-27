@@ -5,6 +5,7 @@
 // If you encounter a vulnerability or an issue, please contact <info@neutralx.com>
 pragma solidity ^0.8.13;
 
+import "forge-std/console.sol";
 import "./interfaces/IDepositFeeCalculator.sol";
 import "./interfaces/IRedemptionFeeCalculator.sol";
 import "@openzeppelin/contracts/token/ERC20/IERC20.sol";
@@ -54,9 +55,9 @@ contract FeeCalculator is IDepositFeeCalculator, IRedemptionFeeCalculator {
     /// @return recipients The addresses of the fee recipients.
     /// @return feesDenominatedInPoolTokens The amount of fees each recipient should receive.
     function calculateDepositFees(address tco2, address pool, uint256 depositAmount)
-        external
-        override
-        returns (address[] memory recipients, uint256[] memory feesDenominatedInPoolTokens)
+    external
+    override
+    returns (address[] memory recipients, uint256[] memory feesDenominatedInPoolTokens)
     {
         require(depositAmount > 0, "depositAmount must be > 0");
 
@@ -73,9 +74,9 @@ contract FeeCalculator is IDepositFeeCalculator, IRedemptionFeeCalculator {
     /// @return recipients The addresses of the fee recipients.
     /// @return feesDenominatedInPoolTokens The amount of fees each recipient should receive.
     function distributeFeeAmongShares(uint256 totalFee)
-        private
-        view
-        returns (address[] memory recipients, uint256[] memory feesDenominatedInPoolTokens)
+    private
+    view
+    returns (address[] memory recipients, uint256[] memory feesDenominatedInPoolTokens)
     {
         feesDenominatedInPoolTokens = new uint256[](_recipients.length);
 
@@ -98,9 +99,9 @@ contract FeeCalculator is IDepositFeeCalculator, IRedemptionFeeCalculator {
     /// @return recipients The addresses of the fee recipients.
     /// @return feesDenominatedInPoolTokens The amount of fees each recipient should receive.
     function calculateRedemptionFee(address tco2, address pool, uint256 depositAmount)
-        external
-        override
-        returns (address[] memory recipients, uint256[] memory feesDenominatedInPoolTokens)
+    external
+    override
+    returns (address[] memory recipients, uint256[] memory feesDenominatedInPoolTokens)
     {
         require(depositAmount > 0, "depositAmount must be > 0");
 
@@ -147,9 +148,9 @@ contract FeeCalculator is IDepositFeeCalculator, IRedemptionFeeCalculator {
     /// @param total The total supply of the pool.
     /// @return The calculated ratios.
     function getRatiosRedemption(SD59x18 amount, SD59x18 current, SD59x18 total)
-        private
-        view
-        returns (SD59x18, SD59x18)
+    private
+    view
+    returns (SD59x18, SD59x18)
     {
         SD59x18 a = total == zero ? zero : current / total;
         SD59x18 b = (total - amount) == zero ? zero : (current - amount) / (total - amount);
@@ -198,18 +199,20 @@ contract FeeCalculator is IDepositFeeCalculator, IRedemptionFeeCalculator {
         require(amount <= current);
 
         SD59x18 amount_float = sd(int256(amount));
-
-        if (
-            current == total //single asset (or no assets) special case
-        ) {
-            uint256 fee = intoUint256(amount_float * (singleAssetRedemptionRelativeFee));
-            return fee;
-        }
-
         SD59x18 ta = sd(int256(current));
         SD59x18 tb = ta - amount_float;
 
         (SD59x18 da, SD59x18 db) = getRatiosRedemption(amount_float, ta, sd(int256(total)));
+
+        console.logUint(intoUint256(da));
+        console.logUint(intoUint256(db));
+
+        if (
+            current == total || da == db //single asset (or no assets) or dominance of single asset is very high special case
+        ) {
+            uint256 fee = intoUint256(amount_float * (singleAssetRedemptionRelativeFee));
+            return fee;
+        }
 
         //redemption_fee = scale * (tb * log10(b+shift) - ta * log10(a+shift)) + constant*amount;
         SD59x18 i_a = ta * (da + redemptionFeeShift).log10();

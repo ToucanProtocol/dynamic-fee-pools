@@ -533,6 +533,20 @@ contract FeeCalculatorTest is Test {
         assertEq(fees[0], 35999999999999999154);
     }
 
+    function testCalculateRedemptionFees_ZeroDeposit_ExceptionShouldBeThrown() public {
+        // Arrange
+        // Set up your test data
+        uint256 redemptionAmount = 0;
+
+        // Set up mock pool
+        mockPool.setTotalSupply(1000 * 1e18);
+        mockToken.setTokenBalance(address(mockPool), 500 * 1e18);
+
+        // Act
+        vm.expectRevert("redemptionAmount must be > 0");
+        feeCalculator.calculateRedemptionFee(address(mockToken), address(mockPool), redemptionAmount);
+    }
+
     function testCalculateRedemptionFees_TotalEqualCurrent_FeeCappedAt10Percent() public {
         // Arrange
         // Set up your test data

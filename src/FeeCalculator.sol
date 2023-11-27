@@ -93,20 +93,20 @@ contract FeeCalculator is IDepositFeeCalculator, IRedemptionFeeCalculator {
     /// @notice Calculates the redemption fees for a given amount.
     /// @param tco2 The address of the TCO2 token.
     /// @param pool The address of the pool.
-    /// @param depositAmount The amount to be redeemed.
+    /// @param redemptionAmount The amount to be redeemed.
     /// @return recipients The addresses of the fee recipients.
     /// @return feesDenominatedInPoolTokens The amount of fees each recipient should receive.
-    function calculateRedemptionFee(address tco2, address pool, uint256 depositAmount)
+    function calculateRedemptionFee(address tco2, address pool, uint256 redemptionAmount)
         external
         view
         override
         returns (address[] memory recipients, uint256[] memory feesDenominatedInPoolTokens)
     {
-        require(depositAmount > 0, "depositAmount must be > 0");
+        require(redemptionAmount > 0, "redemptionAmount must be > 0");
 
-        uint256 totalFee = getRedemptionFee(depositAmount, getTokenBalance(pool, tco2), getTotalSupply(pool));
+        uint256 totalFee = getRedemptionFee(redemptionAmount, getTokenBalance(pool, tco2), getTotalSupply(pool));
 
-        require(totalFee <= depositAmount, "Fee must be lower or equal to redemption amount");
+        require(totalFee <= redemptionAmount, "Fee must be lower or equal to redemption amount");
         require(totalFee > 0, "Fee must be greater than 0");
 
         return distributeFeeAmongShares(totalFee);

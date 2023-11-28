@@ -507,8 +507,11 @@ contract FeeCalculatorTest is Test {
         mockToken.setTokenBalance(address(mockPool), 1500 * 1e18);
 
         // Act
-        vm.expectRevert("The total volume in the pool must be greater than or equal to the volume for an individual asset");
-        (address[] memory recipients, uint256[] memory fees) = feeCalculator.calculateDepositFees(address(mockToken), address(mockPool), depositAmount);
+        vm.expectRevert(
+            "The total volume in the pool must be greater than or equal to the volume for an individual asset"
+        );
+        (address[] memory recipients, uint256[] memory fees) =
+            feeCalculator.calculateDepositFees(address(mockToken), address(mockPool), depositAmount);
     }
 
     function testCalculateRedemptionFees_CurrentGreaterThanTotal_ExceptionShouldBeThrown() public {
@@ -521,8 +524,11 @@ contract FeeCalculatorTest is Test {
         mockToken.setTokenBalance(address(mockPool), 1500 * 1e18);
 
         // Act & Assert
-        vm.expectRevert("The total volume in the pool must be greater than or equal to the volume for an individual asset");
-        (address[] memory recipients, uint256[] memory fees) = feeCalculator.calculateRedemptionFees(address(mockToken), address(mockPool), depositAmount);
+        vm.expectRevert(
+            "The total volume in the pool must be greater than or equal to the volume for an individual asset"
+        );
+        (address[] memory recipients, uint256[] memory fees) =
+            feeCalculator.calculateRedemptionFees(address(mockToken), address(mockPool), depositAmount);
     }
 
     function testCalculateRedemptionFees_AmountGreaterThanCurrent_ExceptionShouldBeThrown() public {
@@ -536,7 +542,8 @@ contract FeeCalculatorTest is Test {
 
         // Act
         vm.expectRevert("The amount to be redeemed cannot exceed the current balance of the pool");
-        (address[] memory recipients, uint256[] memory fees) = feeCalculator.calculateRedemptionFees(address(mockToken), address(mockPool), depositAmount);
+        (address[] memory recipients, uint256[] memory fees) =
+            feeCalculator.calculateRedemptionFees(address(mockToken), address(mockPool), depositAmount);
     }
 
     function testCalculateRedemptionFees_ZeroRedemption_ExceptionShouldBeThrown() public {
@@ -550,7 +557,8 @@ contract FeeCalculatorTest is Test {
 
         // Act & Assert
         vm.expectRevert("redemptionAmount must be > 0");
-        (address[] memory recipients, uint256[] memory fees) = feeCalculator.calculateRedemptionFees(address(mockToken), address(mockPool), depositAmount);
+        (address[] memory recipients, uint256[] memory fees) =
+            feeCalculator.calculateRedemptionFees(address(mockToken), address(mockPool), depositAmount);
     }
 
     function testCalculateDepositFees_EmptyPool_FeeCappedAt10Percent() public {

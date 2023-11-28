@@ -163,7 +163,10 @@ contract FeeCalculator is IDepositFeeCalculator, IRedemptionFeeCalculator {
     /// @param total The total supply of the pool.
     /// @return The calculated deposit fee.
     function getDepositFee(uint256 amount, uint256 current, uint256 total) private view returns (uint256) {
-        require(total >= current);
+        require(
+            total >= current,
+            "The total volume in the pool must be greater than or equal to the volume for an individual asset"
+        );
 
         SD59x18 amount_float = sd(int256(amount));
 
@@ -194,8 +197,11 @@ contract FeeCalculator is IDepositFeeCalculator, IRedemptionFeeCalculator {
     /// @param total The total supply of the pool.
     /// @return The calculated redemption fee.
     function getRedemptionFee(uint256 amount, uint256 current, uint256 total) private view returns (uint256) {
-        require(total >= current);
-        require(amount <= current);
+        require(
+            total >= current,
+            "The total volume in the pool must be greater than or equal to the volume for an individual asset"
+        );
+        require(amount <= current, "The amount to be redeemed cannot exceed the current balance of the pool");
 
         SD59x18 amount_float = sd(int256(amount));
 

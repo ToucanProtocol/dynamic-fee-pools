@@ -214,7 +214,7 @@ contract FeeCalculator is IDepositFeeCalculator, IRedemptionFeeCalculator {
 
         console.logUint(intoUint256(da));
         console.logUint(intoUint256(db));
-        console.logUint(intoUint256(da-db));
+        console.logUint(intoUint256(da - db));
 
         //redemption_fee = scale * (tb * log10(b+shift) - ta * log10(a+shift)) + constant*amount;
         SD59x18 i_a = ta * (da + redemptionFeeShift).log10();

@@ -507,19 +507,8 @@ contract FeeCalculatorTest is Test {
         mockToken.setTokenBalance(address(mockPool), 1500 * 1e18);
 
         // Act
-        try feeCalculator.calculateDepositFees(address(mockToken), address(mockPool), depositAmount) returns (
-            address[] memory recipients, uint256[] memory fees
-        ) {
-            // Assert
-            assertEq(recipients[0], feeRecipient);
-            assertEq(fees[0], 0);
-            fail("Exception should be thrown");
-        } catch Error(string memory reason) {
-            assertEq(
-                "The total volume in the pool must be greater than or equal to the volume for an individual asset",
-                reason
-            );
-        }
+        vm.expectRevert("The total volume in the pool must be greater than or equal to the volume for an individual asset");
+        (address[] memory recipients, uint256[] memory fees) = feeCalculator.calculateDepositFees(address(mockToken), address(mockPool), depositAmount);
     }
 
     function testCalculateRedemptionFees_CurrentGreaterThanTotal_ExceptionShouldBeThrown() public {
@@ -531,20 +520,9 @@ contract FeeCalculatorTest is Test {
         mockPool.setTotalSupply(1000 * 1e18);
         mockToken.setTokenBalance(address(mockPool), 1500 * 1e18);
 
-        // Act
-        try feeCalculator.calculateRedemptionFees(address(mockToken), address(mockPool), depositAmount) returns (
-            address[] memory recipients, uint256[] memory fees
-        ) {
-            // Assert
-            assertEq(recipients[0], feeRecipient);
-            assertEq(fees[0], 0);
-            fail("Exception should be thrown");
-        } catch Error(string memory reason) {
-            assertEq(
-                "The total volume in the pool must be greater than or equal to the volume for an individual asset",
-                reason
-            );
-        }
+        // Act & Assert
+        vm.expectRevert("The total volume in the pool must be greater than or equal to the volume for an individual asset");
+        (address[] memory recipients, uint256[] memory fees) = feeCalculator.calculateRedemptionFees(address(mockToken), address(mockPool), depositAmount);
     }
 
     function testCalculateRedemptionFees_AmountGreaterThanCurrent_ExceptionShouldBeThrown() public {
@@ -557,16 +535,8 @@ contract FeeCalculatorTest is Test {
         mockToken.setTokenBalance(address(mockPool), 500 * 1e18);
 
         // Act
-        try feeCalculator.calculateRedemptionFees(address(mockToken), address(mockPool), depositAmount) returns (
-            address[] memory recipients, uint256[] memory fees
-        ) {
-            // Assert
-            assertEq(recipients[0], feeRecipient);
-            assertEq(fees[0], 0);
-            fail("Exception should be thrown");
-        } catch Error(string memory reason) {
-            assertEq("The amount to be redeemed cannot exceed the current balance of the pool", reason);
-        }
+        vm.expectRevert("The amount to be redeemed cannot exceed the current balance of the pool");
+        (address[] memory recipients, uint256[] memory fees) = feeCalculator.calculateRedemptionFees(address(mockToken), address(mockPool), depositAmount);
     }
 
     function testCalculateRedemptionFees_ZeroRedemption_ExceptionShouldBeThrown() public {
@@ -578,17 +548,9 @@ contract FeeCalculatorTest is Test {
         mockPool.setTotalSupply(1000 * 1e18);
         mockToken.setTokenBalance(address(mockPool), 500 * 1e18);
 
-        // Act
-        try feeCalculator.calculateRedemptionFees(address(mockToken), address(mockPool), depositAmount) returns (
-            address[] memory recipients, uint256[] memory fees
-        ) {
-            // Assert
-            assertEq(recipients[0], feeRecipient);
-            assertEq(fees[0], 0);
-            fail("Exception should be thrown");
-        } catch Error(string memory reason) {
-            assertEq("redemptionAmount must be > 0", reason);
-        }
+        // Act & Assert
+        vm.expectRevert("redemptionAmount must be > 0");
+        (address[] memory recipients, uint256[] memory fees) = feeCalculator.calculateRedemptionFees(address(mockToken), address(mockPool), depositAmount);
     }
 
     function testCalculateDepositFees_EmptyPool_FeeCappedAt10Percent() public {
@@ -937,13 +899,9 @@ contract FeeCalculatorTest is Test {
         address[] memory _recipients = new address[](0);
         uint256[] memory _feeShares = new uint256[](0);
 
-        // Act
-        try feeCalculator.feeSetup(_recipients, _feeShares) {
-            fail("Exception should be thrown");
-        } catch Error(string memory reason) {
-            // Assert
-            assertEq("Total shares must equal 100", reason);
-        }
+        // Act & Assert
+        vm.expectRevert("Total shares must equal 100");
+        feeCalculator.feeSetup(_recipients, _feeShares);
     }
 
     function testFeeSetup_RecipientsAndSharesDifferentLength_ShouldThrowError() public {
@@ -959,13 +917,9 @@ contract FeeCalculatorTest is Test {
         _feeShares[1] = 20;
         _feeShares[2] = 60;
 
-        // Act
-        try feeCalculator.feeSetup(_recipients, _feeShares) {
-            fail("Exception should be thrown");
-        } catch Error(string memory reason) {
-            // Assert
-            assertEq("Recipients and shares arrays must have the same length", reason);
-        }
+        // Act & Assert
+        vm.expectRevert("Recipients and shares arrays must have the same length");
+        feeCalculator.feeSetup(_recipients, _feeShares);
     }
 
     function testFeeSetup_RecipientsAndSharesSameLengthButSharesSumUpTo101_ShouldThrowError() public {
@@ -983,13 +937,9 @@ contract FeeCalculatorTest is Test {
         _feeShares[1] = 20;
         _feeShares[2] = 60;
 
-        // Act
-        try feeCalculator.feeSetup(_recipients, _feeShares) {
-            fail("Exception should be thrown");
-        } catch Error(string memory reason) {
-            // Assert
-            assertEq("Total shares must equal 100", reason);
-        }
+        // Act & Assert
+        vm.expectRevert("Total shares must equal 100");
+        feeCalculator.feeSetup(_recipients, _feeShares);
     }
 
     function testFeeSetupFuzzy(address[] memory recipients, uint8 firstShare) public {

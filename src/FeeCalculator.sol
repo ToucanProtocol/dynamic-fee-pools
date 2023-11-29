@@ -5,7 +5,6 @@
 // If you encounter a vulnerability or an issue, please contact <info@neutralx.com>
 pragma solidity ^0.8.13;
 
-import "forge-std/console.sol";
 import "./interfaces/IDepositFeeCalculator.sol";
 import "./interfaces/IRedemptionFeeCalculator.sol";
 import "@openzeppelin/contracts/token/ERC20/IERC20.sol";
@@ -27,6 +26,7 @@ contract FeeCalculator is IDepositFeeCalculator, IRedemptionFeeCalculator {
     SD59x18 private redemptionFeeShift = sd(0.1 * 1e18); //-log10(0+0.1)=1 -> 10^-1
     SD59x18 private redemptionFeeConstant = redemptionFeeScale * (one + redemptionFeeShift).log10(); //0.0413926851582251=log10(1+0.1)
     SD59x18 private singleAssetRedemptionRelativeFee = sd(0.1 * 1e18);
+    SD59x18 private dustAssetRedemptionRelativeFee = sd(0.3 * 1e18);
 
     address[] private _recipients;
     uint256[] private _shares;
@@ -212,21 +212,24 @@ contract FeeCalculator is IDepositFeeCalculator, IRedemptionFeeCalculator {
 
         (SD59x18 da, SD59x18 db) = getRatiosRedemption(amount_float, ta, sd(int256(total)));
 
-        console.logUint(intoUint256(da));
-        console.logUint(intoUint256(db));
-        console.logUint(intoUint256(da - db));
-
         //redemption_fee = scale * (tb * log10(b+shift) - ta * log10(a+shift)) + constant*amount;
         SD59x18 i_a = ta * (da + redemptionFeeShift).log10();
         SD59x18 i_b = tb * (db + redemptionFeeShift).log10();
         SD59x18 fee_float = redemptionFeeScale * (i_b - i_a) + redemptionFeeConstant * amount_float;
 
+        /*
+        @dev
+             The fee is negative if the amount is too small relative to the pool domination
+             In this case we apply the dustAssetRedemptionRelativeFee which is currently set to 30%
+             which corresponds to maximum fee for redemption function
+             This protects the case where sum of multiple extremely redemption would allow emptying the pool at discount
+
+             Case exists only if asset pool domination is > 90% and amount is ~1e-18 of that asset in the pool
+        */
         if (fee_float < zero) {
-            uint256 fee = intoUint256(amount_float * (singleAssetRedemptionRelativeFee));
-            return fee;
+            return intoUint256(amount_float * dustAssetRedemptionRelativeFee);
         }
 
-        uint256 fee = intoUint256(fee_float);
-        return fee;
+        return intoUint256(fee_float);
     }
 }

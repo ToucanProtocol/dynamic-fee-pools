@@ -7,7 +7,9 @@ pragma solidity ^0.8.13;
 
 import {Test, console2} from "forge-std/Test.sol";
 import {FeeCalculator} from "../src/FeeCalculator.sol";
+import {SD59x18, sd, intoUint256 as sdIntoUint256} from "@prb/math/src/SD59x18.sol";
 import {UD60x18, ud, intoUint256} from "@prb/math/src/UD60x18.sol";
+
 import "@openzeppelin/contracts/token/ERC20/IERC20.sol";
 
 contract MockPool is IERC20 {
@@ -590,7 +592,7 @@ contract FeeCalculatorTest is Test {
         assertEq(fees[0], 737254938220315128);
     }
 
-    function testCalculateRedemptionFees_HugeTotalLargeCurrentSmallDeposit() public {
+    function testCalculateRedemptionFees_HugeTotalLargeCurrentSmallDeposit_FeeCappedAt30Percent() public {
         // Arrange
         // Set up your test data
         uint256 depositAmount = 10000 * 1e18;
@@ -606,10 +608,10 @@ contract FeeCalculatorTest is Test {
 
         // Assert
         assertEq(recipients[0], feeRecipient);
-        assertEq(fees[0], depositAmount / 10);
+        assertEq(fees[0], depositAmount * 30 / 100);
     }
 
-    function testCalculateRedemptionFees_NegativeCase() public {
+    function testCalculateRedemptionFees_NegativeFeeValue_FeeCappedAt30Percent() public {
         // Arrange
         // Set up your test data
         uint256 depositAmount = 2323662174650;
@@ -624,7 +626,7 @@ contract FeeCalculatorTest is Test {
 
         // Assert
         assertEq(recipients[0], feeRecipient);
-        assertEq(fees[0], depositAmount / 10);
+        assertEq(fees[0], depositAmount * 30 / 100);
     }
 
     function testCalculateDepositFeesFuzzy(uint256 depositAmount, uint256 current, uint256 total) public {
@@ -687,6 +689,8 @@ contract FeeCalculatorTest is Test {
         uint256 current = _current;
         uint256 total = _total;
 
+        SD59x18 dustAssetRedemptionRelativeFee = sd(0.3 * 1e18);
+
         // Arrange
         // Set up your test data
 
@@ -714,6 +718,12 @@ contract FeeCalculatorTest is Test {
             );
         }
 
+        /// @dev if we fail at the first try, we do not want to test the rest of the function
+        vm.assume(oneTimeRedemptionFailed == false);
+        /// @dev This prevents the case when the fee is so small that it is being calculated using dustAssetRedemptionRelativeFee
+        /// @dev we don not want to test this case
+        vm.assume(oneTimeFee != sdIntoUint256(sd(int256(redemptionAmount)) * dustAssetRedemptionRelativeFee));
+
         uint256 equalRedemption = redemptionAmount / numberOfRedemptions;
         uint256 restRedemption = redemptionAmount % numberOfRedemptions;
         uint256 feeFromDividedRedemptions = 0;
@@ -738,15 +748,8 @@ contract FeeCalculatorTest is Test {
             }
         }
 
-        // Assert
-        if (multipleTimesRedemptionFailedCount == 0 && !oneTimeRedemptionFailed) {
-            uint256 maximumAllowedErrorPercentage = (numberOfRedemptions <= 1) ? 0 : 1;
-            if (
-                oneTimeFee + feeFromDividedRedemptions > 1e-8 * 1e18 // we skip assertion for extremely small fees (basically zero fees) because of numerical errors
-            ) {
-                assertGe((maximumAllowedErrorPercentage + 100) * feeFromDividedRedemptions / 100, oneTimeFee);
-            } //we add 1% tolerance for numerical errors
-        }
+        // @dev we allow for 0.1% error
+        assertGe(1001 * feeFromDividedRedemptions / 1000, oneTimeFee);
     }
 
     function testCalculateDepositFeesFuzzy_DepositDividedIntoOneChunkFeesGreaterOrEqualToOneDeposit(

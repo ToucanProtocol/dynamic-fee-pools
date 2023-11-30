@@ -34,6 +34,62 @@ contract FeeCalculator is IDepositFeeCalculator, IRedemptionFeeCalculator, Ownab
 
     constructor() Ownable(msg.sender) {}
 
+    /// @notice Sets the deposit fee scale.
+    /// @dev Can only be called by the current owner.
+    /// @param _depositFeeScale The new deposit fee scale.
+    function setDepositFeeScale(SD59x18 _depositFeeScale) external onlyOwner {
+        depositFeeScale = _depositFeeScale;
+    }
+
+    /// @notice Sets the deposit fee ratio scale.
+    /// @dev Can only be called by the current owner.
+    /// @param _depositFeeRatioScale The new deposit fee ratio scale.
+    function setDepositFeeRatioScale(SD59x18 _depositFeeRatioScale) external onlyOwner {
+        depositFeeRatioScale = _depositFeeRatioScale;
+    }
+
+    /// @notice Sets the single asset deposit relative fee.
+    /// @dev Can only be called by the current owner.
+    /// @param _singleAssetDepositRelativeFee The new single asset deposit relative fee.
+    function setSingleAssetDepositRelativeFee(SD59x18 _singleAssetDepositRelativeFee) external onlyOwner {
+        singleAssetDepositRelativeFee = _singleAssetDepositRelativeFee;
+    }
+
+    /// @notice Sets the redemption fee scale.
+    /// @dev Can only be called by the current owner.
+    /// @param _redemptionFeeScale The new redemption fee scale.
+    function setRedemptionFeeScale(SD59x18 _redemptionFeeScale) external onlyOwner {
+        redemptionFeeScale = _redemptionFeeScale;
+    }
+
+    /// @notice Sets the redemption fee shift.
+    /// @dev Can only be called by the current owner.
+    /// @param _redemptionFeeShift The new redemption fee shift.
+    function setRedemptionFeeShift(SD59x18 _redemptionFeeShift) external onlyOwner {
+        redemptionFeeShift = _redemptionFeeShift;
+    }
+
+    /// @notice Sets the redemption fee constant.
+    /// @dev Can only be called by the current owner.
+    /// @param _redemptionFeeShift The new redemption fee shift.
+    function setRedemptionFeeConstant(SD59x18 _redemptionFeeConstant) external onlyOwner {
+        redemptionFeeConstant = _redemptionFeeConstant;
+    }
+
+    /// @notice Sets the single asset redemption relative fee.
+    /// @dev Can only be called by the current owner.
+    /// @param _singleAssetRedemptionRelativeFee The new single asset redemption relative fee.
+    function setSingleAssetRedemptionRelativeFee(SD59x18 _singleAssetRedemptionRelativeFee) external onlyOwner {
+        singleAssetRedemptionRelativeFee = _singleAssetRedemptionRelativeFee;
+    }
+
+    /// @notice Sets the dust asset redemption relative fee.
+    /// @dev Can only be called by the current owner.
+    /// @param _dustAssetRedemptionRelativeFee The new dust asset redemption relative fee.
+    function setDustAssetRedemptionRelativeFee(SD59x18 _dustAssetRedemptionRelativeFee) external onlyOwner {
+        dustAssetRedemptionRelativeFee = _dustAssetRedemptionRelativeFee;
+    }
+
     /// @notice Sets up the fee distribution among recipients.
     /// @param recipients The addresses of the fee recipients.
     /// @param shares The share of the fee each recipient should receive.

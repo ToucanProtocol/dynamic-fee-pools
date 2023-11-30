@@ -71,7 +71,7 @@ contract FeeCalculator is IDepositFeeCalculator, IRedemptionFeeCalculator, Ownab
 
     /// @notice Sets the redemption fee constant.
     /// @dev Can only be called by the current owner.
-    /// @param _redemptionFeeShift The new redemption fee shift.
+    /// @param _redemptionFeeConstant The new redemption fee shift.
     function setRedemptionFeeConstant(SD59x18 _redemptionFeeConstant) external onlyOwner {
         redemptionFeeConstant = _redemptionFeeConstant;
     }

@@ -8,13 +8,14 @@ pragma solidity ^0.8.13;
 import "./interfaces/IDepositFeeCalculator.sol";
 import "./interfaces/IRedemptionFeeCalculator.sol";
 import "@openzeppelin/contracts/token/ERC20/IERC20.sol";
+import "@openzeppelin/contracts/access/Ownable.sol";
 import {SD59x18, sd, intoUint256} from "@prb/math/src/SD59x18.sol";
 
 /// @title FeeCalculator
 /// @author Neutral Labs Inc.
 /// @notice This contract calculates deposit and redemption fees for a given pool.
 /// @dev It implements IDepositFeeCalculator and IRedemptionFeeCalculator interfaces.
-contract FeeCalculator is IDepositFeeCalculator, IRedemptionFeeCalculator {
+contract FeeCalculator is IDepositFeeCalculator, IRedemptionFeeCalculator, Ownable {
     SD59x18 private zero = sd(0);
     SD59x18 private one = sd(1e18);
 
@@ -31,10 +32,12 @@ contract FeeCalculator is IDepositFeeCalculator, IRedemptionFeeCalculator {
     address[] private _recipients;
     uint256[] private _shares;
 
+    constructor() Ownable(msg.sender) {}
+
     /// @notice Sets up the fee distribution among recipients.
     /// @param recipients The addresses of the fee recipients.
     /// @param shares The share of the fee each recipient should receive.
-    function feeSetup(address[] memory recipients, uint256[] memory shares) external {
+    function feeSetup(address[] memory recipients, uint256[] memory shares) external onlyOwner {
         require(recipients.length == shares.length, "Recipients and shares arrays must have the same length");
 
         uint256 totalShares = 0;

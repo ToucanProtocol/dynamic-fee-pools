@@ -25,9 +25,21 @@ FeeCalculator implements `IDepositFeeCalculator` and `IRedemptionFeeCalculator` 
 
 Run the following command in your terminal:
 
+all tests
 ```bash
 forge test -vv --via-ir
 ```
+
+basic tests only
+```bash
+forge test --no-match-contract Fuzzy -vv --via-ir
+```
+
+fuzzy tests only
+```bash
+forge test --match-contract Fuzzy -vv --via-ir
+```
+
 
 # Fee Structure :chart_with_upwards_trend:
 

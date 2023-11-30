@@ -26,6 +26,7 @@ contract FeeCalculator is IDepositFeeCalculator, IRedemptionFeeCalculator {
     SD59x18 private redemptionFeeShift = sd(0.1 * 1e18); //-log10(0+0.1)=1 -> 10^-1
     SD59x18 private redemptionFeeConstant = redemptionFeeScale * (one + redemptionFeeShift).log10(); //0.0413926851582251=log10(1+0.1)
     SD59x18 private singleAssetRedemptionRelativeFee = sd(0.1 * 1e18);
+    SD59x18 private dustAssetRedemptionRelativeFee = sd(0.3 * 1e18);
 
     address[] private _recipients;
     uint256[] private _shares;
@@ -222,9 +223,19 @@ contract FeeCalculator is IDepositFeeCalculator, IRedemptionFeeCalculator {
         SD59x18 i_b = tb * (db + redemptionFeeShift).log10();
         SD59x18 fee_float = redemptionFeeScale * (i_b - i_a) + redemptionFeeConstant * amount_float;
 
-        require(fee_float > zero, "Fee must be greater than 0");
+        /*
+        @dev
+             The fee becomes negative if the amount is too small in comparison to the pool's size.
+             In such cases, we apply the dustAssetRedemptionRelativeFee, which is currently set at 30%.
+             This represents the maximum fee for the redemption function.
+             This measure protects against scenarios where the sum of multiple extremely small redemptions could deplete the pool at a discounted rate.
 
-        uint256 fee = intoUint256(fee_float);
-        return fee;
+             Case exists only if asset pool domination is > 90% and amount is ~1e-18 of that asset in the pool
+        */
+        if (fee_float < zero) {
+            return intoUint256(amount_float * dustAssetRedemptionRelativeFee);
+        }
+
+        return intoUint256(fee_float);
     }
 }

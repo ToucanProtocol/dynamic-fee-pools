@@ -91,6 +91,7 @@ contract FeeCalculator is IDepositFeeCalculator, IRedemptionFeeCalculator, Ownab
     }
 
     /// @notice Sets up the fee distribution among recipients.
+    /// @dev Can only be called by the current owner.
     /// @param recipients The addresses of the fee recipients.
     /// @param shares The share of the fee each recipient should receive.
     function feeSetup(address[] memory recipients, uint256[] memory shares) external onlyOwner {

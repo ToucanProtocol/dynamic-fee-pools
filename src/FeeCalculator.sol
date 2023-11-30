@@ -219,10 +219,10 @@ contract FeeCalculator is IDepositFeeCalculator, IRedemptionFeeCalculator {
 
         /*
         @dev
-             The fee is negative if the amount is too small relative to the pool domination
-             In this case we apply the dustAssetRedemptionRelativeFee which is currently set to 30%
-             which corresponds to maximum fee for redemption function
-             This protects the case where sum of multiple extremely redemption would allow emptying the pool at discount
+             The fee becomes negative if the amount is too small in comparison to the pool's size.
+             In such cases, we apply the dustAssetRedemptionRelativeFee, which is currently set at 30%.
+             This represents the maximum fee for the redemption function.
+             This measure protects against scenarios where the sum of multiple extremely small redemptions could deplete the pool at a discounted rate.
 
              Case exists only if asset pool domination is > 90% and amount is ~1e-18 of that asset in the pool
         */

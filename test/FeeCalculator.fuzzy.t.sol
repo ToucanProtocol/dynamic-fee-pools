@@ -11,7 +11,6 @@ import {SD59x18, sd, intoUint256 as sdIntoUint256} from "@prb/math/src/SD59x18.s
 import {UD60x18, ud, intoUint256} from "@prb/math/src/UD60x18.sol";
 import "./TestUtilities.sol";
 
-
 contract FeeCalculatorTestFuzzy is Test {
     using TestUtilities for uint256[];
 

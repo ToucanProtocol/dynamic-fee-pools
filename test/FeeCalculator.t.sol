@@ -13,6 +13,7 @@ import "./TestUtilities.sol";
 
 contract FeeCalculatorTest is Test {
     using TestUtilities for uint256[];
+
     UD60x18 private one = ud(1e18);
     UD60x18 private redemptionFeeScale = ud(0.3 * 1e18);
     UD60x18 private redemptionFeeShift = ud(0.1 * 1e18); //-log10(0+0.1)=1 -> 10^-1

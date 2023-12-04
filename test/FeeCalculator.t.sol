@@ -658,4 +658,94 @@ contract FeeCalculatorTest is Test {
         vm.expectRevert("Total shares must equal 100");
         feeCalculator.feeSetup(_recipients, _feeShares);
     }
+
+    function testSetDepositFeeScaleReverts() public {
+        int256 invalid = (1.1 * 1e18);
+        vm.expectRevert("Deposit fee scale must be between 0 and 1");
+        feeCalculator.setDepositFeeScale(invalid);
+    }
+
+    function testSetSingleAssetDepositRelativeFeeReverts() public {
+        int256 invalid = (1.3 * 1e18);
+        vm.expectRevert("Single asset deposit relative fee must be between 0 and 1");
+        feeCalculator.setSingleAssetDepositRelativeFee(invalid);
+    }
+
+    function testSetRedemptionFeeScaleReverts() public {
+        int256 invalid = (1.4 * 1e18);
+        vm.expectRevert("Redemption fee scale must be between 0 and 1");
+        feeCalculator.setRedemptionFeeScale(invalid);
+    }
+
+    function testSetRedemptionFeeShiftReverts() public {
+        int256 invalid = (1.5 * 1e18);
+        vm.expectRevert("Redemption fee shift must be between 0 and 1");
+        feeCalculator.setRedemptionFeeShift(invalid);
+    }
+
+    function testSetRedemptionFeeConstantReverts() public {
+        int256 invalid = (1.6 * 1e18);
+        vm.expectRevert("Redemption fee constant must be between 0 and 1");
+        feeCalculator.setRedemptionFeeConstant(invalid);
+    }
+
+    function testSetSingleAssetRedemptionRelativeFeeReverts() public {
+        int256 invalid = (1.7 * 1e18);
+        vm.expectRevert("Single asset redemption relative fee must be between 0 and 1");
+        feeCalculator.setSingleAssetRedemptionRelativeFee(invalid);
+    }
+
+    function testSetDustAssetRedemptionRelativeFeeReverts() public {
+        int256 invalid = (1.8 * 1e18);
+        vm.expectRevert("Dust asset redemption relative fee must be between 0 and 1");
+        feeCalculator.setDustAssetRedemptionRelativeFee(invalid);
+    }
+
+    function testSetDepositFeeScaleNegativeReverts() public {
+        int256 invalid = (-0.1 * 1e18);
+        vm.expectRevert("Deposit fee scale must be between 0 and 1");
+        feeCalculator.setDepositFeeScale(invalid);
+    }
+
+    function testSetDepositFeeRatioScaleNegativeReverts() public {
+        int256 invalid = (-0.2 * 1e18);
+        vm.expectRevert("Deposit fee ratio scale must be above 0");
+        feeCalculator.setDepositFeeRatioScale(invalid);
+    }
+
+    function testSetSingleAssetDepositRelativeFeeNegativeReverts() public {
+        int256 invalid = (-0.3 * 1e18);
+        vm.expectRevert("Single asset deposit relative fee must be between 0 and 1");
+        feeCalculator.setSingleAssetDepositRelativeFee(invalid);
+    }
+
+    function testSetRedemptionFeeScaleNegativeReverts() public {
+        int256 invalid = (-0.4 * 1e18);
+        vm.expectRevert("Redemption fee scale must be between 0 and 1");
+        feeCalculator.setRedemptionFeeScale(invalid);
+    }
+
+    function testSetRedemptionFeeShiftNegativeReverts() public {
+        int256 invalid = (-0.5 * 1e18);
+        vm.expectRevert("Redemption fee shift must be between 0 and 1");
+        feeCalculator.setRedemptionFeeShift(invalid);
+    }
+
+    function testSetRedemptionFeeConstantNegativeReverts() public {
+        int256 invalid = (-0.6 * 1e18);
+        vm.expectRevert("Redemption fee constant must be between 0 and 1");
+        feeCalculator.setRedemptionFeeConstant(invalid);
+    }
+
+    function testSetSingleAssetRedemptionRelativeFeeNegativeReverts() public {
+        int256 invalid = (-0.7 * 1e18);
+        vm.expectRevert("Single asset redemption relative fee must be between 0 and 1");
+        feeCalculator.setSingleAssetRedemptionRelativeFee(invalid);
+    }
+
+    function testSetDustAssetRedemptionRelativeFeeNegativeReverts() public {
+        int256 invalid = (-0.8 * 1e18);
+        vm.expectRevert("Dust asset redemption relative fee must be between 0 and 1");
+        feeCalculator.setDustAssetRedemptionRelativeFee(invalid);
+    }
 }

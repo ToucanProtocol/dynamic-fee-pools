@@ -34,7 +34,96 @@ contract FeeCalculator is IDepositFeeCalculator, IRedemptionFeeCalculator, Ownab
 
     constructor() Ownable(msg.sender) {}
 
+    /// @notice Sets the deposit fee scale.
+    /// @dev Can only be called by the current owner.
+    /// @param _depositFeeScale The new deposit fee scale.
+    function setDepositFeeScale(int256 _depositFeeScale) external onlyOwner {
+        SD59x18 depositFeeScaleSD = sd(_depositFeeScale);
+        require(depositFeeScaleSD >= zero && depositFeeScaleSD <= one, "Deposit fee scale must be between 0 and 1");
+        depositFeeScale = depositFeeScaleSD;
+    }
+
+    /// @notice Sets the deposit fee ratio scale.
+    /// @dev Can only be called by the current owner.
+    /// @param _depositFeeRatioScale The new deposit fee ratio scale.
+    function setDepositFeeRatioScale(int256 _depositFeeRatioScale) external onlyOwner {
+        SD59x18 depositFeeRatioScaleSD = sd(_depositFeeRatioScale);
+        require(depositFeeRatioScaleSD >= zero, "Deposit fee ratio scale must be above 0");
+        depositFeeRatioScale = depositFeeRatioScaleSD;
+    }
+
+    /// @notice Sets the single asset deposit relative fee.
+    /// @dev Can only be called by the current owner.
+    /// @param _singleAssetDepositRelativeFee The new single asset deposit relative fee.
+    function setSingleAssetDepositRelativeFee(int256 _singleAssetDepositRelativeFee) external onlyOwner {
+        SD59x18 singleAssetDepositRelativeFeeSD = sd(_singleAssetDepositRelativeFee);
+        require(
+            singleAssetDepositRelativeFeeSD >= zero && singleAssetDepositRelativeFeeSD <= one,
+            "Single asset deposit relative fee must be between 0 and 1"
+        );
+        singleAssetDepositRelativeFee = singleAssetDepositRelativeFeeSD;
+    }
+
+    /// @notice Sets the redemption fee scale.
+    /// @dev Can only be called by the current owner.
+    /// @param _redemptionFeeScale The new redemption fee scale.
+    function setRedemptionFeeScale(int256 _redemptionFeeScale) external onlyOwner {
+        SD59x18 redemptionFeeScaleSD = sd(_redemptionFeeScale);
+        require(
+            redemptionFeeScaleSD >= zero && redemptionFeeScaleSD <= one, "Redemption fee scale must be between 0 and 1"
+        );
+        redemptionFeeScale = redemptionFeeScaleSD;
+    }
+
+    /// @notice Sets the redemption fee shift.
+    /// @dev Can only be called by the current owner.
+    /// @param _redemptionFeeShift The new redemption fee shift.
+    function setRedemptionFeeShift(int256 _redemptionFeeShift) external onlyOwner {
+        SD59x18 redemptionFeeShiftSD = sd(_redemptionFeeShift);
+        require(
+            redemptionFeeShiftSD >= zero && redemptionFeeShiftSD <= one, "Redemption fee shift must be between 0 and 1"
+        );
+        redemptionFeeShift = redemptionFeeShiftSD;
+    }
+
+    /// @notice Sets the redemption fee constant.
+    /// @dev Can only be called by the current owner.
+    /// @param _redemptionFeeConstant The new redemption fee shift.
+    function setRedemptionFeeConstant(int256 _redemptionFeeConstant) external onlyOwner {
+        SD59x18 redemptionFeeConstantSD = sd(_redemptionFeeConstant);
+        require(
+            redemptionFeeConstantSD >= zero && redemptionFeeConstantSD <= one,
+            "Redemption fee constant must be between 0 and 1"
+        );
+        redemptionFeeConstant = redemptionFeeConstantSD;
+    }
+
+    /// @notice Sets the single asset redemption relative fee.
+    /// @dev Can only be called by the current owner.
+    /// @param _singleAssetRedemptionRelativeFee The new single asset redemption relative fee.
+    function setSingleAssetRedemptionRelativeFee(int256 _singleAssetRedemptionRelativeFee) external onlyOwner {
+        SD59x18 singleAssetRedemptionRelativeFeeSD = sd(_singleAssetRedemptionRelativeFee);
+        require(
+            singleAssetRedemptionRelativeFeeSD >= zero && singleAssetRedemptionRelativeFeeSD <= one,
+            "Single asset redemption relative fee must be between 0 and 1"
+        );
+        singleAssetRedemptionRelativeFee = singleAssetRedemptionRelativeFeeSD;
+    }
+
+    /// @notice Sets the dust asset redemption relative fee.
+    /// @dev Can only be called by the current owner.
+    /// @param _dustAssetRedemptionRelativeFee The new dust asset redemption relative fee.
+    function setDustAssetRedemptionRelativeFee(int256 _dustAssetRedemptionRelativeFee) external onlyOwner {
+        SD59x18 dustAssetRedemptionRelativeFeeSD = sd(_dustAssetRedemptionRelativeFee);
+        require(
+            dustAssetRedemptionRelativeFeeSD >= zero && dustAssetRedemptionRelativeFeeSD <= one,
+            "Dust asset redemption relative fee must be between 0 and 1"
+        );
+        dustAssetRedemptionRelativeFee = dustAssetRedemptionRelativeFeeSD;
+    }
+
     /// @notice Sets up the fee distribution among recipients.
+    /// @dev Can only be called by the current owner.
     /// @param recipients The addresses of the fee recipients.
     /// @param shares The share of the fee each recipient should receive.
     function feeSetup(address[] memory recipients, uint256[] memory shares) external onlyOwner {

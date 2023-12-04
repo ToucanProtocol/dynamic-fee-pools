@@ -683,12 +683,6 @@ contract FeeCalculatorTest is Test {
         feeCalculator.setRedemptionFeeShift(invalid);
     }
 
-    function testSetRedemptionFeeConstantReverts() public {
-        int256 invalid = (1.6 * 1e18);
-        vm.expectRevert("Redemption fee constant must be between 0 and 1");
-        feeCalculator.setRedemptionFeeConstant(invalid);
-    }
-
     function testSetSingleAssetRedemptionRelativeFeeReverts() public {
         int256 invalid = (1.7 * 1e18);
         vm.expectRevert("Single asset redemption relative fee must be between 0 and 1");
@@ -729,12 +723,6 @@ contract FeeCalculatorTest is Test {
         int256 invalid = (-0.5 * 1e18);
         vm.expectRevert("Redemption fee shift must be between 0 and 1");
         feeCalculator.setRedemptionFeeShift(invalid);
-    }
-
-    function testSetRedemptionFeeConstantNegativeReverts() public {
-        int256 invalid = (-0.6 * 1e18);
-        vm.expectRevert("Redemption fee constant must be between 0 and 1");
-        feeCalculator.setRedemptionFeeConstant(invalid);
     }
 
     function testSetSingleAssetRedemptionRelativeFeeNegativeReverts() public {

@@ -25,7 +25,11 @@ contract FeeCalculator is IDepositFeeCalculator, IRedemptionFeeCalculator, Ownab
 
     SD59x18 private redemptionFeeScale = sd(0.3 * 1e18);
     SD59x18 private redemptionFeeShift = sd(0.1 * 1e18); //-log10(0+0.1)=1 -> 10^-1
-    SD59x18 private redemptionFeeConstant = redemptionFeeScale * (one + redemptionFeeShift).log10(); //0.0413926851582251=log10(1+0.1)
+
+    function redemptionFeeConstant() private view returns (SD59x18) {
+        return redemptionFeeScale * (one + redemptionFeeShift).log10(); //0.0413926851582251=log10(1+0.1)
+    }
+
     SD59x18 private singleAssetRedemptionRelativeFee = sd(0.1 * 1e18);
     SD59x18 private dustAssetRedemptionRelativeFee = sd(0.3 * 1e18);
 
@@ -84,18 +88,6 @@ contract FeeCalculator is IDepositFeeCalculator, IRedemptionFeeCalculator, Ownab
             redemptionFeeShiftSD >= zero && redemptionFeeShiftSD <= one, "Redemption fee shift must be between 0 and 1"
         );
         redemptionFeeShift = redemptionFeeShiftSD;
-    }
-
-    /// @notice Sets the redemption fee constant.
-    /// @dev Can only be called by the current owner.
-    /// @param _redemptionFeeConstant The new redemption fee shift.
-    function setRedemptionFeeConstant(int256 _redemptionFeeConstant) external onlyOwner {
-        SD59x18 redemptionFeeConstantSD = sd(_redemptionFeeConstant);
-        require(
-            redemptionFeeConstantSD >= zero && redemptionFeeConstantSD <= one,
-            "Redemption fee constant must be between 0 and 1"
-        );
-        redemptionFeeConstant = redemptionFeeConstantSD;
     }
 
     /// @notice Sets the single asset redemption relative fee.
@@ -313,7 +305,7 @@ contract FeeCalculator is IDepositFeeCalculator, IRedemptionFeeCalculator, Ownab
         //redemption_fee = scale * (tb * log10(b+shift) - ta * log10(a+shift)) + constant*amount;
         SD59x18 i_a = ta * (da + redemptionFeeShift).log10();
         SD59x18 i_b = tb * (db + redemptionFeeShift).log10();
-        SD59x18 fee_float = redemptionFeeScale * (i_b - i_a) + redemptionFeeConstant * amount_float;
+        SD59x18 fee_float = redemptionFeeScale * (i_b - i_a) + redemptionFeeConstant() * amount_float;
 
         /*
         @dev

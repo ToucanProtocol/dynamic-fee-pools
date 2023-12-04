@@ -665,12 +665,6 @@ contract FeeCalculatorTest is Test {
         feeCalculator.setDepositFeeScale(invalid);
     }
 
-    function testSetDepositFeeRatioScaleReverts() public {
-        SD59x18 invalid = sd(1.2 * 1e18);
-        vm.expectRevert("Deposit fee ratio scale must be between 0 and 1");
-        feeCalculator.setDepositFeeRatioScale(invalid);
-    }
-
     function testSetSingleAssetDepositRelativeFeeReverts() public {
         SD59x18 invalid = sd(1.3 * 1e18);
         vm.expectRevert("Single asset deposit relative fee must be between 0 and 1");
@@ -715,7 +709,7 @@ contract FeeCalculatorTest is Test {
 
     function testSetDepositFeeRatioScaleNegativeReverts() public {
         SD59x18 invalid = sd(-0.2 * 1e18);
-        vm.expectRevert("Deposit fee ratio scale must be between 0 and 1");
+        vm.expectRevert("Deposit fee ratio scale must be above 0");
         feeCalculator.setDepositFeeRatioScale(invalid);
     }
 

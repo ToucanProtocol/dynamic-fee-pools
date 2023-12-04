@@ -46,10 +46,7 @@ contract FeeCalculator is IDepositFeeCalculator, IRedemptionFeeCalculator, Ownab
     /// @dev Can only be called by the current owner.
     /// @param _depositFeeRatioScale The new deposit fee ratio scale.
     function setDepositFeeRatioScale(SD59x18 _depositFeeRatioScale) external onlyOwner {
-        require(
-            _depositFeeRatioScale >= zero && _depositFeeRatioScale <= one,
-            "Deposit fee ratio scale must be between 0 and 1"
-        );
+        require(_depositFeeRatioScale >= zero, "Deposit fee ratio scale must be above 0");
         depositFeeRatioScale = _depositFeeRatioScale;
     }
 

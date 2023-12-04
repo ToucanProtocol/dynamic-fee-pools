@@ -38,6 +38,7 @@ contract FeeCalculator is IDepositFeeCalculator, IRedemptionFeeCalculator, Ownab
     /// @dev Can only be called by the current owner.
     /// @param _depositFeeScale The new deposit fee scale.
     function setDepositFeeScale(SD59x18 _depositFeeScale) external onlyOwner {
+        require(_depositFeeScale >= zero && _depositFeeScale <= one, "Deposit fee scale must be between 0 and 1");
         depositFeeScale = _depositFeeScale;
     }
 
@@ -45,6 +46,7 @@ contract FeeCalculator is IDepositFeeCalculator, IRedemptionFeeCalculator, Ownab
     /// @dev Can only be called by the current owner.
     /// @param _depositFeeRatioScale The new deposit fee ratio scale.
     function setDepositFeeRatioScale(SD59x18 _depositFeeRatioScale) external onlyOwner {
+        require(_depositFeeRatioScale >= zero && _depositFeeRatioScale <= one, "Deposit fee ratio scale must be between 0 and 1");
         depositFeeRatioScale = _depositFeeRatioScale;
     }
 
@@ -52,6 +54,7 @@ contract FeeCalculator is IDepositFeeCalculator, IRedemptionFeeCalculator, Ownab
     /// @dev Can only be called by the current owner.
     /// @param _singleAssetDepositRelativeFee The new single asset deposit relative fee.
     function setSingleAssetDepositRelativeFee(SD59x18 _singleAssetDepositRelativeFee) external onlyOwner {
+        require(_singleAssetDepositRelativeFee >= zero && _singleAssetDepositRelativeFee <= one, "Single asset deposit relative fee must be between 0 and 1");
         singleAssetDepositRelativeFee = _singleAssetDepositRelativeFee;
     }
 
@@ -59,6 +62,7 @@ contract FeeCalculator is IDepositFeeCalculator, IRedemptionFeeCalculator, Ownab
     /// @dev Can only be called by the current owner.
     /// @param _redemptionFeeScale The new redemption fee scale.
     function setRedemptionFeeScale(SD59x18 _redemptionFeeScale) external onlyOwner {
+        require(_redemptionFeeScale >= zero && _redemptionFeeScale <= one, "Redemption fee scale must be between 0 and 1");
         redemptionFeeScale = _redemptionFeeScale;
     }
 
@@ -66,6 +70,7 @@ contract FeeCalculator is IDepositFeeCalculator, IRedemptionFeeCalculator, Ownab
     /// @dev Can only be called by the current owner.
     /// @param _redemptionFeeShift The new redemption fee shift.
     function setRedemptionFeeShift(SD59x18 _redemptionFeeShift) external onlyOwner {
+        require(_redemptionFeeShift >= zero && _redemptionFeeShift <= one, "Redemption fee shift must be between 0 and 1");
         redemptionFeeShift = _redemptionFeeShift;
     }
 
@@ -73,6 +78,7 @@ contract FeeCalculator is IDepositFeeCalculator, IRedemptionFeeCalculator, Ownab
     /// @dev Can only be called by the current owner.
     /// @param _redemptionFeeConstant The new redemption fee shift.
     function setRedemptionFeeConstant(SD59x18 _redemptionFeeConstant) external onlyOwner {
+        require(_redemptionFeeConstant >= zero && _redemptionFeeConstant <= one, "Redemption fee constant must be between 0 and 1");
         redemptionFeeConstant = _redemptionFeeConstant;
     }
 
@@ -80,6 +86,7 @@ contract FeeCalculator is IDepositFeeCalculator, IRedemptionFeeCalculator, Ownab
     /// @dev Can only be called by the current owner.
     /// @param _singleAssetRedemptionRelativeFee The new single asset redemption relative fee.
     function setSingleAssetRedemptionRelativeFee(SD59x18 _singleAssetRedemptionRelativeFee) external onlyOwner {
+        require(_singleAssetRedemptionRelativeFee >= zero && _singleAssetRedemptionRelativeFee <= one, "Single asset redemption relative fee must be between 0 and 1");
         singleAssetRedemptionRelativeFee = _singleAssetRedemptionRelativeFee;
     }
 
@@ -87,6 +94,7 @@ contract FeeCalculator is IDepositFeeCalculator, IRedemptionFeeCalculator, Ownab
     /// @dev Can only be called by the current owner.
     /// @param _dustAssetRedemptionRelativeFee The new dust asset redemption relative fee.
     function setDustAssetRedemptionRelativeFee(SD59x18 _dustAssetRedemptionRelativeFee) external onlyOwner {
+        require(_dustAssetRedemptionRelativeFee >= zero && _dustAssetRedemptionRelativeFee <= one, "Dust asset redemption relative fee must be between 0 and 1");
         dustAssetRedemptionRelativeFee = _dustAssetRedemptionRelativeFee;
     }
 

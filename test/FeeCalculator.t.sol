@@ -736,4 +736,111 @@ contract FeeCalculatorTest is Test {
         vm.expectRevert("Dust asset redemption relative fee must be between 0 and 1");
         feeCalculator.setDustAssetRedemptionRelativeFee(invalid);
     }
+
+    function testSetDepositFeeScale() public {
+        // Arrange
+        // Set up mock pool
+        mockPool.setTotalSupply(1000 * 1e18);
+        mockToken.setTokenBalance(address(mockPool), 500 * 1e18);
+        feeCalculator.setDepositFeeScale(0.09 * 1e18);
+
+        // Act
+        (address[] memory recipients, uint256[] memory fees) =
+            feeCalculator.calculateDepositFees(address(mockToken), address(mockPool), 100 * 1e18);
+
+        // Assert
+        assertEq(fees[0], 9718378209069523938 / 2);
+    }
+
+    function testSetDepositFeeRatioScale() public {
+        // Arrange
+        // Set up mock pool
+        mockPool.setTotalSupply(1000 * 1e18);
+        mockToken.setTokenBalance(address(mockPool), 500 * 1e18);
+        feeCalculator.setDepositFeeRatioScale(0.2 * 1e18);
+
+        // Act
+        (address[] memory recipients, uint256[] memory fees) =
+            feeCalculator.calculateDepositFees(address(mockToken), address(mockPool), 100 * 1e18);
+
+        // Assert
+        assertEq(fees[0], 1299819671838098442);
+    }
+
+    function testSetSingleAssetDepositRelativeFee() public {
+        // Arrange
+        // Set up mock pool
+        mockPool.setTotalSupply(1000 * 1e18);
+        mockToken.setTokenBalance(address(mockPool), 1000 * 1e18);
+        feeCalculator.setSingleAssetDepositRelativeFee(0.67 * 1e18);
+
+        // Act
+        (address[] memory recipients, uint256[] memory fees) =
+            feeCalculator.calculateDepositFees(address(mockToken), address(mockPool), 100 * 1e18);
+
+        // Assert
+        assertEq(fees[0], 67 * 1e18);
+    }
+
+    function testSetRedemptionFeeScale() public {
+        // Arrange
+        // Set up mock pool
+        mockPool.setTotalSupply(1000 * 1e18);
+        mockToken.setTokenBalance(address(mockPool), 500 * 1e18);
+        feeCalculator.setRedemptionFeeScale(0.4 * 1e18);
+
+        // Act
+        (address[] memory recipients, uint256[] memory fees) =
+            feeCalculator.calculateRedemptionFees(address(mockToken), address(mockPool), 100e18);
+
+        // Assert
+        assertEq(fees[0], 3778028623870480400);
+    }
+
+    function testSetRedemptionFeeShift() public {
+        // Arrange
+        // Set up mock pool
+        mockPool.setTotalSupply(1000 * 1e18);
+        mockToken.setTokenBalance(address(mockPool), 500 * 1e18);
+        feeCalculator.setRedemptionFeeShift(0.5 * 1e18);
+
+        // Act
+        (address[] memory recipients, uint256[] memory fees) =
+            feeCalculator.calculateRedemptionFees(address(mockToken), address(mockPool), 100e18);
+
+        // Assert
+        assertEq(fees[0], 2303907724666580660);
+    }
+
+    function testSetSingleAssetRedemptionRelativeFee() public {
+        // Arrange
+        // Set up mock pool
+        mockPool.setTotalSupply(1000 * 1e18);
+        mockToken.setTokenBalance(address(mockPool), 1000 * 1e18);
+        feeCalculator.setSingleAssetRedemptionRelativeFee(0.83 * 1e18);
+
+        // Act
+        (address[] memory recipients, uint256[] memory fees) =
+            feeCalculator.calculateRedemptionFees(address(mockToken), address(mockPool), 100 * 1e18);
+
+        assertEq(fees[0], 83 * 1e18);
+    }
+
+    function testSetDustAssetRedemptionRelativeFee() public {
+        // Arrange
+        // Set up your test data
+        uint256 depositAmount = 2323662174650;
+
+        // Set up mock pool
+        mockPool.setTotalSupply(56636794628913227180683983236);
+        mockToken.setTokenBalance(address(mockPool), 55661911070827884041095553095);
+        feeCalculator.setDustAssetRedemptionRelativeFee(0.91 * 1e18);
+
+        // Act
+        (address[] memory recipients, uint256[] memory fees) =
+            feeCalculator.calculateRedemptionFees(address(mockToken), address(mockPool), depositAmount);
+
+        // Assert
+        assertEq(fees[0], depositAmount * 91 / 100);
+    }
 }

@@ -267,6 +267,8 @@ contract FeeCalculator is IDepositFeeCalculator, IRedemptionFeeCalculator, Ownab
 
         (SD59x18 da, SD59x18 db) = getRatiosDeposit(amount_float, ta, sd(int256(total)));
 
+        require(db * depositFeeRatioScale < one, "Deposit outside range");
+
         SD59x18 ta_log_a = ta * (one - da * depositFeeRatioScale).log10();
         SD59x18 tb_log_b = tb * (one - db * depositFeeRatioScale).log10();
 

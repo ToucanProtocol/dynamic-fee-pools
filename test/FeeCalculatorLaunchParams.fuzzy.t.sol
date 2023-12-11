@@ -76,7 +76,8 @@ contract FeeCalculatorLaunchParamsTestFuzzy is Test {
         } catch Error(string memory reason) {
             assertTrue(
                 keccak256(bytes("Fee must be greater than 0")) == keccak256(bytes(reason))
-                || keccak256(bytes("Fee must be lower or equal to deposit amount")) == keccak256(bytes(reason)) || keccak256(bytes("Deposit outside range")) == keccak256(bytes(reason)),
+                    || keccak256(bytes("Fee must be lower or equal to deposit amount")) == keccak256(bytes(reason))
+                    || keccak256(bytes("Deposit outside range")) == keccak256(bytes(reason)),
                 "error should be 'Fee must be greater than 0' or 'Fee must be lower or equal to deposit amount' or 'Deposit outside range'"
             );
         }
@@ -129,7 +130,8 @@ contract FeeCalculatorLaunchParamsTestFuzzy is Test {
             oneTimeDepositFailed = true;
             assertTrue(
                 keccak256(bytes("Fee must be greater than 0")) == keccak256(bytes(reason))
-                    || keccak256(bytes("Fee must be lower or equal to deposit amount")) == keccak256(bytes(reason)) || keccak256(bytes("Deposit outside range")) == keccak256(bytes(reason)),
+                    || keccak256(bytes("Fee must be lower or equal to deposit amount")) == keccak256(bytes(reason))
+                    || keccak256(bytes("Deposit outside range")) == keccak256(bytes(reason)),
                 "error should be 'Fee must be greater than 0' or 'Fee must be lower or equal to deposit amount' or 'Deposit outside range'"
             );
         }
@@ -153,7 +155,8 @@ contract FeeCalculatorLaunchParamsTestFuzzy is Test {
                 multipleTimesDepositFailedCount++;
                 assertTrue(
                     keccak256(bytes("Fee must be greater than 0")) == keccak256(bytes(reason))
-                    || keccak256(bytes("Fee must be lower or equal to deposit amount")) == keccak256(bytes(reason)) || keccak256(bytes("Deposit outside range")) == keccak256(bytes(reason)),
+                        || keccak256(bytes("Fee must be lower or equal to deposit amount")) == keccak256(bytes(reason))
+                        || keccak256(bytes("Deposit outside range")) == keccak256(bytes(reason)),
                     "error should be 'Fee must be greater than 0' or 'Fee must be lower or equal to deposit amount' or 'Deposit outside range'"
                 );
             }

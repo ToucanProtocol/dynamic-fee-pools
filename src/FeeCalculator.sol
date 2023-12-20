@@ -254,8 +254,7 @@ contract FeeCalculator is IFeeCalculator, Ownable {
         if (
             current == total //single asset (or no assets) special case
         ) {
-            uint256 fee = intoUint256(amount_float * singleAssetDepositRelativeFee);
-            return fee;
+            return intoUint256(amount_float * singleAssetDepositRelativeFee);
         }
 
         SD59x18 ta = sd(int256(current));

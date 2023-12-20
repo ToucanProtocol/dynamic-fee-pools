@@ -44,7 +44,7 @@ contract MockPool is IERC20 {
         return true;
     }
 
-    function balanceOf(address account) external pure returns (uint256) {
+    function balanceOf(address) external pure returns (uint256) {
         return 0;
     }
 }

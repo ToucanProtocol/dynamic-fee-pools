@@ -67,9 +67,8 @@ contract FeeCalculatorTestFuzzy is Test {
         mockToken.setTokenBalance(address(mockPool), current);
 
         // Act
-        try feeCalculator.calculateDepositFees(address(mockToken), address(mockPool), depositAmount) returns (
-            uint256 feeAmount
-        ) {} catch Error(string memory reason) {
+        try feeCalculator.calculateDepositFees(address(mockToken), address(mockPool), depositAmount) {}
+        catch Error(string memory reason) {
             assertTrue(
                 keccak256(bytes("Fee must be greater than 0")) == keccak256(bytes(reason))
                     || keccak256(bytes("Fee must be lower or equal to deposit amount")) == keccak256(bytes(reason)),
@@ -278,11 +277,12 @@ contract FeeCalculatorTestFuzzy is Test {
 
         // Act
         uint256 feeAmount = feeCalculator.calculateDepositFees(address(mockToken), address(mockPool), depositAmount);
-        (address[] memory recipients, uint256[] memory fees) = feeCalculator.calculateFeeAmongShares(feeAmount);
+        (address[] memory gotRecipients, uint256[] memory fees) = feeCalculator.calculateFeeAmongShares(feeAmount);
 
         // Assert
+        assertEq(gotRecipients.length, recipients.length);
         for (uint256 i = 0; i < recipients.length; i++) {
-            assertEq(recipients[i], recipients[i]);
+            assertEq(gotRecipients[i], recipients[i]);
         }
 
         assertEq(fees.sumOf(), 11526003792614720250);

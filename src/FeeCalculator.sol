@@ -197,6 +197,42 @@ contract FeeCalculator is IDepositFeeCalculator, IRedemptionFeeCalculator, Ownab
         return distributeFeeAmongShares(totalFee);
     }
 
+    /// @notice Calculates the redemption fees across multiple TCO2s for a given amount.
+    /// @param tco2s The addresses of the TCO2 tokens.
+    /// @param pool The address of the pool.
+    /// @param amounts The amounts to be redeemed per TCO2.
+    /// @return recipients The addresses of the fee recipients.
+    /// @return feesDenominatedInPoolTokens The amount of fees each recipient should receive.
+    function calculateRedemptionFeesMany(address[] calldata tco2s, address pool, uint256[] calldata amounts)
+        external
+        view
+        override
+        returns (address[] memory recipients, uint256[] memory feesDenominatedInPoolTokens)
+    {
+        uint256 tco2Len = tco2s.length;
+        require(tco2Len == amounts.length, "Length mismatch");
+
+        uint256 totalFee = 0;
+        uint256 totalPoolSupply = getTotalSupply(pool);
+
+        for (uint256 i = 0; i < tco2Len; ++i) {
+            uint256 redemptionAmount = amounts[i];
+            require(redemptionAmount > 0, "amount must be > 0");
+            uint256 tco2Balance = getTokenBalance(pool, tco2s[i]);
+            uint256 feeAmount = getRedemptionFee(redemptionAmount, tco2Balance, totalPoolSupply);
+            require(feeAmount <= redemptionAmount, "Fee must be lower or equal to redemption amount");
+            totalFee += feeAmount;
+            // Update total pool supply to account for the tokens to be burnt
+            // so the next iteration charges fees using the intermediate
+            // pool supply.
+            totalPoolSupply = totalPoolSupply - redemptionAmount + feeAmount;
+        }
+
+        require(totalFee > 0, "Fee must be greater than 0");
+
+        return distributeFeeAmongShares(totalFee);
+    }
+
     /// @notice Gets the balance of the TCO2 token in a given pool.
     /// @param pool The address of the pool.
     /// @param tco2 The address of the TCO2 token.

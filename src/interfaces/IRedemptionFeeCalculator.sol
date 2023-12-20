@@ -12,10 +12,10 @@ interface IRedemptionFeeCalculator {
     /// @notice Calculates the redemption fees for a given amount.
     /// @param tco2 The address of the TCO2 token.
     /// @param pool The address of the pool.
-    /// @param depositAmount The amount to be redeemed.
+    /// @param redemptionAmount The amount to be redeemed.
     /// @return recipients The addresses of the fee recipients.
     /// @return feesDenominatedInPoolTokens The amount of fees each recipient should receive.
-    function calculateRedemptionFees(address tco2, address pool, uint256 depositAmount)
+    function calculateRedemptionFees(address tco2, address pool, uint256 redemptionAmount)
         external
         returns (address[] memory recipients, uint256[] memory feesDenominatedInPoolTokens);
 }

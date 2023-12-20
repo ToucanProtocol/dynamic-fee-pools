@@ -17,6 +17,7 @@ interface IFeeCalculator {
     /// tokens for this deposit.
     function calculateDepositFees(address tco2, address pool, uint256 depositAmount)
         external
+        view
         returns (uint256 feeAmount);
 
     /// @notice Calculates the redemption fees for a given amount.
@@ -27,6 +28,7 @@ interface IFeeCalculator {
     /// tokens for this redemption.
     function calculateRedemptionFees(address tco2, address pool, uint256 redemptionAmount)
         external
+        view
         returns (uint256 feeAmount);
 
     /// @notice Calculates the total fee among the recipients according to their shares.

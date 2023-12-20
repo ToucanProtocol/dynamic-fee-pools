@@ -68,11 +68,8 @@ contract FeeCalculatorTestFuzzy is Test {
 
         // Act
         try feeCalculator.calculateDepositFees(address(mockToken), address(mockPool), depositAmount) returns (
-            address[] memory recipients, uint256[] memory fees
-        ) {
-            // Assert
-            assertEq(recipients[0], feeRecipient);
-        } catch Error(string memory reason) {
+            uint256 feeAmount
+        ) {} catch Error(string memory reason) {
             assertTrue(
                 keccak256(bytes("Fee must be greater than 0")) == keccak256(bytes(reason))
                     || keccak256(bytes("Fee must be lower or equal to deposit amount")) == keccak256(bytes(reason)),
@@ -124,12 +121,9 @@ contract FeeCalculatorTestFuzzy is Test {
 
         // Act
         try feeCalculator.calculateRedemptionFees(address(mockToken), address(mockPool), redemptionAmount) returns (
-            address[] memory recipients, uint256[] memory fees
+            uint256 feeAmount
         ) {
-            oneTimeFee = fees[0];
-
-            // Assert
-            assertEq(recipients[0], feeRecipient);
+            oneTimeFee = feeAmount;
         } catch Error(string memory reason) {
             oneTimeRedemptionFailed = true;
             assertTrue(
@@ -152,9 +146,9 @@ contract FeeCalculatorTestFuzzy is Test {
         for (uint256 i = 0; i < numberOfRedemptions; i++) {
             uint256 redemption = equalRedemption + (i == 0 ? restRedemption : 0);
             try feeCalculator.calculateRedemptionFees(address(mockToken), address(mockPool), redemption) returns (
-                address[] memory recipients, uint256[] memory fees
+                uint256 feeAmount
             ) {
-                feeFromDividedRedemptions += fees[0];
+                feeFromDividedRedemptions += feeAmount;
                 total -= redemption;
                 current -= redemption;
                 mockPool.setTotalSupply(total);
@@ -210,12 +204,9 @@ contract FeeCalculatorTestFuzzy is Test {
 
         // Act
         try feeCalculator.calculateDepositFees(address(mockToken), address(mockPool), depositAmount) returns (
-            address[] memory recipients, uint256[] memory fees
+            uint256 feeAmount
         ) {
-            oneTimeFee = fees[0];
-
-            // Assert
-            assertEq(recipients[0], feeRecipient);
+            oneTimeFee = feeAmount;
         } catch Error(string memory reason) {
             oneTimeDepositFailed = true;
             assertTrue(
@@ -233,9 +224,9 @@ contract FeeCalculatorTestFuzzy is Test {
             uint256 deposit = equalDeposit + (i == 0 ? restDeposit : 0);
 
             try feeCalculator.calculateDepositFees(address(mockToken), address(mockPool), deposit) returns (
-                address[] memory recipients, uint256[] memory fees
+                uint256 feeAmount
             ) {
-                feeFromDividedDeposits += fees[0];
+                feeFromDividedDeposits += feeAmount;
                 total += deposit;
                 current += deposit;
                 mockPool.setTotalSupply(total);
@@ -286,8 +277,8 @@ contract FeeCalculatorTestFuzzy is Test {
         mockToken.setTokenBalance(address(mockPool), 100 * 1e18);
 
         // Act
-        (address[] memory recipients, uint256[] memory fees) =
-            feeCalculator.calculateDepositFees(address(mockToken), address(mockPool), depositAmount);
+        uint256 feeAmount = feeCalculator.calculateDepositFees(address(mockToken), address(mockPool), depositAmount);
+        (address[] memory recipients, uint256[] memory fees) = feeCalculator.calculateFeeAmongShares(feeAmount);
 
         // Assert
         for (uint256 i = 0; i < recipients.length; i++) {

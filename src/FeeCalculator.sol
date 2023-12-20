@@ -5,17 +5,17 @@
 // If you encounter a vulnerability or an issue, please contact <info@neutralx.com>
 pragma solidity ^0.8.13;
 
-import "./interfaces/IDepositFeeCalculator.sol";
-import "./interfaces/IRedemptionFeeCalculator.sol";
 import "@openzeppelin/contracts/token/ERC20/IERC20.sol";
 import "@openzeppelin/contracts/access/Ownable.sol";
 import {SD59x18, sd, intoUint256} from "@prb/math/src/SD59x18.sol";
 
+import "./interfaces/IFeeCalculator.sol";
+
 /// @title FeeCalculator
 /// @author Neutral Labs Inc.
 /// @notice This contract calculates deposit and redemption fees for a given pool.
-/// @dev It implements IDepositFeeCalculator and IRedemptionFeeCalculator interfaces.
-contract FeeCalculator is IDepositFeeCalculator, IRedemptionFeeCalculator, Ownable {
+/// @dev It implements the IFeeCalculator interface.
+contract FeeCalculator is IFeeCalculator, Ownable {
     SD59x18 private zero = sd(0);
     SD59x18 private one = sd(1e18);
 
@@ -131,34 +131,32 @@ contract FeeCalculator is IDepositFeeCalculator, IRedemptionFeeCalculator, Ownab
         _shares = shares;
     }
 
-    /// @notice Calculates the deposit fees for a given amount.
+    /// @notice Calculates the deposit fee for a given amount.
     /// @param tco2 The address of the TCO2 token.
     /// @param pool The address of the pool.
     /// @param depositAmount The amount to be deposited.
-    /// @return recipients The addresses of the fee recipients.
-    /// @return feesDenominatedInPoolTokens The amount of fees each recipient should receive.
+    /// @return feeAmount The fee to be charged in pool
+    /// tokens for this deposit.
     function calculateDepositFees(address tco2, address pool, uint256 depositAmount)
         external
         view
         override
-        returns (address[] memory recipients, uint256[] memory feesDenominatedInPoolTokens)
+        returns (uint256 feeAmount)
     {
         require(depositAmount > 0, "depositAmount must be > 0");
 
-        uint256 totalFee = getDepositFee(depositAmount, getTokenBalance(pool, tco2), getTotalSupply(pool));
+        feeAmount = getDepositFee(depositAmount, getTokenBalance(pool, tco2), getTotalSupply(pool));
 
-        require(totalFee <= depositAmount, "Fee must be lower or equal to deposit amount");
-        require(totalFee > 0, "Fee must be greater than 0");
-
-        return distributeFeeAmongShares(totalFee);
+        require(feeAmount <= depositAmount, "Fee must be lower or equal to deposit amount");
+        require(feeAmount > 0, "Fee must be greater than 0");
     }
 
-    /// @notice Distributes the total fee among the recipients according to their shares.
+    /// @notice Calculates the total fee among the recipients according to their shares.
     /// @param totalFee The total fee to be distributed.
     /// @return recipients The addresses of the fee recipients.
     /// @return feesDenominatedInPoolTokens The amount of fees each recipient should receive.
-    function distributeFeeAmongShares(uint256 totalFee)
-        private
+    function calculateFeeAmongShares(uint256 totalFee)
+        external
         view
         returns (address[] memory recipients, uint256[] memory feesDenominatedInPoolTokens)
     {
@@ -179,22 +177,20 @@ contract FeeCalculator is IDepositFeeCalculator, IRedemptionFeeCalculator, Ownab
     /// @param tco2 The address of the TCO2 token.
     /// @param pool The address of the pool.
     /// @param redemptionAmount The amount to be redeemed.
-    /// @return recipients The addresses of the fee recipients.
-    /// @return feesDenominatedInPoolTokens The amount of fees each recipient should receive.
+    /// @return feeAmount The fee to be charged in pool
+    /// tokens for this redemption.
     function calculateRedemptionFees(address tco2, address pool, uint256 redemptionAmount)
         external
         view
         override
-        returns (address[] memory recipients, uint256[] memory feesDenominatedInPoolTokens)
+        returns (uint256 feeAmount)
     {
         require(redemptionAmount > 0, "redemptionAmount must be > 0");
 
-        uint256 totalFee = getRedemptionFee(redemptionAmount, getTokenBalance(pool, tco2), getTotalSupply(pool));
+        feeAmount = getRedemptionFee(redemptionAmount, getTokenBalance(pool, tco2), getTotalSupply(pool));
 
-        require(totalFee <= redemptionAmount, "Fee must be lower or equal to redemption amount");
-        require(totalFee > 0, "Fee must be greater than 0");
-
-        return distributeFeeAmongShares(totalFee);
+        require(feeAmount <= redemptionAmount, "Fee must be lower or equal to redemption amount");
+        require(feeAmount > 0, "Fee must be greater than 0");
     }
 
     /// @notice Gets the balance of the TCO2 token in a given pool.

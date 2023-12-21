@@ -319,4 +319,11 @@ contract FeeCalculator is IFeeCalculator, Ownable {
 
         return intoUint256(fee_float);
     }
+
+    /// @notice Returns the current fee setup.
+    /// @return recipients shares The fee recipients and their share of the total fee.
+    function getFeeSetup() external view returns (address[] memory recipients, uint256[] memory shares) {
+        recipients = _recipients;
+        shares = _shares;
+    }
 }

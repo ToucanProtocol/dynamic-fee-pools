@@ -42,6 +42,26 @@ contract FeeCalculatorTest is Test {
         feeCalculator.feeSetup(recipients, feeShares);
     }
 
+    function testGetFeeSetup() public {
+        address feeRecipient1 = 0xAb5801a7D398351b8bE11C439e05C5B3259aeC9B;
+        address feeRecipient2 = 0xCA35b7d915458EF540aDe6068dFe2F44E8fa733c;
+
+        address[] memory recipients = new address[](2);
+        recipients[0] = feeRecipient1;
+        recipients[1] = feeRecipient2;
+        uint256[] memory feeShares = new uint256[](2);
+        feeShares[0] = 30;
+        feeShares[1] = 70;
+
+        feeCalculator.feeSetup(recipients, feeShares);
+
+        (address[] memory _recipients, uint256[] memory _feeShares) = feeCalculator.getFeeSetup();
+        assertEq(_recipients[0], feeRecipient1);
+        assertEq(_recipients[1], feeRecipient2);
+        assertEq(_feeShares[0], 30);
+        assertEq(_feeShares[1], 70);
+    }
+
     function testCalculateDepositFeesNormalCase() public {
         // Arrange
         // Set up your test data

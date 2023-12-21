@@ -3,7 +3,7 @@
 // SPDX-License-Identifier: UNLICENSED
 
 // If you encounter a vulnerability or an issue, please contact <info@neutralx.com>
-pragma solidity ^0.8.13;
+pragma solidity 0.8.19;
 
 import "@openzeppelin/contracts/token/ERC20/IERC20.sol";
 import "@openzeppelin/contracts/access/Ownable.sol";
@@ -36,7 +36,7 @@ contract FeeCalculator is IFeeCalculator, Ownable {
     address[] private _recipients;
     uint256[] private _shares;
 
-    constructor() Ownable(msg.sender) {}
+    constructor() Ownable() {}
 
     /// @notice Sets the deposit fee scale.
     /// @dev Can only be called by the current owner.

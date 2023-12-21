@@ -254,8 +254,7 @@ contract FeeCalculator is IFeeCalculator, Ownable {
         if (
             current == total //single asset (or no assets) special case
         ) {
-            uint256 fee = intoUint256(amount_float * singleAssetDepositRelativeFee);
-            return fee;
+            return intoUint256(amount_float * singleAssetDepositRelativeFee);
         }
 
         SD59x18 ta = sd(int256(current));
@@ -319,5 +318,12 @@ contract FeeCalculator is IFeeCalculator, Ownable {
         }
 
         return intoUint256(fee_float);
+    }
+
+    /// @notice Returns the current fee setup.
+    /// @return recipients shares The fee recipients and their share of the total fee.
+    function getFeeSetup() external view returns (address[] memory recipients, uint256[] memory shares) {
+        recipients = _recipients;
+        shares = _shares;
     }
 }

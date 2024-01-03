@@ -42,7 +42,7 @@ contract FeeCalculatorLaunchParamsTest is Test {
 
         // Act
         uint256 feeAmount = feeCalculator.calculateDepositFees(address(mockToken), address(mockPool), depositAmount);
-        (address[] memory recipients, uint256[] memory fees) = feeCalculator.calculateFeeAmongShares(feeAmount);
+        (address[] memory recipients, uint256[] memory fees) = feeCalculator.calculateDepositFeeShares(feeAmount);
 
         // Assert
         assertEq(recipients[0], feeRecipient);
@@ -71,7 +71,7 @@ contract FeeCalculatorLaunchParamsTest is Test {
 
         // Act
         uint256 feeAmount = feeCalculator.calculateDepositFees(address(mockToken), address(mockPool), depositAmount);
-        (address[] memory recipients, uint256[] memory fees) = feeCalculator.calculateFeeAmongShares(feeAmount);
+        (address[] memory recipients, uint256[] memory fees) = feeCalculator.calculateDepositFeeShares(feeAmount);
 
         // Assert
         assertEq(recipients[0], feeRecipient1);
@@ -102,7 +102,7 @@ contract FeeCalculatorLaunchParamsTest is Test {
 
         // Act
         uint256 feeAmount = feeCalculator.calculateDepositFees(address(mockToken), address(mockPool), depositAmount);
-        (address[] memory recipients, uint256[] memory fees) = feeCalculator.calculateFeeAmongShares(feeAmount);
+        (address[] memory recipients, uint256[] memory fees) = feeCalculator.calculateDepositFeeShares(feeAmount);
 
         // Assert
         assertEq(recipients[0], feeRecipient1);
@@ -123,7 +123,7 @@ contract FeeCalculatorLaunchParamsTest is Test {
 
         // Act
         uint256 feeAmount = feeCalculator.calculateDepositFees(address(mockToken), address(mockPool), depositAmount);
-        (address[] memory recipients, uint256[] memory fees) = feeCalculator.calculateFeeAmongShares(feeAmount);
+        (address[] memory recipients, uint256[] memory fees) = feeCalculator.calculateDepositFeeShares(feeAmount);
 
         // Assert
         assertEq(recipients[0], feeRecipient);
@@ -173,7 +173,7 @@ contract FeeCalculatorLaunchParamsTest is Test {
 
         // Act
         uint256 feeAmount = feeCalculator.calculateDepositFees(address(mockToken), address(mockPool), depositAmount);
-        (address[] memory recipients, uint256[] memory fees) = feeCalculator.calculateFeeAmongShares(feeAmount);
+        (address[] memory recipients, uint256[] memory fees) = feeCalculator.calculateDepositFeeShares(feeAmount);
 
         // Assert
         assertEq(recipients[0], feeRecipient);
@@ -192,7 +192,7 @@ contract FeeCalculatorLaunchParamsTest is Test {
 
         // Act
         uint256 feeAmount = feeCalculator.calculateDepositFees(address(mockToken), address(mockPool), depositAmount);
-        (address[] memory recipients, uint256[] memory fees) = feeCalculator.calculateFeeAmongShares(feeAmount);
+        (address[] memory recipients, uint256[] memory fees) = feeCalculator.calculateDepositFeeShares(feeAmount);
 
         // Assert
         assertEq(recipients[0], feeRecipient);
@@ -230,7 +230,7 @@ contract FeeCalculatorLaunchParamsTest is Test {
 
         // Act
         uint256 feeAmount = feeCalculator.calculateDepositFees(address(mockToken), address(mockPool), depositAmount);
-        (address[] memory recipients, uint256[] memory fees) = feeCalculator.calculateFeeAmongShares(feeAmount);
+        (address[] memory recipients, uint256[] memory fees) = feeCalculator.calculateDepositFeeShares(feeAmount);
 
         // Assert
         assertEq(recipients[0], feeRecipient1);
@@ -277,7 +277,7 @@ contract FeeCalculatorLaunchParamsTest is Test {
 
         // Act
         uint256 feeAmount = feeCalculator.calculateDepositFees(address(mockToken), address(mockPool), depositAmount);
-        (address[] memory recipients, uint256[] memory fees) = feeCalculator.calculateFeeAmongShares(feeAmount);
+        (address[] memory recipients, uint256[] memory fees) = feeCalculator.calculateDepositFeeShares(feeAmount);
 
         // Assert
         assertEq(recipients[0], feeRecipient1);
@@ -305,7 +305,7 @@ contract FeeCalculatorLaunchParamsTest is Test {
 
         // Act
         uint256 feeAmount = feeCalculator.calculateDepositFees(address(mockToken), address(mockPool), depositAmount);
-        (address[] memory recipients, uint256[] memory fees) = feeCalculator.calculateFeeAmongShares(feeAmount);
+        (address[] memory recipients, uint256[] memory fees) = feeCalculator.calculateDepositFeeShares(feeAmount);
 
         // Assert
         assertEq(recipients[0], feeRecipient);
@@ -354,7 +354,7 @@ contract FeeCalculatorLaunchParamsTest is Test {
 
         // Act
         uint256 feeAmount = feeCalculator.calculateDepositFees(address(mockToken), address(mockPool), depositAmount);
-        (address[] memory recipients, uint256[] memory fees) = feeCalculator.calculateFeeAmongShares(feeAmount);
+        (address[] memory recipients, uint256[] memory fees) = feeCalculator.calculateDepositFeeShares(feeAmount);
 
         // Assert
         assertEq(recipients[0], feeRecipient);
@@ -386,7 +386,7 @@ contract FeeCalculatorLaunchParamsTest is Test {
 
         // Act
         uint256 feeAmount = feeCalculator.calculateDepositFees(address(mockToken), address(mockPool), depositAmount);
-        (address[] memory recipients, uint256[] memory fees) = feeCalculator.calculateFeeAmongShares(feeAmount);
+        (address[] memory recipients, uint256[] memory fees) = feeCalculator.calculateDepositFeeShares(feeAmount);
 
         // Assert
         assertEq(recipients[0], feeRecipient);
@@ -418,7 +418,7 @@ contract FeeCalculatorLaunchParamsTest is Test {
 
         // Act
         uint256 feeAmount = feeCalculator.calculateDepositFees(address(mockToken), address(mockPool), depositAmount);
-        (address[] memory recipients, uint256[] memory fees) = feeCalculator.calculateFeeAmongShares(feeAmount);
+        (address[] memory recipients, uint256[] memory fees) = feeCalculator.calculateDepositFeeShares(feeAmount);
 
         // Assert
         assertEq(recipients[0], feeRecipient);

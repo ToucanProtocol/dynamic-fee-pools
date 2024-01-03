@@ -151,12 +151,12 @@ contract FeeCalculator is IFeeCalculator, Ownable {
         require(feeAmount > 0, "Fee must be greater than 0");
     }
 
-    /// @notice Calculates the total fee among the recipients according to their shares.
+    /// @notice Calculates the fee shares and recipients based on the total fee.
     /// @param totalFee The total fee to be distributed.
     /// @return recipients The addresses of the fee recipients.
     /// @return feesDenominatedInPoolTokens The amount of fees each recipient should receive.
-    function calculateFeeAmongShares(uint256 totalFee)
-        external
+    function calculateFeeShares(uint256 totalFee)
+        internal
         view
         returns (address[] memory recipients, uint256[] memory feesDenominatedInPoolTokens)
     {
@@ -191,6 +191,30 @@ contract FeeCalculator is IFeeCalculator, Ownable {
 
         require(feeAmount <= redemptionAmount, "Fee must be lower or equal to redemption amount");
         require(feeAmount > 0, "Fee must be greater than 0");
+    }
+
+    /// @notice Calculates the fee shares and recipients for a deposit based on the total fee.
+    /// @param totalFee The total fee to be shared.
+    /// @return recipients The addresses of the fee recipients.
+    /// @return feesDenominatedInPoolTokens The amount of fees each recipient should receive.
+    function calculateDepositFeeShares(uint256 totalFee)
+        external
+        view
+        returns (address[] memory recipients, uint256[] memory feesDenominatedInPoolTokens)
+    {
+        return calculateFeeShares(totalFee);
+    }
+
+    /// @notice Calculates the fee shares and recipients for a redemption based on the total fee.
+    /// @param totalFee The total fee to be shared.
+    /// @return recipients The addresses of the fee recipients.
+    /// @return feesDenominatedInPoolTokens The amount of fees each recipient should receive.
+    function calculateRedemptionFeeShares(uint256 totalFee)
+        external
+        view
+        returns (address[] memory recipients, uint256[] memory feesDenominatedInPoolTokens)
+    {
+        return calculateFeeShares(totalFee);
     }
 
     /// @notice Gets the balance of the TCO2 token in a given pool.

@@ -31,11 +31,20 @@ interface IFeeCalculator {
         view
         returns (uint256 feeAmount);
 
-    /// @notice Calculates the total fee among the recipients according to their shares.
-    /// @param totalFee The total fee to be distributed.
+    /// @notice Calculates the fee shares and recipients for a deposit based on the total fee.
+    /// @param totalFee The total fee to be shared.
     /// @return recipients The addresses of the fee recipients.
     /// @return feesDenominatedInPoolTokens The amount of fees each recipient should receive.
-    function calculateFeeAmongShares(uint256 totalFee)
+    function calculateDepositFeeShares(uint256 totalFee)
+        external
+        view
+        returns (address[] memory recipients, uint256[] memory feesDenominatedInPoolTokens);
+
+    /// @notice Calculates the fee shares and recipients for a redemption based on the total fee.
+    /// @param totalFee The total fee to be shared.
+    /// @return recipients The addresses of the fee recipients.
+    /// @return feesDenominatedInPoolTokens The amount of fees each recipient should receive.
+    function calculateRedemptionFeeShares(uint256 totalFee)
         external
         view
         returns (address[] memory recipients, uint256[] memory feesDenominatedInPoolTokens);

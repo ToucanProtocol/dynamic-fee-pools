@@ -277,7 +277,7 @@ contract FeeCalculatorTestFuzzy is Test {
 
         // Act
         uint256 feeAmount = feeCalculator.calculateDepositFees(address(mockToken), address(mockPool), depositAmount);
-        (address[] memory gotRecipients, uint256[] memory fees) = feeCalculator.calculateFeeAmongShares(feeAmount);
+        (address[] memory gotRecipients, uint256[] memory fees) = feeCalculator.calculateDepositFeeShares(feeAmount);
 
         // Assert
         assertEq(gotRecipients.length, recipients.length);

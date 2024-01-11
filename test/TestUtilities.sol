@@ -24,6 +24,10 @@ contract MockPool is IERC20 {
         return _totalSupply;
     }
 
+    function totalTCO2Supply() external view returns (uint256) {
+        return _totalSupply;
+    }
+
     function setTotalSupply(uint256 ts) public {
         _totalSupply = ts;
     }

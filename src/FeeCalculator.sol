@@ -10,6 +10,7 @@ import "@openzeppelin/contracts/access/Ownable.sol";
 import {SD59x18, sd, intoUint256} from "@prb/math/src/SD59x18.sol";
 
 import "./interfaces/IFeeCalculator.sol";
+import "./interfaces/IPool.sol";
 
 /// @title FeeCalculator
 /// @author Neutral Labs Inc.
@@ -230,7 +231,7 @@ contract FeeCalculator is IFeeCalculator, Ownable {
     /// @param pool The address of the pool.
     /// @return The total supply of the pool.
     function getTotalSupply(address pool) private view returns (uint256) {
-        uint256 totalSupply = IERC20(pool).totalSupply();
+        uint256 totalSupply = IPool(pool).totalTCO2Supply();
         return totalSupply;
     }
 

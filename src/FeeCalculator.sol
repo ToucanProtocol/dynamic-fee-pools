@@ -9,7 +9,7 @@ import "@openzeppelin/contracts/token/ERC20/IERC20.sol";
 import "@openzeppelin/contracts/access/Ownable.sol";
 import {SD59x18, sd, intoUint256} from "@prb/math/src/SD59x18.sol";
 
-import "./interfaces/IFeeCalculator.sol";
+import {IFeeCalculator, FeeDistribution} from "./interfaces/IFeeCalculator.sol";
 import "./interfaces/IPool.sol";
 
 /// @title FeeCalculator
@@ -136,86 +136,65 @@ contract FeeCalculator is IFeeCalculator, Ownable {
     /// @param tco2 The address of the TCO2 token.
     /// @param pool The address of the pool.
     /// @param depositAmount The amount to be deposited.
-    /// @return feeAmount The fee to be charged in pool
-    /// tokens for this deposit.
+    /// @return feeDistribution How the fee is meant to be
+    /// distributed among the fee recipients.
     function calculateDepositFees(address tco2, address pool, uint256 depositAmount)
         external
         view
         override
-        returns (uint256 feeAmount)
+        returns (FeeDistribution memory feeDistribution)
     {
         require(depositAmount > 0, "depositAmount must be > 0");
 
-        feeAmount = getDepositFee(depositAmount, getTokenBalance(pool, tco2), getTotalSupply(pool));
+        uint256 feeAmount = getDepositFee(depositAmount, getTokenBalance(pool, tco2), getTotalSupply(pool));
 
         require(feeAmount <= depositAmount, "Fee must be lower or equal to deposit amount");
         require(feeAmount > 0, "Fee must be greater than 0");
+        feeDistribution = calculateFeeShares(feeAmount);
     }
 
     /// @notice Calculates the fee shares and recipients based on the total fee.
     /// @param totalFee The total fee to be distributed.
-    /// @return recipients The addresses of the fee recipients.
-    /// @return feesDenominatedInPoolTokens The amount of fees each recipient should receive.
-    function calculateFeeShares(uint256 totalFee)
-        internal
-        view
-        returns (address[] memory recipients, uint256[] memory feesDenominatedInPoolTokens)
-    {
-        feesDenominatedInPoolTokens = new uint256[](_recipients.length);
+    /// @return feeDistribution The recipients and the amount of fees each
+    /// recipient should receive.
+    function calculateFeeShares(uint256 totalFee) internal view returns (FeeDistribution memory feeDistribution) {
+        uint256[] memory shares = new uint256[](_recipients.length);
 
         uint256 restFee = totalFee;
 
         for (uint256 i = 0; i < _recipients.length; i++) {
-            feesDenominatedInPoolTokens[i] = (totalFee * _shares[i]) / 100;
-            restFee -= feesDenominatedInPoolTokens[i];
+            shares[i] = (totalFee * _shares[i]) / 100;
+            restFee -= shares[i];
         }
 
-        recipients = _recipients;
-        feesDenominatedInPoolTokens[0] += restFee; //we give rest of the fee (if any) to the first recipient
+        // If any fee is left, it is distributed to the first recipient.
+        // This may happen if any of the shares of the fee to be distributed
+        // has leftover from the division by 100 above.
+        shares[0] += restFee;
+
+        feeDistribution.recipients = _recipients;
+        feeDistribution.shares = shares;
     }
 
     /// @notice Calculates the redemption fees for a given amount.
     /// @param tco2 The address of the TCO2 token.
     /// @param pool The address of the pool.
     /// @param redemptionAmount The amount to be redeemed.
-    /// @return feeAmount The fee to be charged in pool
-    /// tokens for this redemption.
+    /// @return feeDistribution How the fee is meant to be
+    /// distributed among the fee recipients.
     function calculateRedemptionFees(address tco2, address pool, uint256 redemptionAmount)
         external
         view
         override
-        returns (uint256 feeAmount)
+        returns (FeeDistribution memory feeDistribution)
     {
         require(redemptionAmount > 0, "redemptionAmount must be > 0");
 
-        feeAmount = getRedemptionFee(redemptionAmount, getTokenBalance(pool, tco2), getTotalSupply(pool));
+        uint256 feeAmount = getRedemptionFee(redemptionAmount, getTokenBalance(pool, tco2), getTotalSupply(pool));
 
         require(feeAmount <= redemptionAmount, "Fee must be lower or equal to redemption amount");
         require(feeAmount > 0, "Fee must be greater than 0");
-    }
-
-    /// @notice Calculates the fee shares and recipients for a deposit based on the total fee.
-    /// @param totalFee The total fee to be shared.
-    /// @return recipients The addresses of the fee recipients.
-    /// @return feesDenominatedInPoolTokens The amount of fees each recipient should receive.
-    function calculateDepositFeeShares(uint256 totalFee)
-        external
-        view
-        returns (address[] memory recipients, uint256[] memory feesDenominatedInPoolTokens)
-    {
-        return calculateFeeShares(totalFee);
-    }
-
-    /// @notice Calculates the fee shares and recipients for a redemption based on the total fee.
-    /// @param totalFee The total fee to be shared.
-    /// @return recipients The addresses of the fee recipients.
-    /// @return feesDenominatedInPoolTokens The amount of fees each recipient should receive.
-    function calculateRedemptionFeeShares(uint256 totalFee)
-        external
-        view
-        returns (address[] memory recipients, uint256[] memory feesDenominatedInPoolTokens)
-    {
-        return calculateFeeShares(totalFee);
+        feeDistribution = calculateFeeShares(feeAmount);
     }
 
     /// @notice Gets the balance of the TCO2 token in a given pool.

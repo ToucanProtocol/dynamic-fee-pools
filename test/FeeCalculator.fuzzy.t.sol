@@ -7,6 +7,7 @@ pragma solidity ^0.8.13;
 
 import {Test, console2} from "forge-std/Test.sol";
 import {FeeCalculator} from "../src/FeeCalculator.sol";
+import {FeeDistribution} from "../src/interfaces/IFeeCalculator.sol";
 import {SD59x18, sd, intoUint256 as sdIntoUint256} from "@prb/math/src/SD59x18.sol";
 import {UD60x18, ud, intoUint256} from "@prb/math/src/UD60x18.sol";
 import "./TestUtilities.sol";
@@ -120,9 +121,9 @@ contract FeeCalculatorTestFuzzy is Test {
 
         // Act
         try feeCalculator.calculateRedemptionFees(address(mockToken), address(mockPool), redemptionAmount) returns (
-            uint256 feeAmount
+            FeeDistribution memory feeDistribution
         ) {
-            oneTimeFee = feeAmount;
+            oneTimeFee = feeDistribution.shares.sumOf();
         } catch Error(string memory reason) {
             oneTimeRedemptionFailed = true;
             assertTrue(
@@ -145,9 +146,9 @@ contract FeeCalculatorTestFuzzy is Test {
         for (uint256 i = 0; i < numberOfRedemptions; i++) {
             uint256 redemption = equalRedemption + (i == 0 ? restRedemption : 0);
             try feeCalculator.calculateRedemptionFees(address(mockToken), address(mockPool), redemption) returns (
-                uint256 feeAmount
+                FeeDistribution memory feeDistribution
             ) {
-                feeFromDividedRedemptions += feeAmount;
+                feeFromDividedRedemptions += feeDistribution.shares.sumOf();
                 total -= redemption;
                 current -= redemption;
                 mockPool.setTotalSupply(total);
@@ -203,9 +204,9 @@ contract FeeCalculatorTestFuzzy is Test {
 
         // Act
         try feeCalculator.calculateDepositFees(address(mockToken), address(mockPool), depositAmount) returns (
-            uint256 feeAmount
+            FeeDistribution memory feeDistribution
         ) {
-            oneTimeFee = feeAmount;
+            oneTimeFee = feeDistribution.shares.sumOf();
         } catch Error(string memory reason) {
             oneTimeDepositFailed = true;
             assertTrue(
@@ -223,9 +224,9 @@ contract FeeCalculatorTestFuzzy is Test {
             uint256 deposit = equalDeposit + (i == 0 ? restDeposit : 0);
 
             try feeCalculator.calculateDepositFees(address(mockToken), address(mockPool), deposit) returns (
-                uint256 feeAmount
+                FeeDistribution memory feeDistribution
             ) {
-                feeFromDividedDeposits += feeAmount;
+                feeFromDividedDeposits += feeDistribution.shares.sumOf();
                 total += deposit;
                 current += deposit;
                 mockPool.setTotalSupply(total);
@@ -276,8 +277,10 @@ contract FeeCalculatorTestFuzzy is Test {
         mockToken.setTokenBalance(address(mockPool), 100 * 1e18);
 
         // Act
-        uint256 feeAmount = feeCalculator.calculateDepositFees(address(mockToken), address(mockPool), depositAmount);
-        (address[] memory gotRecipients, uint256[] memory fees) = feeCalculator.calculateDepositFeeShares(feeAmount);
+        FeeDistribution memory feeDistribution =
+            feeCalculator.calculateDepositFees(address(mockToken), address(mockPool), depositAmount);
+        address[] memory gotRecipients = feeDistribution.recipients;
+        uint256[] memory fees = feeDistribution.shares;
 
         // Assert
         assertEq(gotRecipients.length, recipients.length);

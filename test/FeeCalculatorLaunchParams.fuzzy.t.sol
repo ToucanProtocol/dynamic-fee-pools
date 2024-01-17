@@ -7,6 +7,7 @@ pragma solidity ^0.8.13;
 
 import {Test, console2} from "forge-std/Test.sol";
 import {FeeCalculator} from "../src/FeeCalculator.sol";
+import {FeeDistribution} from "../src/interfaces/IFeeCalculator.sol";
 import "./TestUtilities.sol";
 
 contract FeeCalculatorLaunchParamsTestFuzzy is Test {
@@ -116,9 +117,9 @@ contract FeeCalculatorLaunchParamsTestFuzzy is Test {
 
         // Act
         try feeCalculator.calculateDepositFees(address(mockToken), address(mockPool), depositAmount) returns (
-            uint256 feeAmount
+            FeeDistribution memory feeDistribution
         ) {
-            oneTimeFee = feeAmount;
+            oneTimeFee = feeDistribution.shares.sumOf();
         } catch Error(string memory reason) {
             oneTimeDepositFailed = true;
             assertTrue(
@@ -137,9 +138,9 @@ contract FeeCalculatorLaunchParamsTestFuzzy is Test {
             uint256 deposit = equalDeposit + (i == 0 ? restDeposit : 0);
 
             try feeCalculator.calculateDepositFees(address(mockToken), address(mockPool), deposit) returns (
-                uint256 feeAmount
+                FeeDistribution memory feeDistribution
             ) {
-                feeFromDividedDeposits += feeAmount;
+                feeFromDividedDeposits += feeDistribution.shares.sumOf();
                 total += deposit;
                 current += deposit;
                 mockPool.setTotalSupply(total);

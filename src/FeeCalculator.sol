@@ -196,32 +196,25 @@ contract FeeCalculator is IFeeCalculator, Ownable {
         //poolAmount >= tco2Amount
         uint256 minTCO2Amount = poolAmount - calculateRedemptionFee(poolAmount, current, total);
         uint256 maxTCO2Amount = poolAmount;
-        uint256 bestEstimateTCO2RedemptionAmount = minTCO2Amount;
-        uint256 bestDiff = type(uint256).max;
+        uint256 tco2RedemptionAmount = (minTCO2Amount + maxTCO2Amount) / 2; //midpoint
+        uint256 maxIterations = 40;
 
-        uint256 maxIterations = 10;
-        uint256 step = (maxTCO2Amount - minTCO2Amount) / maxIterations;
-
-        for (
-            uint256 tco2RedemptionAmount = minTCO2Amount;
-            tco2RedemptionAmount < maxTCO2Amount;
-            tco2RedemptionAmount += step
-        ) {
+        for (uint256 i = 0; i < maxIterations; i++) {
             uint256 feeAmount = calculateRedemptionFee(tco2RedemptionAmount, current, total);
             uint256 estimatedPoolAmount = tco2RedemptionAmount + feeAmount;
-            uint256 diff = (estimatedPoolAmount > poolAmount)
-                ? (estimatedPoolAmount - poolAmount)
-                : (poolAmount - estimatedPoolAmount);
 
-            if (diff < bestDiff) {
-                bestEstimateTCO2RedemptionAmount = tco2RedemptionAmount;
-                bestDiff = diff;
+            bool isOverestimated = (estimatedPoolAmount > poolAmount);
+
+            if (isOverestimated) {
+                maxTCO2Amount = tco2RedemptionAmount;
             } else {
-                break;
+                minTCO2Amount = tco2RedemptionAmount;
             }
+
+            tco2RedemptionAmount = (minTCO2Amount + maxTCO2Amount) / 2; //midpoint
         }
 
-        return bestEstimateTCO2RedemptionAmount;
+        return tco2RedemptionAmount;
     }
 
     /// @notice Calculates the redemption fees for a given amount.

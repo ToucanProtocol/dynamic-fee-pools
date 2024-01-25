@@ -192,14 +192,25 @@ contract FeeCalculator is IFeeCalculator, Ownable {
         require(tco2s.length == 1, "only one");
         address tco2 = tco2s[0];
         uint256 redemptionAmount = redemptionAmounts[0];
+        uint256 feeAmount = calculateRedemptionFee(redemptionAmount, getTokenBalance(pool, tco2), getTotalSupply(pool));
+        feeDistribution = calculateFeeShares(feeAmount);
+    }
 
+    /// @notice Calculates the redemption fee for a given amount.
+    /// @param redemptionAmount The amount to be redeemed.
+    /// @return The calculated redemption fee.
+    function calculateRedemptionFee(uint256 redemptionAmount, uint256 current, uint256 total)
+        private
+        view
+        returns (uint256)
+    {
         require(redemptionAmount > 0, "redemptionAmount must be > 0");
 
-        uint256 feeAmount = getRedemptionFee(redemptionAmount, getTokenBalance(pool, tco2), getTotalSupply(pool));
+        uint256 feeAmount = getRedemptionFee(redemptionAmount, current, total);
 
         require(feeAmount <= redemptionAmount, "Fee must be lower or equal to redemption amount");
         require(feeAmount > 0, "Fee must be greater than 0");
-        feeDistribution = calculateFeeShares(feeAmount);
+        return feeAmount;
     }
 
     /// @notice Gets the balance of the TCO2 token in a given pool.

@@ -49,7 +49,7 @@ contract FeeCalculatorLaunchParamsTestFuzzy is Test {
         mockToken.setTokenBalance(address(mockPool), 1e9 * 1e18);
 
         vm.expectRevert("Fee must be greater than 0");
-        feeCalculator.calculateDepositFees(address(mockToken), address(mockPool), depositAmount);
+        feeCalculator.calculateDepositFees(address(mockPool), address(mockToken), depositAmount);
     }
 
     function testCalculateDepositFeesFuzzy(uint256 depositAmount, uint256 current, uint256 total) public {
@@ -69,7 +69,7 @@ contract FeeCalculatorLaunchParamsTestFuzzy is Test {
         mockToken.setTokenBalance(address(mockPool), current);
 
         // Act
-        try feeCalculator.calculateDepositFees(address(mockToken), address(mockPool), depositAmount) {}
+        try feeCalculator.calculateDepositFees(address(mockPool), address(mockToken), depositAmount) {}
         catch Error(string memory reason) {
             assertTrue(
                 keccak256(bytes("Fee must be greater than 0")) == keccak256(bytes(reason))
@@ -116,7 +116,7 @@ contract FeeCalculatorLaunchParamsTestFuzzy is Test {
         uint256 oneTimeFee = 0;
 
         // Act
-        try feeCalculator.calculateDepositFees(address(mockToken), address(mockPool), depositAmount) returns (
+        try feeCalculator.calculateDepositFees(address(mockPool), address(mockToken), depositAmount) returns (
             FeeDistribution memory feeDistribution
         ) {
             oneTimeFee = feeDistribution.shares.sumOf();
@@ -137,7 +137,7 @@ contract FeeCalculatorLaunchParamsTestFuzzy is Test {
         for (uint256 i = 0; i < numberOfDeposits; i++) {
             uint256 deposit = equalDeposit + (i == 0 ? restDeposit : 0);
 
-            try feeCalculator.calculateDepositFees(address(mockToken), address(mockPool), deposit) returns (
+            try feeCalculator.calculateDepositFees(address(mockPool), address(mockToken), deposit) returns (
                 FeeDistribution memory feeDistribution
             ) {
                 feeFromDividedDeposits += feeDistribution.shares.sumOf();

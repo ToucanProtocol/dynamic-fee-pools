@@ -968,4 +968,35 @@ contract FeeCalculatorTest is Test {
         // Assert
         assertEq(fees[0], redemptionAmount * 91 / 100);
     }
+
+    function testEstimateTCO2RedemptionAmount_NormalCase_ShouldGiveResultsWithSmallSlippage() public {
+        // Arrange
+        // Set up your test data
+        uint256 redemptionAmount = 100 * 1e18;
+        address[] memory tco2s = new address[](1);
+        tco2s[0] = address(mockToken);
+        uint256[] memory redemptionAmounts = new uint256[](1);
+        redemptionAmounts[0] = redemptionAmount;
+
+        // Set up mock pool
+        uint256 total = 1000 * 1e18;
+        uint256 current = 500 * 1e18;
+        mockPool.setTotalSupply(total);
+        mockToken.setTokenBalance(address(mockPool), current);
+
+        // Act
+        uint256 poolAmount = redemptionAmount
+            + feeCalculator.calculateRedemptionFees(address(mockPool), tco2s, redemptionAmounts).shares[0];
+        uint256 estimatedRedemptionAmount =
+            feeCalculator.estimateTCO2RedemptionAmount(address(mockPool), address(mockToken), poolAmount);
+
+        uint256[] memory estimatedRedemptionAmounts = new uint256[](1);
+        estimatedRedemptionAmounts[0] = redemptionAmount;
+
+        uint256 estimatedPoolAmount = estimatedRedemptionAmount
+            + feeCalculator.calculateRedemptionFees(address(mockPool), tco2s, estimatedRedemptionAmounts).shares[0];
+
+        // Assert
+        assertApproxEqRel(poolAmount, estimatedPoolAmount, 0.02 * 1e18); //2% slippage allowed
+    }
 }

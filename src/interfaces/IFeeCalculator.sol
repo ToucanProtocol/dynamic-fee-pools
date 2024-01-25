@@ -27,11 +27,11 @@ interface IFeeCalculator {
 
     /// @notice Calculates the redemption fees for a given amount.
     /// @param pool The address of the pool.
-    /// @param tco2 The address of the TCO2 token.
-    /// @param redemptionAmount The amount to be redeemed.
+    /// @param tco2s The addresses of the TCO2 token.
+    /// @param redemptionAmounts The amounts to be redeemed.
     /// @return feeDistribution How the fee is meant to be
     /// distributed among the fee recipients.
-    function calculateRedemptionFees(address pool, address tco2, uint256 redemptionAmount)
+    function calculateRedemptionFees(address pool, address[] calldata tco2s, uint256[] calldata redemptionAmounts)
         external
         view
         returns (FeeDistribution memory feeDistribution);

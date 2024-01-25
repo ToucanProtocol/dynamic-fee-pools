@@ -119,8 +119,13 @@ contract FeeCalculatorTestFuzzy is Test {
         bool oneTimeRedemptionFailed = false;
         uint256 multipleTimesRedemptionFailedCount = 0;
 
+        address[] memory tco2s = new address[](1);
+        tco2s[0] = address(mockToken);
+        uint256[] memory redemptionAmounts = new uint256[](1);
+        redemptionAmounts[0] = redemptionAmount;
+
         // Act
-        try feeCalculator.calculateRedemptionFees(address(mockPool), address(mockToken), redemptionAmount) returns (
+        try feeCalculator.calculateRedemptionFees(address(mockPool), tco2s, redemptionAmounts) returns (
             FeeDistribution memory feeDistribution
         ) {
             oneTimeFee = feeDistribution.shares.sumOf();
@@ -145,7 +150,8 @@ contract FeeCalculatorTestFuzzy is Test {
 
         for (uint256 i = 0; i < numberOfRedemptions; i++) {
             uint256 redemption = equalRedemption + (i == 0 ? restRedemption : 0);
-            try feeCalculator.calculateRedemptionFees(address(mockPool), address(mockToken), redemption) returns (
+            redemptionAmounts[0] = redemption;
+            try feeCalculator.calculateRedemptionFees(address(mockPool), tco2s, redemptionAmounts) returns (
                 FeeDistribution memory feeDistribution
             ) {
                 feeFromDividedRedemptions += feeDistribution.shares.sumOf();

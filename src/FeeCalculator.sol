@@ -178,16 +178,21 @@ contract FeeCalculator is IFeeCalculator, Ownable {
 
     /// @notice Calculates the redemption fees for a given amount.
     /// @param pool The address of the pool.
-    /// @param tco2 The address of the TCO2 token.
-    /// @param redemptionAmount The amount to be redeemed.
+    /// @param tco2s The addresses of the TCO2 token.
+    /// @param redemptionAmounts The amounts to be redeemed.
     /// @return feeDistribution How the fee is meant to be
     /// distributed among the fee recipients.
-    function calculateRedemptionFees(address pool, address tco2, uint256 redemptionAmount)
+    function calculateRedemptionFees(address pool, address[] calldata tco2s, uint256[] calldata redemptionAmounts)
         external
         view
         override
         returns (FeeDistribution memory feeDistribution)
     {
+        require(tco2s.length == redemptionAmounts.length, "length mismatch");
+        require(tco2s.length == 1, "only one");
+        address tco2 = tco2s[0];
+        uint256 redemptionAmount = redemptionAmounts[0];
+
         require(redemptionAmount > 0, "redemptionAmount must be > 0");
 
         uint256 feeAmount = getRedemptionFee(redemptionAmount, getTokenBalance(pool, tco2), getTotalSupply(pool));

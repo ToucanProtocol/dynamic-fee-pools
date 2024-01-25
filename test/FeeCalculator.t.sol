@@ -997,6 +997,6 @@ contract FeeCalculatorTest is Test {
             + feeCalculator.calculateRedemptionFees(address(mockPool), tco2s, estimatedRedemptionAmounts).shares[0];
 
         // Assert
-        assertApproxEqRel(poolAmount, estimatedPoolAmount, 0.02 * 1e18); //2% slippage allowed
+        assertApproxEqRel(poolAmount, estimatedPoolAmount, 0.01 * 1e18); //1% slippage allowed
     }
 }

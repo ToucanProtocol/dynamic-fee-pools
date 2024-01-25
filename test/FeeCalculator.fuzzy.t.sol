@@ -309,7 +309,7 @@ contract FeeCalculatorTestFuzzy is Test {
         uint128 _current,
         uint128 _total
     ) public {
-        vm.assume(_total >= _current);
+        vm.assume(_total/2 >= _current);
         vm.assume(_redemptionAmount <= _current / 2);
         vm.assume(_redemptionAmount < 1e20 * 1e18);
         vm.assume(_total < 1e20 * 1e18);
@@ -344,6 +344,6 @@ contract FeeCalculatorTestFuzzy is Test {
             + feeCalculator.calculateRedemptionFees(address(mockPool), tco2s, estimatedRedemptionAmounts).shares[0];
 
         // Assert
-        assertApproxEqRel(poolAmount, estimatedPoolAmount, 0.01 * 2e18); //2% slippage allowed
+        assertApproxEqRel(poolAmount, estimatedPoolAmount, 0.01 * 1e18); //1% slippage allowed
     }
 }

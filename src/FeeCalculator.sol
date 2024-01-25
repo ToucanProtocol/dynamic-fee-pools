@@ -176,6 +176,54 @@ contract FeeCalculator is IFeeCalculator, Ownable {
         feeDistribution.shares = shares;
     }
 
+    /// @notice Estimates the TCO2 token redemption amount for a given pool token redemption amount.
+    /// @param pool The address of the pool.
+    /// @param tco2 The address of the TCO2 token.
+    /// @param poolAmount the pool token amount to be redeemed.
+    /// @return estimated TCO2 token redemption amount for a give pool token redemption amount.
+    function estimateTCO2RedemptionAmount(address pool, address tco2, uint256 poolAmount)
+        external
+        view
+        override
+        returns (uint256)
+    {
+        uint256 current = getTokenBalance(pool, tco2);
+        uint256 total = getTotalSupply(pool);
+
+        // @dev this is implicit function, so we need to estimate
+        // redemptionAmount = poolAmount - calculateRedemptionFee(redemptionAmount, current, total)
+
+        //poolAmount >= tco2Amount
+        uint256 minTCO2Amount = poolAmount - calculateRedemptionFee(poolAmount, current, total);
+        uint256 maxTCO2Amount = poolAmount;
+        uint256 bestEstimateTCO2RedemptionAmount = minTCO2Amount;
+        uint256 bestDiff = type(uint256).max;
+
+        uint256 maxIterations = 10;
+        uint256 step = (maxTCO2Amount - minTCO2Amount) / maxIterations;
+
+        for (
+            uint256 tco2RedemptionAmount = minTCO2Amount;
+            tco2RedemptionAmount < maxTCO2Amount;
+            tco2RedemptionAmount += step
+        ) {
+            uint256 feeAmount = calculateRedemptionFee(tco2RedemptionAmount, current, total);
+            uint256 estimatedPoolAmount = tco2RedemptionAmount + feeAmount;
+            uint256 diff = (estimatedPoolAmount > poolAmount)
+                ? (estimatedPoolAmount - poolAmount)
+                : (poolAmount - estimatedPoolAmount);
+
+            if (diff < bestDiff) {
+                bestEstimateTCO2RedemptionAmount = tco2RedemptionAmount;
+                bestDiff = diff;
+            } else {
+                break;
+            }
+        }
+
+        return bestEstimateTCO2RedemptionAmount;
+    }
+
     /// @notice Calculates the redemption fees for a given amount.
     /// @param pool The address of the pool.
     /// @param tco2s The addresses of the TCO2 token.

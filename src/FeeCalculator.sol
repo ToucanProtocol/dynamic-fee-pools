@@ -223,28 +223,30 @@ contract FeeCalculator is IFeeCalculator, Ownable {
     /// @param amount The amount to be deposited.
     /// @param current The current balance of the pool.
     /// @param total The total supply of the pool.
-    /// @return The calculated ratios.
+    /// @return The current and resulting ratios of the asset in the pool
+    /// before and after the deposit.
     function getRatiosDeposit(SD59x18 amount, SD59x18 current, SD59x18 total) private view returns (SD59x18, SD59x18) {
-        SD59x18 a = total == zero ? zero : current / total;
-        SD59x18 b = (current + amount) / (total + amount);
+        SD59x18 currentRatio = total == zero ? zero : current / total;
+        SD59x18 resultingRatio = (current + amount) / (total + amount);
 
-        return (a, b);
+        return (currentRatio, resultingRatio);
     }
 
     /// @notice Calculates the ratios for redemption fee calculation.
     /// @param amount The amount to be redeemed.
     /// @param current The current balance of the pool.
     /// @param total The total supply of the pool.
-    /// @return The calculated ratios.
+    /// @return The current and resulting ratios of the asset in the pool
+    /// before and after the redemption.
     function getRatiosRedemption(SD59x18 amount, SD59x18 current, SD59x18 total)
         private
         view
         returns (SD59x18, SD59x18)
     {
-        SD59x18 a = total == zero ? zero : current / total;
-        SD59x18 b = (total - amount) == zero ? zero : (current - amount) / (total - amount);
+        SD59x18 currentRatio = total == zero ? zero : current / total;
+        SD59x18 resultingRatio = (total - amount) == zero ? zero : (current - amount) / (total - amount);
 
-        return (a, b);
+        return (currentRatio, resultingRatio);
     }
 
     /// @notice Calculates the deposit fee for a given amount.
@@ -258,27 +260,27 @@ contract FeeCalculator is IFeeCalculator, Ownable {
             "The total volume in the pool must be greater than or equal to the volume for an individual asset"
         );
 
-        SD59x18 amount_float = sd(int256(amount));
+        SD59x18 amountSD = sd(int256(amount));
 
         if (
             current == total //single asset (or no assets) special case
         ) {
-            return intoUint256(amount_float * singleAssetDepositRelativeFee);
+            return intoUint256(amountSD * singleAssetDepositRelativeFee);
         }
 
-        SD59x18 ta = sd(int256(current));
-        SD59x18 tb = ta + amount_float;
+        SD59x18 currentSD = sd(int256(current));
+        SD59x18 resultingSD = currentSD + amountSD;
 
-        (SD59x18 da, SD59x18 db) = getRatiosDeposit(amount_float, ta, sd(int256(total)));
+        (SD59x18 currentRatio, SD59x18 resultingRatio) = getRatiosDeposit(amountSD, currentSD, sd(int256(total)));
 
-        require(db * depositFeeRatioScale < one, "Deposit outside range");
+        require(resultingRatio * depositFeeRatioScale < one, "Deposit outside range");
 
-        SD59x18 ta_log_a = ta * (one - da * depositFeeRatioScale).log10();
-        SD59x18 tb_log_b = tb * (one - db * depositFeeRatioScale).log10();
+        SD59x18 currentLog = currentSD * (one - currentRatio * depositFeeRatioScale).log10();
+        SD59x18 resultingLog = resultingSD * (one - resultingRatio * depositFeeRatioScale).log10();
 
-        SD59x18 fee_float = depositFeeScale * (ta_log_a - tb_log_b);
+        SD59x18 feeSD = depositFeeScale * (currentLog - resultingLog);
 
-        uint256 fee = intoUint256(fee_float);
+        uint256 fee = intoUint256(feeSD);
         return fee;
     }
 
@@ -294,24 +296,24 @@ contract FeeCalculator is IFeeCalculator, Ownable {
         );
         require(amount <= current, "The amount to be redeemed cannot exceed the current balance of the pool");
 
-        SD59x18 amount_float = sd(int256(amount));
+        SD59x18 amountSD = sd(int256(amount));
 
         if (
             current == total //single asset (or no assets) special case
         ) {
-            uint256 fee = intoUint256(amount_float * (singleAssetRedemptionRelativeFee));
+            uint256 fee = intoUint256(amountSD * (singleAssetRedemptionRelativeFee));
             return fee;
         }
 
-        SD59x18 ta = sd(int256(current));
-        SD59x18 tb = ta - amount_float;
+        SD59x18 currentSD = sd(int256(current));
+        SD59x18 resultingSD = currentSD - amountSD;
 
-        (SD59x18 da, SD59x18 db) = getRatiosRedemption(amount_float, ta, sd(int256(total)));
+        (SD59x18 currentRatio, SD59x18 resultingRatio) = getRatiosRedemption(amountSD, currentSD, sd(int256(total)));
 
-        //redemption_fee = scale * (tb * log10(b+shift) - ta * log10(a+shift)) + constant*amount;
-        SD59x18 i_a = ta * (da + redemptionFeeShift).log10();
-        SD59x18 i_b = tb * (db + redemptionFeeShift).log10();
-        SD59x18 fee_float = redemptionFeeScale * (i_b - i_a) + redemptionFeeConstant() * amount_float;
+        //redemption_fee = scale * (resultingSD * log10(b+shift) - currentSD * log10(a+shift)) + constant*amount;
+        SD59x18 currentLog = currentSD * (currentRatio + redemptionFeeShift).log10();
+        SD59x18 resultingLog = resultingSD * (resultingRatio + redemptionFeeShift).log10();
+        SD59x18 feeSD = redemptionFeeScale * (resultingLog - currentLog) + redemptionFeeConstant() * amountSD;
 
         /*
         @dev
@@ -322,11 +324,11 @@ contract FeeCalculator is IFeeCalculator, Ownable {
 
              Case exists only if asset pool domination is > 90% and amount is ~1e-18 of that asset in the pool
         */
-        if (fee_float < zero) {
-            return intoUint256(amount_float * dustAssetRedemptionRelativeFee);
+        if (feeSD < zero) {
+            return intoUint256(amountSD * dustAssetRedemptionRelativeFee);
         }
 
-        return intoUint256(fee_float);
+        return intoUint256(feeSD);
     }
 
     /// @notice Returns the current fee setup.

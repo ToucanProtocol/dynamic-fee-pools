@@ -309,8 +309,8 @@ contract FeeCalculatorTestFuzzy is Test {
         uint128 _current,
         uint128 _total
     ) public {
-        vm.assume(_total / 2 >= _current);
-        vm.assume(_redemptionAmount <= _current / 2);
+        vm.assume(_total >= _current);
+        vm.assume(_redemptionAmount < _current / 2); //because of the fee that stays in the pool the redemption amount needs to be lower than current amount
         vm.assume(_redemptionAmount < 1e20 * 1e18);
         vm.assume(_total < 1e20 * 1e18);
         vm.assume(_redemptionAmount > 1e-6 * 1e18);

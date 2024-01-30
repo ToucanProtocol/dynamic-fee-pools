@@ -40,9 +40,9 @@ interface IFeeCalculator {
     /// @param pool The address of the pool.
     /// @param tco2 The address of the TCO2 token.
     /// @param poolAmount the pool token amount to be redeemed.
-    /// @return estimated TCO2 token redemption amount for a give pool token redemption amount.
+    /// @return estimatedTCO2Amount estimated TCO2 token redemption amount for a give pool token redemption amount.
     function estimateTCO2RedemptionAmount(address pool, address tco2, uint256 poolAmount)
         external
         view
-        returns (uint256);
+        returns (uint256 estimatedTCO2Amount);
 }

@@ -338,7 +338,7 @@ contract FeeCalculatorTestFuzzy is Test {
             feeCalculator.estimateTCO2RedemptionAmount(address(mockPool), address(mockToken), poolAmount);
 
         uint256[] memory estimatedRedemptionAmounts = new uint256[](1);
-        estimatedRedemptionAmounts[0] = redemptionAmount;
+        estimatedRedemptionAmounts[0] = estimatedRedemptionAmount;
 
         uint256 estimatedPoolAmount = estimatedRedemptionAmount
             + feeCalculator.calculateRedemptionFees(address(mockPool), tco2s, estimatedRedemptionAmounts).shares[0];

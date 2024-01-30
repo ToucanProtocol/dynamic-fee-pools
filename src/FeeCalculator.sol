@@ -27,6 +27,8 @@ contract FeeCalculator is IFeeCalculator, Ownable {
     SD59x18 private redemptionFeeScale = sd(0.3 * 1e18);
     SD59x18 private redemptionFeeShift = sd(0.1 * 1e18); //-log10(0+0.1)=1 -> 10^-1
 
+    uint256 private estimateTCO2RedemptionAmountIterations = 40;
+
     function redemptionFeeConstant() private view returns (SD59x18) {
         return redemptionFeeScale * (one + redemptionFeeShift).log10(); //0.0413926851582251=log10(1+0.1)
     }
@@ -115,6 +117,16 @@ contract FeeCalculator is IFeeCalculator, Ownable {
         dustAssetRedemptionRelativeFee = dustAssetRedemptionRelativeFeeSD;
     }
 
+    /// @notice Sets the estimate TCO2 redemption amount iterations.
+    /// @dev Can only be called by the current owner.
+    /// @param _estimateTCO2RedemptionAmountIterations The new estimate TCO2 redemption amount iterations.
+    function setEstimateTCO2RedemptionAmountIterations(uint256 _estimateTCO2RedemptionAmountIterations)
+        external
+        onlyOwner
+    {
+        estimateTCO2RedemptionAmountIterations = _estimateTCO2RedemptionAmountIterations;
+    }
+
     /// @notice Sets up the fee distribution among recipients.
     /// @dev Can only be called by the current owner.
     /// @param recipients The addresses of the fee recipients.
@@ -197,9 +209,8 @@ contract FeeCalculator is IFeeCalculator, Ownable {
         uint256 minTCO2Amount = poolAmount - calculateRedemptionFee(poolAmount, current, total);
         uint256 maxTCO2Amount = poolAmount;
         uint256 tco2RedemptionAmount = (minTCO2Amount + maxTCO2Amount) / 2; //midpoint
-        uint256 maxIterations = 40;
 
-        for (uint256 i = 0; i < maxIterations; i++) {
+        for (uint256 i = 0; i < estimateTCO2RedemptionAmountIterations; i++) {
             uint256 feeAmount = calculateRedemptionFee(tco2RedemptionAmount, current, total);
             uint256 estimatedPoolAmount = tco2RedemptionAmount + feeAmount;
 

@@ -303,4 +303,47 @@ contract FeeCalculatorTestFuzzy is Test {
         }
         assertApproxEqAbs(fees[recipients.length - 1], 11526003792614720250 * (equalShare + leftShare) / 100, 1);
     }
+
+    function testEstimateTCO2RedemptionAmount_FuzzyCase_ShouldGiveResultsWithSmallSlippage(
+        uint128 _redemptionAmount,
+        uint128 _current,
+        uint128 _total
+    ) public {
+        vm.assume(_total >= _current);
+        vm.assume(_redemptionAmount < _current / 2); //because of the fee that stays in the pool the redemption amount needs to be lower than current amount
+        vm.assume(_redemptionAmount < 1e20 * 1e18);
+        vm.assume(_total < 1e20 * 1e18);
+        vm.assume(_redemptionAmount > 1e-6 * 1e18);
+        vm.assume(_current > 1e12);
+
+        // Arrange
+        // Set up your test data
+        uint256 redemptionAmount = _redemptionAmount;
+        uint256 current = _current;
+        uint256 total = _total;
+
+        address[] memory tco2s = new address[](1);
+        tco2s[0] = address(mockToken);
+        uint256[] memory redemptionAmounts = new uint256[](1);
+        redemptionAmounts[0] = redemptionAmount;
+
+        // Set up mock pool
+        mockPool.setTotalSupply(total);
+        mockToken.setTokenBalance(address(mockPool), current);
+
+        // Act
+        uint256 poolAmount = redemptionAmount
+            + feeCalculator.calculateRedemptionFees(address(mockPool), tco2s, redemptionAmounts).shares[0];
+        uint256 estimatedRedemptionAmount =
+            feeCalculator.estimateTCO2RedemptionAmount(address(mockPool), address(mockToken), poolAmount);
+
+        uint256[] memory estimatedRedemptionAmounts = new uint256[](1);
+        estimatedRedemptionAmounts[0] = estimatedRedemptionAmount;
+
+        uint256 estimatedPoolAmount = estimatedRedemptionAmount
+            + feeCalculator.calculateRedemptionFees(address(mockPool), tco2s, estimatedRedemptionAmounts).shares[0];
+
+        // Assert
+        assertApproxEqRel(poolAmount, estimatedPoolAmount, 0.01 * 1e18); //1% slippage allowed
+    }
 }

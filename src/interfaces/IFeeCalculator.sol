@@ -35,4 +35,15 @@ interface IFeeCalculator {
         external
         view
         returns (FeeDistribution memory feeDistribution);
+
+    /// @notice Estimates the TCO2 token redemption amount for a given pool token redemption amount.
+    /// @dev Client that want to use a fixed pool token amount should use this function first to go from POOL to an approximation of the TCO2 they will get back, then use TCO2 to calculate the actual redemption fees they need to pay with calculateRedemptionFees.
+    /// @param pool The address of the pool.
+    /// @param tco2 The address of the TCO2 token.
+    /// @param poolAmount the pool token amount to be redeemed.
+    /// @return estimatedTCO2Amount estimated TCO2 token redemption amount for a give pool token redemption amount.
+    function estimateTCO2RedemptionAmount(address pool, address tco2, uint256 poolAmount)
+        external
+        view
+        returns (uint256 estimatedTCO2Amount);
 }

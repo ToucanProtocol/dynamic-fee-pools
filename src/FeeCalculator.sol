@@ -27,6 +27,8 @@ contract FeeCalculator is IFeeCalculator, Ownable {
     SD59x18 private redemptionFeeScale = sd(0.3 * 1e18);
     SD59x18 private redemptionFeeShift = sd(0.1 * 1e18); //-log10(0+0.1)=1 -> 10^-1
 
+    uint256 private estimateTCO2RedemptionAmountIterations = 40;
+
     function redemptionFeeConstant() private view returns (SD59x18) {
         return redemptionFeeScale * (one + redemptionFeeShift).log10(); //0.0413926851582251=log10(1+0.1)
     }
@@ -115,6 +117,16 @@ contract FeeCalculator is IFeeCalculator, Ownable {
         dustAssetRedemptionRelativeFee = dustAssetRedemptionRelativeFeeSD;
     }
 
+    /// @notice Sets the estimate TCO2 redemption amount iterations.
+    /// @dev Can only be called by the current owner.
+    /// @param _estimateTCO2RedemptionAmountIterations The new estimate TCO2 redemption amount iterations.
+    function setEstimateTCO2RedemptionAmountIterations(uint256 _estimateTCO2RedemptionAmountIterations)
+        external
+        onlyOwner
+    {
+        estimateTCO2RedemptionAmountIterations = _estimateTCO2RedemptionAmountIterations;
+    }
+
     /// @notice Sets up the fee distribution among recipients.
     /// @dev Can only be called by the current owner.
     /// @param recipients The addresses of the fee recipients.
@@ -176,6 +188,47 @@ contract FeeCalculator is IFeeCalculator, Ownable {
         feeDistribution.shares = shares;
     }
 
+    /// @notice Estimates the TCO2 token redemption amount for a given pool token redemption amount.
+    /// @dev Client that want to use a fixed pool token amount should use this function first to go from POOL to an approximation of the TCO2 they will get back, then use TCO2 to calculate the actual redemption fees they need to pay with calculateRedemptionFees.
+    /// @param pool The address of the pool.
+    /// @param tco2 The address of the TCO2 token.
+    /// @param poolAmount the pool token amount to be redeemed.
+    /// @return estimated TCO2 token redemption amount for a give pool token redemption amount.
+    function estimateTCO2RedemptionAmount(address pool, address tco2, uint256 poolAmount)
+        external
+        view
+        override
+        returns (uint256)
+    {
+        uint256 current = getTokenBalance(pool, tco2);
+        uint256 total = getTotalSupply(pool);
+
+        // @dev this is implicit function, so we need to estimate
+        // redemptionAmount = poolAmount - calculateRedemptionFee(redemptionAmount, current, total)
+
+        //poolAmount >= tco2Amount
+        uint256 minTCO2Amount = poolAmount - calculateRedemptionFee(poolAmount, current, total);
+        uint256 maxTCO2Amount = poolAmount;
+        uint256 tco2RedemptionAmount = (minTCO2Amount + maxTCO2Amount) / 2; //midpoint
+
+        for (uint256 i = 0; i < estimateTCO2RedemptionAmountIterations; i++) {
+            uint256 feeAmount = calculateRedemptionFee(tco2RedemptionAmount, current, total);
+            uint256 estimatedPoolAmount = tco2RedemptionAmount + feeAmount;
+
+            bool isOverestimated = (estimatedPoolAmount > poolAmount);
+
+            if (isOverestimated) {
+                maxTCO2Amount = tco2RedemptionAmount;
+            } else {
+                minTCO2Amount = tco2RedemptionAmount;
+            }
+
+            tco2RedemptionAmount = (minTCO2Amount + maxTCO2Amount) / 2; //midpoint
+        }
+
+        return tco2RedemptionAmount;
+    }
+
     /// @notice Calculates the redemption fees for a given amount.
     /// @param pool The address of the pool.
     /// @param tco2s The addresses of the TCO2 token.
@@ -192,14 +245,25 @@ contract FeeCalculator is IFeeCalculator, Ownable {
         require(tco2s.length == 1, "only one");
         address tco2 = tco2s[0];
         uint256 redemptionAmount = redemptionAmounts[0];
+        uint256 feeAmount = calculateRedemptionFee(redemptionAmount, getTokenBalance(pool, tco2), getTotalSupply(pool));
+        feeDistribution = calculateFeeShares(feeAmount);
+    }
 
+    /// @notice Calculates the redemption fee for a given amount.
+    /// @param redemptionAmount The amount to be redeemed.
+    /// @return The calculated redemption fee.
+    function calculateRedemptionFee(uint256 redemptionAmount, uint256 current, uint256 total)
+        private
+        view
+        returns (uint256)
+    {
         require(redemptionAmount > 0, "redemptionAmount must be > 0");
 
-        uint256 feeAmount = getRedemptionFee(redemptionAmount, getTokenBalance(pool, tco2), getTotalSupply(pool));
+        uint256 feeAmount = getRedemptionFee(redemptionAmount, current, total);
 
         require(feeAmount <= redemptionAmount, "Fee must be lower or equal to redemption amount");
         require(feeAmount > 0, "Fee must be greater than 0");
-        feeDistribution = calculateFeeShares(feeAmount);
+        return feeAmount;
     }
 
     /// @notice Gets the balance of the TCO2 token in a given pool.

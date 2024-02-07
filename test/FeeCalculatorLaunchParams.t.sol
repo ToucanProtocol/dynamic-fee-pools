@@ -39,7 +39,7 @@ contract FeeCalculatorLaunchParamsTest is Test {
 
         // Set up mock pool
         mockPool.setTotalSupply(1000 * 1e18);
-        mockToken.setTokenBalance(address(mockPool), 500 * 1e18);
+        mockPool.setProjectSupply(1, 500 * 1e18);
 
         // Act
         FeeDistribution memory feeDistribution =
@@ -62,7 +62,7 @@ contract FeeCalculatorLaunchParamsTest is Test {
 
         // Set up mock pool
         mockPool.setTotalSupply(1000 * 1e18);
-        mockToken.setTokenBalance(address(mockPool), 500 * 1e18);
+        mockPool.setProjectSupply(1, 500 * 1e18);
 
         address[] memory _recipients = new address[](2);
         _recipients[0] = feeRecipient1;
@@ -95,7 +95,7 @@ contract FeeCalculatorLaunchParamsTest is Test {
 
         // Set up mock pool
         mockPool.setTotalSupply(1000 * 1e18);
-        mockToken.setTokenBalance(address(mockPool), 500 * 1e18);
+        mockPool.setProjectSupply(1, 500 * 1e18);
 
         address[] memory _recipients = new address[](2);
         _recipients[0] = feeRecipient1;
@@ -126,7 +126,7 @@ contract FeeCalculatorLaunchParamsTest is Test {
 
         // Set up mock pool
         mockPool.setTotalSupply(53461 * 1e18);
-        mockToken.setTokenBalance(address(mockPool), 15462 * 1e18);
+        mockPool.setProjectSupply(1, 15462 * 1e18);
 
         // Act
         FeeDistribution memory feeDistribution =
@@ -147,7 +147,7 @@ contract FeeCalculatorLaunchParamsTest is Test {
 
         // Set up mock pool
         mockPool.setTotalSupply(1e5 * 1e18);
-        mockToken.setTokenBalance(address(mockPool), 1e4 * 1e18);
+        mockPool.setProjectSupply(1, 1e4 * 1e18);
 
         // Act
         vm.expectRevert("Fee must be greater than 0");
@@ -164,7 +164,7 @@ contract FeeCalculatorLaunchParamsTest is Test {
 
         // Set up mock pool
         mockPool.setTotalSupply(1e5 * 1e18);
-        mockToken.setTokenBalance(address(mockPool), 1e4 * 1e18);
+        mockPool.setProjectSupply(1, 1e4 * 1e18);
 
         // Act
         vm.expectRevert("Fee must be greater than 0");
@@ -178,7 +178,7 @@ contract FeeCalculatorLaunchParamsTest is Test {
 
         // Set up mock pool
         mockPool.setTotalSupply(1e5 * 1e18);
-        mockToken.setTokenBalance(address(mockPool), 1e4 * 1e18);
+        mockPool.setProjectSupply(1, 1e4 * 1e18);
 
         // Act
         FeeDistribution memory feeDistribution =
@@ -199,7 +199,7 @@ contract FeeCalculatorLaunchParamsTest is Test {
 
         // Set up mock pool
         mockPool.setTotalSupply(1e5 * 1e18);
-        mockToken.setTokenBalance(address(mockPool), 1e4 * 1e18);
+        mockPool.setProjectSupply(1, 1e4 * 1e18);
 
         // Act
         FeeDistribution memory feeDistribution =
@@ -225,7 +225,7 @@ contract FeeCalculatorLaunchParamsTest is Test {
 
         // Set up mock pool
         mockPool.setTotalSupply(1e5 * 1e18);
-        mockToken.setTokenBalance(address(mockPool), 1e4 * 1e18);
+        mockPool.setProjectSupply(1, 1e4 * 1e18);
 
         address[] memory _recipients = new address[](5);
         _recipients[0] = feeRecipient1;
@@ -274,7 +274,7 @@ contract FeeCalculatorLaunchParamsTest is Test {
 
         // Set up mock pool
         mockPool.setTotalSupply(1e5 * 1e18);
-        mockToken.setTokenBalance(address(mockPool), 1e4 * 1e18);
+        mockPool.setProjectSupply(1, 1e4 * 1e18);
 
         address[] memory _recipients = new address[](5);
         _recipients[0] = feeRecipient1;
@@ -318,7 +318,7 @@ contract FeeCalculatorLaunchParamsTest is Test {
 
         // Set up mock pool
         mockPool.setTotalSupply(100 * 1e6 * 1e18);
-        mockToken.setTokenBalance(address(mockPool), 1e6 * 1e18);
+        mockPool.setProjectSupply(1, 1e6 * 1e18);
 
         // Act
         FeeDistribution memory feeDistribution =
@@ -339,7 +339,7 @@ contract FeeCalculatorLaunchParamsTest is Test {
 
         // Set up mock pool
         mockPool.setTotalSupply(1000 * 1e18);
-        mockToken.setTokenBalance(address(mockPool), 500 * 1e18);
+        mockPool.setProjectSupply(1, 500 * 1e18);
 
         // Act
         vm.expectRevert("depositAmount must be > 0");
@@ -353,7 +353,7 @@ contract FeeCalculatorLaunchParamsTest is Test {
 
         // Set up mock pool
         mockPool.setTotalSupply(1000 * 1e18);
-        mockToken.setTokenBalance(address(mockPool), 1500 * 1e18);
+        mockPool.setProjectSupply(1, 1500 * 1e18);
 
         // Act
         vm.expectRevert(
@@ -369,7 +369,7 @@ contract FeeCalculatorLaunchParamsTest is Test {
 
         // Set up mock pool
         mockPool.setTotalSupply(0);
-        mockToken.setTokenBalance(address(mockPool), 0);
+        mockPool.setProjectSupply(1, 0);
 
         // Act
         FeeDistribution memory feeDistribution =
@@ -389,7 +389,7 @@ contract FeeCalculatorLaunchParamsTest is Test {
 
         // Set up mock pool
         mockPool.setTotalSupply(1);
-        mockToken.setTokenBalance(address(mockPool), 0);
+        mockPool.setProjectSupply(1, 0);
 
         // Act
         vm.expectRevert("Deposit outside range");
@@ -403,7 +403,7 @@ contract FeeCalculatorLaunchParamsTest is Test {
 
         // Set up mock pool
         mockPool.setTotalSupply(1000);
-        mockToken.setTokenBalance(address(mockPool), 1000);
+        mockPool.setProjectSupply(1, 1000);
 
         // Act
         FeeDistribution memory feeDistribution =
@@ -423,7 +423,7 @@ contract FeeCalculatorLaunchParamsTest is Test {
 
         // Set up mock pool
         mockPool.setTotalSupply(1000);
-        mockToken.setTokenBalance(address(mockPool), 999);
+        mockPool.setProjectSupply(1, 999);
 
         // Act
         vm.expectRevert("Deposit outside range");
@@ -437,7 +437,7 @@ contract FeeCalculatorLaunchParamsTest is Test {
 
         // Set up mock pool
         mockPool.setTotalSupply(1000 * 1e18);
-        mockToken.setTokenBalance(address(mockPool), 0);
+        mockPool.setProjectSupply(1, 0);
 
         // Act
         FeeDistribution memory feeDistribution =

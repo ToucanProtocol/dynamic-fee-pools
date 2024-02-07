@@ -46,7 +46,7 @@ contract FeeCalculatorLaunchParamsTestFuzzy is Test {
 
         // Set up mock pool
         mockPool.setTotalSupply(1e12 * 1e18);
-        mockToken.setTokenBalance(address(mockPool), 1e9 * 1e18);
+        mockPool.setProjectSupply(1, 1e9 * 1e18);
 
         vm.expectRevert("Fee must be greater than 0");
         feeCalculator.calculateDepositFees(address(mockPool), address(mockToken), depositAmount);
@@ -66,7 +66,7 @@ contract FeeCalculatorLaunchParamsTestFuzzy is Test {
 
         // Set up mock pool
         mockPool.setTotalSupply(total);
-        mockToken.setTokenBalance(address(mockPool), current);
+        mockPool.setProjectSupply(1, current);
 
         // Act
         try feeCalculator.calculateDepositFees(address(mockPool), address(mockToken), depositAmount) {}
@@ -111,7 +111,7 @@ contract FeeCalculatorLaunchParamsTestFuzzy is Test {
         uint256 multipleTimesDepositFailedCount = 0;
         // Set up mock pool
         mockPool.setTotalSupply(total);
-        mockToken.setTokenBalance(address(mockPool), current);
+        mockPool.setProjectSupply(1, current);
 
         uint256 oneTimeFee = 0;
 
@@ -144,7 +144,7 @@ contract FeeCalculatorLaunchParamsTestFuzzy is Test {
                 total += deposit;
                 current += deposit;
                 mockPool.setTotalSupply(total);
-                mockToken.setTokenBalance(address(mockPool), current);
+                mockPool.setProjectSupply(1, current);
             } catch Error(string memory reason) {
                 multipleTimesDepositFailedCount++;
                 assertTrue(

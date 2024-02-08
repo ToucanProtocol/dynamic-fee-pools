@@ -11,6 +11,7 @@ import {SD59x18, sd, intoUint256} from "@prb/math/src/SD59x18.sol";
 
 import {IFeeCalculator, FeeDistribution} from "./interfaces/IFeeCalculator.sol";
 import "./interfaces/IPool.sol";
+import {VintageData, ITCO2} from "./interfaces/ITCO2.sol";
 
 /// @title FeeCalculator
 /// @author Neutral Labs Inc.
@@ -146,7 +147,7 @@ contract FeeCalculator is IFeeCalculator, Ownable {
     {
         require(depositAmount > 0, "depositAmount must be > 0");
 
-        uint256 feeAmount = getDepositFee(depositAmount, getTokenBalance(pool, tco2), getTotalSupply(pool));
+        uint256 feeAmount = getDepositFee(depositAmount, getProjectSupply(pool, tco2), getTotalSupply(pool));
 
         require(feeAmount <= depositAmount, "Fee must be lower or equal to deposit amount");
         require(feeAmount > 0, "Fee must be greater than 0");
@@ -195,20 +196,11 @@ contract FeeCalculator is IFeeCalculator, Ownable {
 
         require(redemptionAmount > 0, "redemptionAmount must be > 0");
 
-        uint256 feeAmount = getRedemptionFee(redemptionAmount, getTokenBalance(pool, tco2), getTotalSupply(pool));
+        uint256 feeAmount = getRedemptionFee(redemptionAmount, getProjectSupply(pool, tco2), getTotalSupply(pool));
 
         require(feeAmount <= redemptionAmount, "Fee must be lower or equal to redemption amount");
         require(feeAmount > 0, "Fee must be greater than 0");
         feeDistribution = calculateFeeShares(feeAmount);
-    }
-
-    /// @notice Gets the balance of the TCO2 token in a given pool.
-    /// @param pool The address of the pool.
-    /// @param tco2 The address of the TCO2 token.
-    /// @return The balance of the TCO2 token in the pool.
-    function getTokenBalance(address pool, address tco2) private view returns (uint256) {
-        uint256 tokenBalance = IERC20(tco2).balanceOf(pool);
-        return tokenBalance;
     }
 
     /// @notice Gets the total supply of a given pool.
@@ -217,6 +209,15 @@ contract FeeCalculator is IFeeCalculator, Ownable {
     function getTotalSupply(address pool) private view returns (uint256) {
         uint256 totalSupply = IPool(pool).totalTCO2Supply();
         return totalSupply;
+    }
+
+    /// @notice Gets the total supply of a project in the pool.
+    /// @param pool The address of the pool.
+    /// @return The total supply of the pool.
+    function getProjectSupply(address pool, address tco2) private view returns (uint256) {
+        VintageData memory vData = ITCO2(tco2).getVintageData();
+        uint256 projectSupply = IPool(pool).totalPerProjectTCO2Supply(vData.projectTokenId);
+        return projectSupply;
     }
 
     /// @notice Calculates the ratios for deposit fee calculation.

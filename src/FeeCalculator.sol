@@ -37,6 +37,15 @@ contract FeeCalculator is IFeeCalculator, Ownable {
     address[] private _recipients;
     uint256[] private _shares;
 
+    event DepositFeeScaleUpdated(int256 depositFeeScale);
+    event DepositFeeRatioUpdated(int256 depositFeeRatioScale);
+    event SingleAssetDepositRelativeFeeUpdated(int256 singleAssetDepositRelativeFee);
+    event RedemptionFeeScaleUpdated(int256 redemptionFeeScale);
+    event RedemptionFeeShift(int256 redemptionFeeShift);
+    event SingleAssetRedemptionRelativeFeeUpdated(int256 singleAssetRedemptionRelativeFee);
+    event DustAssetRedemptionRelativeFeeUpdated(int256 dustAssetRedemptionRelativeFee);
+    event FeeSetup(address[] recipients, uint256[] shares);
+
     constructor() Ownable() {}
 
     /// @notice Sets the deposit fee scale.
@@ -46,6 +55,7 @@ contract FeeCalculator is IFeeCalculator, Ownable {
         SD59x18 depositFeeScaleSD = sd(_depositFeeScale);
         require(depositFeeScaleSD >= zero && depositFeeScaleSD <= one, "Deposit fee scale must be between 0 and 1");
         depositFeeScale = depositFeeScaleSD;
+        emit DepositFeeScaleUpdated(_depositFeeScale);
     }
 
     /// @notice Sets the deposit fee ratio scale.
@@ -55,6 +65,7 @@ contract FeeCalculator is IFeeCalculator, Ownable {
         SD59x18 depositFeeRatioScaleSD = sd(_depositFeeRatioScale);
         require(depositFeeRatioScaleSD >= zero, "Deposit fee ratio scale must be above 0");
         depositFeeRatioScale = depositFeeRatioScaleSD;
+        emit DepositFeeRatioUpdated(_depositFeeRatioScale);
     }
 
     /// @notice Sets the single asset deposit relative fee.
@@ -67,6 +78,7 @@ contract FeeCalculator is IFeeCalculator, Ownable {
             "Single asset deposit relative fee must be between 0 and 1"
         );
         singleAssetDepositRelativeFee = singleAssetDepositRelativeFeeSD;
+        emit SingleAssetDepositRelativeFeeUpdated(_singleAssetDepositRelativeFee);
     }
 
     /// @notice Sets the redemption fee scale.
@@ -78,6 +90,7 @@ contract FeeCalculator is IFeeCalculator, Ownable {
             redemptionFeeScaleSD >= zero && redemptionFeeScaleSD <= one, "Redemption fee scale must be between 0 and 1"
         );
         redemptionFeeScale = redemptionFeeScaleSD;
+        emit RedemptionFeeScaleUpdated(_redemptionFeeScale);
     }
 
     /// @notice Sets the redemption fee shift.
@@ -89,6 +102,7 @@ contract FeeCalculator is IFeeCalculator, Ownable {
             redemptionFeeShiftSD >= zero && redemptionFeeShiftSD <= one, "Redemption fee shift must be between 0 and 1"
         );
         redemptionFeeShift = redemptionFeeShiftSD;
+        emit RedemptionFeeShift(_redemptionFeeShift);
     }
 
     /// @notice Sets the single asset redemption relative fee.
@@ -101,6 +115,7 @@ contract FeeCalculator is IFeeCalculator, Ownable {
             "Single asset redemption relative fee must be between 0 and 1"
         );
         singleAssetRedemptionRelativeFee = singleAssetRedemptionRelativeFeeSD;
+        emit SingleAssetRedemptionRelativeFeeUpdated(_singleAssetRedemptionRelativeFee);
     }
 
     /// @notice Sets the dust asset redemption relative fee.
@@ -113,6 +128,7 @@ contract FeeCalculator is IFeeCalculator, Ownable {
             "Dust asset redemption relative fee must be between 0 and 1"
         );
         dustAssetRedemptionRelativeFee = dustAssetRedemptionRelativeFeeSD;
+        emit DustAssetRedemptionRelativeFeeUpdated(_dustAssetRedemptionRelativeFee);
     }
 
     /// @notice Sets up the fee distribution among recipients.
@@ -130,6 +146,7 @@ contract FeeCalculator is IFeeCalculator, Ownable {
 
         _recipients = recipients;
         _shares = shares;
+        emit FeeSetup(recipients, shares);
     }
 
     /// @notice Calculates the deposit fee for a given amount.

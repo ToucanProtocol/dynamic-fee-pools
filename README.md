@@ -124,10 +124,28 @@ Remember, the goal is to maintain a balanced pool composition and discourage mon
 
 ## How to Use
 
-1. Deploy the contract on a Polygon network.
-2. Call `feeSetup` function to set up the fee distribution among recipients.
-3. Call `calculateDepositFees` function to calculate the deposit fees for a given amount.
-4. Call `calculateRedemptionFee` function to calculate the redemption fees for a given amount.
+1. Deploy the contract:
+
+    forge create --via-ir                    \
+                 --rpc-url <rpc-url>         \
+                 --private-key <private-key> \
+                FeeCalculator
+
+Optionally, if you want to verify the contract at the same time:
+
+    forge create --via-ir                            \
+                 --rpc-url <rpc-url>                 \
+                 --private-key <private-key>         \
+                 --etherscan-api-key <etherscan-key> \
+                 --verify                            \
+                FeeCalculator
+
+
+2. Call `feeSetup()` to set up the fee distribution among recipients.
+
+Now callers should be able to estimate fees for a pool by calling the following functions:
+- Call `calculateDepositFees()` to calculate the deposit fees for a given amount.
+- Call `calculateRedemptionFees()` to calculate the redemption fees for a given amount.
 
 ## Requirements
 

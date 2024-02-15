@@ -15,3 +15,7 @@ docs/
 
 # NPM publish token
 .npmrc
+
+# Node modules since for now forge is using git submodules
+# to clone dependencies
+node_modules/

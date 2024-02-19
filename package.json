@@ -1,0 +1,36 @@
+{
+  "name": "@toucanprotocol/dynamic-fee-pools",
+  "version": "1.0.0",
+  "description": "A contract to calculate fees for deposits and redemptions in a pool based on the project composition in the pool",
+  "private": true,
+  "dependencies": {
+    "@openzeppelin/contracts": "4.6.0",
+    "@prb/math": "4.0.1"
+  },
+  "files": [
+    "/src/**/*.sol"
+  ],
+  "scripts": {
+    "build": "forge install && forge build --via-ir",
+    "test": "forge test --via-ir"
+  },
+  "repository": {
+    "type": "git",
+    "url": "https://github.com/toucanprotocol/dynamic-fee-pools.git"
+  },
+  "author": "Toucan Protocol <dev@toucan.earth>",
+  "license": "GPL-3.0",
+  "bugs": {
+    "url": "https://github.com/toucanprotocol/dynamic-fee-pools/issues"
+  },
+  "homepage": "https://github.com/toucanprotocol/dynamic-fee-pools#readme",
+  "keywords": [
+    "solidity",
+    "smart",
+    "contracts",
+    "toucan",
+    "protocol",
+    "fees",
+    "calculator"
+  ]
+}

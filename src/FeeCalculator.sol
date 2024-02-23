@@ -21,19 +21,19 @@ contract FeeCalculator is IFeeCalculator, Ownable {
     SD59x18 private zero = sd(0);
     SD59x18 private one = sd(1e18);
 
-    SD59x18 private depositFeeScale = sd(0.18 * 1e18);
-    SD59x18 private depositFeeRatioScale = sd(0.99 * 1e18);
-    SD59x18 private singleAssetDepositRelativeFee = sd(0.1 * 1e18);
+    SD59x18 public depositFeeScale = sd(0.18 * 1e18);
+    SD59x18 public depositFeeRatioScale = sd(0.99 * 1e18);
+    SD59x18 public singleAssetDepositRelativeFee = sd(0.1 * 1e18);
 
-    SD59x18 private redemptionFeeScale = sd(0.3 * 1e18);
-    SD59x18 private redemptionFeeShift = sd(0.1 * 1e18); //-log10(0+0.1)=1 -> 10^-1
+    SD59x18 public redemptionFeeScale = sd(0.3 * 1e18);
+    SD59x18 public redemptionFeeShift = sd(0.1 * 1e18); //-log10(0+0.1)=1 -> 10^-1
 
-    function redemptionFeeConstant() private view returns (SD59x18) {
+    function redemptionFeeConstant() public view returns (SD59x18) {
         return redemptionFeeScale * (one + redemptionFeeShift).log10(); //0.0413926851582251=log10(1+0.1)
     }
 
-    SD59x18 private singleAssetRedemptionRelativeFee = sd(0.1 * 1e18);
-    SD59x18 private dustAssetRedemptionRelativeFee = sd(0.3 * 1e18);
+    SD59x18 public singleAssetRedemptionRelativeFee = sd(0.1 * 1e18);
+    SD59x18 public dustAssetRedemptionRelativeFee = sd(0.3 * 1e18);
 
     address[] private _recipients;
     uint256[] private _shares;

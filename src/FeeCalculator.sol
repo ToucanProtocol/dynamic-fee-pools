@@ -1,4 +1,4 @@
-// SPDX-FileCopyrightText: 2023 Neutral Labs Inc.
+// SPDX-FileCopyrightText: 2024 Toucan Protocol
 //
 // SPDX-License-Identifier: UNLICENSED
 
@@ -14,7 +14,7 @@ import "./interfaces/IPool.sol";
 import {VintageData, ITCO2} from "./interfaces/ITCO2.sol";
 
 /// @title FeeCalculator
-/// @author Neutral Labs Inc.
+/// @author Neutral Labs Inc. & Toucan Protocol
 /// @notice This contract calculates deposit and redemption fees for a given pool.
 /// @dev It implements the IFeeCalculator interface.
 contract FeeCalculator is IFeeCalculator, Ownable {

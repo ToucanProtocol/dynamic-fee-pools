@@ -1,4 +1,4 @@
-// SPDX-FileCopyrightText: 2023 Neutral Labs Inc.
+// SPDX-FileCopyrightText: 2024 Toucan Protocol
 //
 // SPDX-License-Identifier: UNLICENSED
 

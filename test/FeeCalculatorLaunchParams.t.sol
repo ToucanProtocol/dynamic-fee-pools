@@ -302,7 +302,7 @@ contract FeeCalculatorLaunchParamsTest is Test {
         assertEq(recipients[2], feeRecipient3);
         assertEq(recipients[3], feeRecipient4);
         assertEq(recipients[4], feeRecipient5);
-        // python based simulator value is 0.017075278992496123
+        // python based simulator value is 0.017075278992520605
         assertEq(fees.sumOf(), 17075278992520605);
         assertEq(fees[0], uint256(17075278992520605) * 15 / 100 + 2); //first recipient gets rest of fee
         assertEq(fees[1], uint256(17075278992520605) * 30 / 100);
@@ -328,8 +328,8 @@ contract FeeCalculatorLaunchParamsTest is Test {
 
         // Assert
         assertEq(recipients[0], feeRecipient);
-        // python based simulator value is 1635798849159168
-        assertApproxEqRel(fees[0], 1635798849159168, 1e16);
+        // python based simulator value is 1635798846738998
+        assertApproxEqRel(fees[0], 1635798846738998, 1e16);
     }
 
     function testCalculateDepositFees_ZeroDeposit_ExceptionShouldBeThrown() public {

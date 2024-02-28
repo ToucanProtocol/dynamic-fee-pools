@@ -21,8 +21,8 @@ contract FeeCalculator is IFeeCalculator, Ownable {
     SD59x18 private zero = sd(0);
     SD59x18 private one = sd(1e18);
 
-    SD59x18 public depositFeeScale = sd(0.18 * 1e18);
-    SD59x18 public depositFeeRatioScale = sd(0.99 * 1e18);
+    SD59x18 public depositFeeScale = sd(0.15 * 1e18);
+    SD59x18 public depositFeeRatioScale = sd(1.25 * 1e18);
     SD59x18 public singleAssetDepositRelativeFee = sd(0.1 * 1e18);
 
     SD59x18 public redemptionFeeScale = sd(0.3 * 1e18);

@@ -81,7 +81,7 @@ contract FeeCalculatorTest is Test {
         // Assert
         assertEq(feeDistribution.recipients.length, feeDistribution.shares.length, "array length mismatch");
         assertEq(recipients[0], feeRecipient);
-        assertEq(fees[0], 9718378209069523938);
+        assertEq(fees[0], 12811562752294360125);
     }
 
     function testCalculateRedemptionFeesNormalCase() public {
@@ -187,9 +187,9 @@ contract FeeCalculatorTest is Test {
         // Assert
         assertEq(recipients[0], feeRecipient1);
         assertEq(recipients[1], feeRecipient2);
-        assertEq(fees.sumOf(), 9718378209069523938);
-        assertEq(fees[0], 9718378209069523938 / 2);
-        assertEq(fees[1], 9718378209069523938 / 2);
+        assertEq(fees.sumOf(), 12811562752294360125);
+        assertEq(fees[0], uint256(12811562752294360125) / 2 + 1);
+        assertEq(fees[1], uint256(12811562752294360125) / 2);
     }
 
     function testCalculateDepositFeesNormalCase_TwoFeeRecipientsSplit30To70() public {
@@ -220,9 +220,9 @@ contract FeeCalculatorTest is Test {
         // Assert
         assertEq(recipients[0], feeRecipient1);
         assertEq(recipients[1], feeRecipient2);
-        assertEq(fees.sumOf(), 9718378209069523938);
-        assertEq(fees[0], uint256(9718378209069523938) * 30 / 100 + 1); //first recipient gets rest from division
-        assertEq(fees[1], uint256(9718378209069523938) * 70 / 100);
+        assertEq(fees.sumOf(), 12811562752294360125);
+        assertEq(fees[0], uint256(12811562752294360125) * 30 / 100 + 1); //first recipient gets rest from division
+        assertEq(fees[1], uint256(12811562752294360125) * 70 / 100);
     }
 
     function testCalculateDepositFeesComplicatedCase() public {
@@ -242,7 +242,7 @@ contract FeeCalculatorTest is Test {
 
         // Assert
         assertEq(recipients[0], feeRecipient);
-        assertEq(fees[0], 46413457506542766270);
+        assertEq(fees[0], 53013879215838797358);
     }
 
     function testCalculateDepositFees_DepositOfOneWei_ShouldThrowException() public {
@@ -293,7 +293,7 @@ contract FeeCalculatorTest is Test {
 
         // Assert
         assertEq(recipients[0], feeRecipient);
-        assertEq(fees[0], 158800759314);
+        assertEq(fees[0], 170744712050);
     }
 
     function testCalculateDepositFees_DepositOfOne_NormalFee() public {
@@ -313,7 +313,7 @@ contract FeeCalculatorTest is Test {
 
         // Assert
         assertEq(recipients[0], feeRecipient);
-        assertEq(fees[0], 15880809772898785);
+        assertEq(fees[0], 17075278992520605);
     }
 
     function testCalculateDepositFees_DepositOfOne_NormalFee_FiveRecipientsEqualSplit() public {
@@ -356,12 +356,12 @@ contract FeeCalculatorTest is Test {
         assertEq(recipients[2], feeRecipient3);
         assertEq(recipients[3], feeRecipient4);
         assertEq(recipients[4], feeRecipient5);
-        assertEq(fees.sumOf(), 15880809772898785);
-        assertEq(fees[0], uint256(15880809772898785) * 20 / 100);
-        assertEq(fees[1], uint256(15880809772898785) * 20 / 100);
-        assertEq(fees[2], uint256(15880809772898785) * 20 / 100);
-        assertEq(fees[3], uint256(15880809772898785) * 20 / 100);
-        assertEq(fees[4], uint256(15880809772898785) * 20 / 100);
+        assertEq(fees.sumOf(), 17075278992520605);
+        assertEq(fees[0], uint256(17075278992520605) * 20 / 100);
+        assertEq(fees[1], uint256(17075278992520605) * 20 / 100);
+        assertEq(fees[2], uint256(17075278992520605) * 20 / 100);
+        assertEq(fees[3], uint256(17075278992520605) * 20 / 100);
+        assertEq(fees[4], uint256(17075278992520605) * 20 / 100);
     }
 
     function testCalculateDepositFees_DepositOfOne_NormalFee_FiveRecipientsComplicatedSplit() public {
@@ -404,12 +404,12 @@ contract FeeCalculatorTest is Test {
         assertEq(recipients[2], feeRecipient3);
         assertEq(recipients[3], feeRecipient4);
         assertEq(recipients[4], feeRecipient5);
-        assertEq(fees.sumOf(), 15880809772898785);
-        assertEq(fees[0], uint256(15880809772898785) * 15 / 100 + 3); //first recipient gets rest of fee
-        assertEq(fees[1], uint256(15880809772898785) * 30 / 100);
-        assertEq(fees[2], uint256(15880809772898785) * 50 / 100);
-        assertEq(fees[3], uint256(15880809772898785) * 3 / 100);
-        assertEq(fees[4], uint256(15880809772898785) * 2 / 100);
+        assertEq(fees.sumOf(), 17075278992520605);
+        assertEq(fees[0], uint256(17075278992520605) * 15 / 100 + 2); //first recipient gets rest of fee
+        assertEq(fees[1], uint256(17075278992520605) * 30 / 100);
+        assertEq(fees[2], uint256(17075278992520605) * 50 / 100);
+        assertEq(fees[3], uint256(17075278992520605) * 3 / 100);
+        assertEq(fees[4], uint256(17075278992520605) * 2 / 100);
     }
 
     function testCalculateDepositFees_HugeTotalLargeCurrentSmallDeposit() public {
@@ -429,7 +429,7 @@ contract FeeCalculatorTest is Test {
 
         // Assert
         assertEq(recipients[0], feeRecipient);
-        assertEq(fees[0], 1551604479562604);
+        assertEq(fees[0], 1635798846738998);
     }
 
     function testCalculateDepositFees_ZeroDeposit_ExceptionShouldBeThrown() public {
@@ -548,14 +548,8 @@ contract FeeCalculatorTest is Test {
         mockPool.setProjectSupply(1, 0);
 
         // Act
-        FeeDistribution memory feeDistribution =
-            feeCalculator.calculateDepositFees(address(mockPool), address(mockToken), depositAmount);
-        address[] memory recipients = feeDistribution.recipients;
-        uint256[] memory fees = feeDistribution.shares;
-
-        // Assert
-        assertEq(recipients[0], feeRecipient);
-        assertEq(fees[0], 35999999999999999154);
+        vm.expectRevert("Deposit outside range");
+        feeCalculator.calculateDepositFees(address(mockPool), address(mockToken), depositAmount);
     }
 
     function testCalculateRedemptionFees_ZeroDeposit_ExceptionShouldBeThrown() public {
@@ -630,14 +624,8 @@ contract FeeCalculatorTest is Test {
         mockPool.setProjectSupply(1, 999);
 
         // Act
-        FeeDistribution memory feeDistribution =
-            feeCalculator.calculateDepositFees(address(mockPool), address(mockToken), depositAmount);
-        address[] memory recipients = feeDistribution.recipients;
-        uint256[] memory fees = feeDistribution.shares;
-
-        // Assert
-        assertEq(recipients[0], feeRecipient);
-        assertEq(fees[0], 35999999999999999161);
+        vm.expectRevert("Deposit outside range");
+        feeCalculator.calculateDepositFees(address(mockPool), address(mockToken), depositAmount);
     }
 
     function testCalculateDepositFees_ZeroCurrent_NormalFees() public {
@@ -657,7 +645,7 @@ contract FeeCalculatorTest is Test {
 
         // Assert
         assertEq(recipients[0], feeRecipient);
-        assertEq(fees[0], 737254938220315128);
+        assertEq(fees[0], 785821041895323300);
     }
 
     function testCalculateRedemptionFees_HugeTotalLargeCurrentSmallDeposit_FeeCappedAt30Percent() public {
@@ -849,7 +837,7 @@ contract FeeCalculatorTest is Test {
         uint256[] memory fees = feeDistribution.shares;
 
         // Assert
-        assertEq(fees[0], 9718378209069523938 / 2);
+        assertEq(fees[0], 7686937651376616075);
     }
 
     function testSetDepositFeeRatioScale() public {
@@ -865,7 +853,7 @@ contract FeeCalculatorTest is Test {
         uint256[] memory fees = feeDistribution.shares;
 
         // Assert
-        assertEq(fees[0], 1299819671838098442);
+        assertEq(fees[0], 1083183059865082035);
     }
 
     function testSetSingleAssetDepositRelativeFee() public {

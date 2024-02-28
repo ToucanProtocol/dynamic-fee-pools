@@ -294,13 +294,13 @@ contract FeeCalculatorTestFuzzy is Test {
             assertEq(gotRecipients[i], recipients[i]);
         }
 
-        assertEq(fees.sumOf(), 11526003792614720250);
+        assertEq(fees.sumOf(), 16955006527425091575);
 
-        assertApproxEqAbs(fees[0], 11526003792614720250 * uint256(firstShare) / 100, recipients.length - 1 + 1); //first fee might get the rest from division
+        assertApproxEqAbs(fees[0], 16955006527425091575 * uint256(firstShare) / 100, recipients.length - 1 + 1); //first fee might get the rest from division
 
         for (uint256 i = 1; i < recipients.length - 1; i++) {
-            assertApproxEqAbs(fees[i], 11526003792614720250 * equalShare / 100, 1);
+            assertApproxEqAbs(fees[i], 16955006527425091575 * equalShare / 100, 1);
         }
-        assertApproxEqAbs(fees[recipients.length - 1], 11526003792614720250 * (equalShare + leftShare) / 100, 1);
+        assertApproxEqAbs(fees[recipients.length - 1], 16955006527425091575 * (equalShare + leftShare) / 100, 1);
     }
 }

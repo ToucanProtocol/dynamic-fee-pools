@@ -38,3 +38,9 @@ jobs:
         run: |
           forge test -vvv --via-ir
         id: test
+
+      - name: Install Slither
+        run: pip install slither-analyzer==0.10.0
+
+      - name: Run Slither
+        run: slither . --config-file slither.config.json

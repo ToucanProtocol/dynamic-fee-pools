@@ -11,7 +11,6 @@ import {SD59x18, sd, intoUint256} from "@prb/math/src/SD59x18.sol";
 
 import {IFeeCalculator, FeeDistribution} from "./interfaces/IFeeCalculator.sol";
 import "./interfaces/IPool.sol";
-import {VintageData, ITCO2} from "./interfaces/ITCO2.sol";
 
 /// @title FeeCalculator
 /// @author Neutral Labs Inc. & Toucan Protocol
@@ -164,11 +163,12 @@ contract FeeCalculator is IFeeCalculator, Ownable {
     {
         require(depositAmount > 0, "depositAmount must be > 0");
 
-        uint256 feeAmount = getDepositFee(depositAmount, getProjectSupply(pool, tco2), getTotalSupply(pool));
-
-        require(feeAmount <= depositAmount, "Fee must be lower or equal to deposit amount");
-        require(feeAmount > 0, "Fee must be greater than 0");
-        feeDistribution = calculateFeeShares(feeAmount);
+        feeDistribution = calculateFee(
+            getTotalSupply(pool),
+            IPool(pool).totalPerProjectSupply(tco2),
+            depositAmount,
+            getDepositFee
+        );
     }
 
     /// @notice Calculates the fee shares and recipients based on the total fee.
@@ -211,13 +211,63 @@ contract FeeCalculator is IFeeCalculator, Ownable {
         address tco2 = tco2s[0];
         uint256 redemptionAmount = redemptionAmounts[0];
 
-        require(redemptionAmount > 0, "redemptionAmount must be > 0");
+        feeDistribution = calculateFee(
+            getTotalSupply(pool),
+            IPool(pool).totalPerProjectSupply(tco2),
+            redemptionAmount,
+            getRedemptionFee
+        );
+    }
 
-        uint256 feeAmount = getRedemptionFee(redemptionAmount, getProjectSupply(pool, tco2), getTotalSupply(pool));
+    /// @notice Calculates the deposit fee for a given amount of an ERC1155 project.
+    /// @param pool The address of the pool.
+    /// @param erc1155 The address of the ERC1155 project
+    /// @param tokenId The tokenId of the vintage.
+    /// @param depositAmount The amount to be deposited.
+    /// @return feeDistribution How the fee is meant to be
+    /// distributed among the fee recipients.
+    function calculateDepositFees(address pool, address erc1155, uint256 tokenId, uint256 depositAmount) 
+        external
+        view
+        override
+        returns (FeeDistribution memory feeDistribution) 
+    {
+        require(depositAmount > 0, "depositAmount must be > 0");
 
-        require(feeAmount <= redemptionAmount, "Fee must be lower or equal to redemption amount");
-        require(feeAmount > 0, "Fee must be greater than 0");
-        feeDistribution = calculateFeeShares(feeAmount);
+        feeDistribution = calculateFee(
+            getTotalSupply(pool),
+            IPool(pool).totalPerProjectSupply(erc1155, tokenId),
+            depositAmount,
+            getDepositFee
+        );
+    }
+
+    /// @notice Calculates the redemption fees for a given amount on ERC1155 projects.
+    /// @param pool The address of the pool.
+    /// @param erc1155s The addresses of the ERC1155 projects.
+    /// @param tokenIds The tokenIds of the project vintages.
+    /// @param redemptionAmounts The amounts to be redeemed.
+    /// @return feeDistribution How the fee is meant to be
+    /// distributed among the fee recipients.
+    function calculateRedemptionFees(
+        address pool, 
+        address[] calldata erc1155s,
+        uint256[] calldata tokenIds,
+        uint256[] calldata redemptionAmounts
+    ) external view override returns (FeeDistribution memory feeDistribution) {
+        require(erc1155s.length == tokenIds.length, "erc1155s/tokenIds length mismatch");
+        require(erc1155s.length == redemptionAmounts.length, "erc1155s/redemptionAmounts length mismatch");
+        require(erc1155s.length == 1, "only one");
+        address erc1155 = erc1155s[0];
+        uint256 tokenId = tokenIds[0];
+        uint256 redemptionAmount = redemptionAmounts[0];
+
+        feeDistribution = calculateFee(
+            getTotalSupply(pool),
+            IPool(pool).totalPerProjectSupply(erc1155, tokenId),
+            redemptionAmount,
+            getRedemptionFee
+        );
     }
 
     /// @notice Gets the total supply of a given pool.
@@ -226,15 +276,6 @@ contract FeeCalculator is IFeeCalculator, Ownable {
     function getTotalSupply(address pool) private view returns (uint256) {
         uint256 totalSupply = IPool(pool).totalTCO2Supply();
         return totalSupply;
-    }
-
-    /// @notice Gets the total supply of a project in the pool.
-    /// @param pool The address of the pool.
-    /// @return The total supply of the pool.
-    function getProjectSupply(address pool, address tco2) private view returns (uint256) {
-        VintageData memory vData = ITCO2(tco2).getVintageData();
-        uint256 projectSupply = IPool(pool).totalPerProjectTCO2Supply(vData.projectTokenId);
-        return projectSupply;
     }
 
     /// @notice Calculates the ratios for deposit fee calculation.
@@ -347,6 +388,22 @@ contract FeeCalculator is IFeeCalculator, Ownable {
         }
 
         return intoUint256(feeSD);
+    }
+
+    function calculateFee(
+        uint256 totalPoolSupply,
+        uint256 projectSupply,
+        uint256 requestedAmount,
+        function(uint256, uint256, uint256) view returns (uint256) calculator
+    ) internal view returns (FeeDistribution memory) {
+        require(requestedAmount > 0, "requested amount must be > 0");
+
+        uint256 feeAmount = calculator(requestedAmount, projectSupply, totalPoolSupply);
+
+        require(feeAmount <= requestedAmount, "Fee must be lower or equal to requested amount");
+        require(feeAmount > 0, "Fee must be greater than 0");
+
+        return calculateFeeShares(feeAmount);
     }
 
     /// @notice Returns the current fee setup.

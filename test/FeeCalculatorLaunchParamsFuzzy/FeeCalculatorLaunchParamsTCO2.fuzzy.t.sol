@@ -5,57 +5,30 @@
 // If you encounter a vulnerability or an issue, please contact <info@neutralx.com>
 pragma solidity ^0.8.13;
 
-import {Test, console2} from "forge-std/Test.sol";
-import {FeeCalculator} from "../src/FeeCalculator.sol";
-import {FeeDistribution} from "../src/interfaces/IFeeCalculator.sol";
-import "./TestUtilities.sol";
+import "./AbstractFeeCalculatorLaunchParams.fuzzy.t.sol";
 
-contract FeeCalculatorLaunchParamsTestFuzzy is Test {
+contract FeeCalculatorLaunchParamsTCO2TestFuzzy is AbstractFeeCalculatorLaunchParamsTestFuzzy {
     using TestUtilities for uint256[];
 
-    FeeCalculator public feeCalculator;
-    MockPool public mockPool;
-    MockToken public mockToken;
-    address public feeRecipient = 0xAb5801a7D398351b8bE11C439e05C5B3259aeC9B;
-
-    function setUp() public {
-        feeCalculator = new FeeCalculator();
-        mockPool = new MockPool();
-        mockToken = new MockToken();
-        address[] memory recipients = new address[](1);
-        recipients[0] = feeRecipient;
-        uint256[] memory feeShares = new uint256[](1);
-        feeShares[0] = 100;
-        feeCalculator.feeSetup(recipients, feeShares);
-        // set up fee calculator launch params
-        feeCalculator.setDepositFeeScale(0.15 * 1e18);
-        feeCalculator.setDepositFeeRatioScale(1.25 * 1e18);
+        function setProjectSupply(address token, uint256 supply) internal override {
+        mockPool.setTCO2Supply(address(token), supply);
     }
 
-    function testCalculateDepositFees_FuzzyExtremelySmallDepositsToLargePool_ShouldThrowError(uint256 depositAmount)
-        public
-    {
-        vm.assume(depositAmount <= 1e-14 * 1e18);
-        vm.assume(depositAmount >= 10);
-
-        //Note! This is a bug, where a very small deposit to a very large pool
-        //causes a == b because of precision limited by ratioDenominator in FeeCalculator
-
-        // Arrange
-        // Set up your test data
-
-        // Set up mock pool
-        mockPool.setTotalSupply(1e12 * 1e18);
-        mockPool.setProjectSupply(1, 1e9 * 1e18);
-
-        vm.expectRevert("Fee must be greater than 0");
-        feeCalculator.calculateDepositFees(address(mockPool), address(mockToken), depositAmount);
+    function calculateDepositFees(
+        address pool,
+        address token,
+        uint256 amount
+    ) internal view override returns (FeeDistribution memory) {
+        return
+            feeCalculator.calculateDepositFees(
+                address(pool),
+                address(token),
+                amount
+            );
     }
 
-    function testCalculateDepositFeesFuzzy(uint256 depositAmount, uint256 current, uint256 total) public {
-        //vm.assume(depositAmount > 0);
-        //vm.assume(total > 0);
-        //vm.assume(current > 0);
+
+    function testCalculateDepositFeesFuzzy(uint256 depositAmount, uint256 current, uint256 total) public override {
         vm.assume(total >= current);
         vm.assume(depositAmount < 1e20 * 1e18);
         vm.assume(depositAmount > 0);
@@ -66,29 +39,18 @@ contract FeeCalculatorLaunchParamsTestFuzzy is Test {
 
         // Set up mock pool
         mockPool.setTotalSupply(total);
-        mockPool.setProjectSupply(1, current);
+        setProjectSupply(address(mockToken), current);
 
         // Act
         try feeCalculator.calculateDepositFees(address(mockPool), address(mockToken), depositAmount) {}
         catch Error(string memory reason) {
             assertTrue(
                 keccak256(bytes("Fee must be greater than 0")) == keccak256(bytes(reason))
-                    || keccak256(bytes("Fee must be lower or equal to deposit amount")) == keccak256(bytes(reason))
+                    || keccak256(bytes("Fee must be lower or equal to requested amount")) == keccak256(bytes(reason))
                     || keccak256(bytes("Deposit outside range")) == keccak256(bytes(reason)),
-                "error should be 'Fee must be greater than 0' or 'Fee must be lower or equal to deposit amount' or 'Deposit outside range'"
+                "error should be 'Fee must be greater than 0' or 'Fee must be lower or equal to requested amount' or 'Deposit outside range'"
             );
         }
-    }
-
-    function testCalculateDepositFeesFuzzy_DepositDividedIntoOneChunkFeesGreaterOrEqualToOneDeposit(
-        uint256 depositAmount,
-        uint256 current,
-        uint256 total
-    ) public {
-        //just a sanity check
-        testCalculateDepositFeesFuzzy_DepositDividedIntoMultipleChunksFeesGreaterOrEqualToOneDeposit(
-            1, depositAmount, current, total
-        );
     }
 
     function testCalculateDepositFeesFuzzy_DepositDividedIntoMultipleChunksFeesGreaterOrEqualToOneDeposit(
@@ -96,7 +58,7 @@ contract FeeCalculatorLaunchParamsTestFuzzy is Test {
         uint256 depositAmount,
         uint256 current,
         uint256 total
-    ) public {
+    ) public override {
         vm.assume(0 < numberOfDeposits);
         vm.assume(total >= current);
 
@@ -111,7 +73,7 @@ contract FeeCalculatorLaunchParamsTestFuzzy is Test {
         uint256 multipleTimesDepositFailedCount = 0;
         // Set up mock pool
         mockPool.setTotalSupply(total);
-        mockPool.setProjectSupply(1, current);
+        setProjectSupply(address(mockToken), current);
 
         uint256 oneTimeFee = 0;
 
@@ -124,9 +86,9 @@ contract FeeCalculatorLaunchParamsTestFuzzy is Test {
             oneTimeDepositFailed = true;
             assertTrue(
                 keccak256(bytes("Fee must be greater than 0")) == keccak256(bytes(reason))
-                    || keccak256(bytes("Fee must be lower or equal to deposit amount")) == keccak256(bytes(reason))
+                    || keccak256(bytes("Fee must be lower or equal to requested amount")) == keccak256(bytes(reason))
                     || keccak256(bytes("Deposit outside range")) == keccak256(bytes(reason)),
-                "error should be 'Fee must be greater than 0' or 'Fee must be lower or equal to deposit amount' or 'Deposit outside range'"
+                "error should be 'Fee must be greater than 0' or 'Fee must be lower or equal to requested amount' or 'Deposit outside range'"
             );
         }
 
@@ -144,14 +106,14 @@ contract FeeCalculatorLaunchParamsTestFuzzy is Test {
                 total += deposit;
                 current += deposit;
                 mockPool.setTotalSupply(total);
-                mockPool.setProjectSupply(1, current);
+                setProjectSupply(address(mockToken), current);
             } catch Error(string memory reason) {
                 multipleTimesDepositFailedCount++;
                 assertTrue(
                     keccak256(bytes("Fee must be greater than 0")) == keccak256(bytes(reason))
-                        || keccak256(bytes("Fee must be lower or equal to deposit amount")) == keccak256(bytes(reason))
+                        || keccak256(bytes("Fee must be lower or equal to requested amount")) == keccak256(bytes(reason))
                         || keccak256(bytes("Deposit outside range")) == keccak256(bytes(reason)),
-                    "error should be 'Fee must be greater than 0' or 'Fee must be lower or equal to deposit amount' or 'Deposit outside range'"
+                    "error should be 'Fee must be greater than 0' or 'Fee must be lower or equal to requested amount' or 'Deposit outside range'"
                 );
             }
         }

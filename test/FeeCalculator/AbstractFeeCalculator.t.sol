@@ -6,13 +6,13 @@
 pragma solidity ^0.8.13;
 
 import {Test, console2} from "forge-std/Test.sol";
-import {FeeCalculator} from "../src/FeeCalculator.sol";
-import {FeeDistribution} from "../src/interfaces/IFeeCalculator.sol";
+import {FeeCalculator} from "../../src/FeeCalculator.sol";
+import {FeeDistribution} from "../../src/interfaces/IFeeCalculator.sol";
 import {SD59x18, sd, intoUint256 as sdIntoUint256} from "@prb/math/src/SD59x18.sol";
 import {UD60x18, ud, intoUint256} from "@prb/math/src/UD60x18.sol";
-import "./TestUtilities.sol";
+import "../TestUtilities.sol";
 
-contract FeeCalculatorTest is Test {
+abstract contract AbstractFeeCalculatorTest is Test {
     using TestUtilities for uint256[];
 
     UD60x18 private one = ud(1e18);
@@ -35,6 +35,10 @@ contract FeeCalculatorTest is Test {
         feeShares[0] = 100;
         feeCalculator.feeSetup(recipients, feeShares);
     }
+
+    function setProjectSupply(address token, uint256 supply) internal virtual;
+    function calculateDepositFees(address pool, address token, uint256 amount) internal view virtual returns (FeeDistribution memory);
+    function calculateRedemptionFees(address pool, address[] memory tokens, uint256[] memory amounts) internal view virtual returns (FeeDistribution memory);
 
     function testFeeSetupEmpty() public {
         address[] memory recipients = new address[](0);
@@ -70,11 +74,11 @@ contract FeeCalculatorTest is Test {
 
         // Set up mock pool
         mockPool.setTotalSupply(1000 * 1e18);
-        mockPool.setProjectSupply(1, 500 * 1e18);
+        setProjectSupply(address(mockToken), 500 * 1e18);
 
         // Act
         FeeDistribution memory feeDistribution =
-            feeCalculator.calculateDepositFees(address(mockPool), address(mockToken), depositAmount);
+            calculateDepositFees(address(mockPool), address(mockToken), depositAmount);
         address[] memory recipients = feeDistribution.recipients;
         uint256[] memory fees = feeDistribution.shares;
 
@@ -95,11 +99,11 @@ contract FeeCalculatorTest is Test {
 
         // Set up mock pool
         mockPool.setTotalSupply(1000 * 1e18);
-        mockPool.setProjectSupply(1, 500 * 1e18);
+        setProjectSupply(address(mockToken), 500 * 1e18);
 
         // Act
         FeeDistribution memory feeDistribution =
-            feeCalculator.calculateRedemptionFees(address(mockPool), tco2s, redemptionAmounts);
+            calculateRedemptionFees(address(mockPool), tco2s, redemptionAmounts);
         address[] memory recipients = feeDistribution.recipients;
         uint256[] memory fees = feeDistribution.shares;
 
@@ -118,13 +122,13 @@ contract FeeCalculatorTest is Test {
         uint256[] memory redemptionAmounts = new uint256[](1);
         redemptionAmounts[0] = redemptionAmount;
 
-        // Set up mock pool
+        // Set up mock pools
         mockPool.setTotalSupply(1e6 * 1e18);
-        mockPool.setProjectSupply(1, 1 * 1e18);
+        setProjectSupply(address(mockToken), 1 * 1e18);
 
         // Act
         FeeDistribution memory feeDistribution =
-            feeCalculator.calculateRedemptionFees(address(mockPool), tco2s, redemptionAmounts);
+            calculateRedemptionFees(address(mockPool), tco2s, redemptionAmounts);
         address[] memory recipients = feeDistribution.recipients;
         uint256[] memory fees = feeDistribution.shares;
 
@@ -146,11 +150,11 @@ contract FeeCalculatorTest is Test {
 
         // Set up mock pool
         mockPool.setTotalSupply(1e6 * 1e18);
-        mockPool.setProjectSupply(1, 1e6 * 1e18);
+        setProjectSupply(address(mockToken), 1e6 * 1e18);
 
         // Act
         FeeDistribution memory feeDistribution =
-            feeCalculator.calculateRedemptionFees(address(mockPool), tco2s, redemptionAmounts);
+            calculateRedemptionFees(address(mockPool), tco2s, redemptionAmounts);
         address[] memory recipients = feeDistribution.recipients;
         uint256[] memory fees = feeDistribution.shares;
 
@@ -168,7 +172,7 @@ contract FeeCalculatorTest is Test {
 
         // Set up mock pool
         mockPool.setTotalSupply(1000 * 1e18);
-        mockPool.setProjectSupply(1, 500 * 1e18);
+        setProjectSupply(address(mockToken), 500 * 1e18);
 
         address[] memory _recipients = new address[](2);
         _recipients[0] = feeRecipient1;
@@ -180,7 +184,7 @@ contract FeeCalculatorTest is Test {
 
         // Act
         FeeDistribution memory feeDistribution =
-            feeCalculator.calculateDepositFees(address(mockPool), address(mockToken), depositAmount);
+            calculateDepositFees(address(mockPool), address(mockToken), depositAmount);
         address[] memory recipients = feeDistribution.recipients;
         uint256[] memory fees = feeDistribution.shares;
 
@@ -201,7 +205,7 @@ contract FeeCalculatorTest is Test {
 
         // Set up mock pool
         mockPool.setTotalSupply(1000 * 1e18);
-        mockPool.setProjectSupply(1, 500 * 1e18);
+        setProjectSupply(address(mockToken), 500 * 1e18);
 
         address[] memory _recipients = new address[](2);
         _recipients[0] = feeRecipient1;
@@ -213,7 +217,7 @@ contract FeeCalculatorTest is Test {
 
         // Act
         FeeDistribution memory feeDistribution =
-            feeCalculator.calculateDepositFees(address(mockPool), address(mockToken), depositAmount);
+            calculateDepositFees(address(mockPool), address(mockToken), depositAmount);
         address[] memory recipients = feeDistribution.recipients;
         uint256[] memory fees = feeDistribution.shares;
 
@@ -232,11 +236,11 @@ contract FeeCalculatorTest is Test {
 
         // Set up mock pool
         mockPool.setTotalSupply(53461 * 1e18);
-        mockPool.setProjectSupply(1, 15462 * 1e18);
+        setProjectSupply(address(mockToken), 15462 * 1e18);
 
         // Act
         FeeDistribution memory feeDistribution =
-            feeCalculator.calculateDepositFees(address(mockPool), address(mockToken), depositAmount);
+            calculateDepositFees(address(mockPool), address(mockToken), depositAmount);
         address[] memory recipients = feeDistribution.recipients;
         uint256[] memory fees = feeDistribution.shares;
 
@@ -252,11 +256,11 @@ contract FeeCalculatorTest is Test {
 
         // Set up mock pool
         mockPool.setTotalSupply(1e5 * 1e18);
-        mockPool.setProjectSupply(1, 1e4 * 1e18);
+        setProjectSupply(address(mockToken), 1e4 * 1e18);
 
         // Act
         vm.expectRevert("Fee must be greater than 0");
-        feeCalculator.calculateDepositFees(address(mockPool), address(mockToken), depositAmount);
+        calculateDepositFees(address(mockPool), address(mockToken), depositAmount);
     }
 
     function testCalculateDepositFees_DepositOfHundredWei_ShouldThrowError() public {
@@ -269,11 +273,11 @@ contract FeeCalculatorTest is Test {
 
         // Set up mock pool
         mockPool.setTotalSupply(1e5 * 1e18);
-        mockPool.setProjectSupply(1, 1e4 * 1e18);
+        setProjectSupply(address(mockToken), 1e4 * 1e18);
 
         // Act
         vm.expectRevert("Fee must be greater than 0");
-        feeCalculator.calculateDepositFees(address(mockPool), address(mockToken), depositAmount);
+        calculateDepositFees(address(mockPool), address(mockToken), depositAmount);
     }
 
     function testCalculateDepositFees_DepositOfHundredThousandsPartOfOne_NonzeroFee() public {
@@ -283,11 +287,11 @@ contract FeeCalculatorTest is Test {
 
         // Set up mock pool
         mockPool.setTotalSupply(1e5 * 1e18);
-        mockPool.setProjectSupply(1, 1e4 * 1e18);
+        setProjectSupply(address(mockToken), 1e4 * 1e18);
 
         // Act
         FeeDistribution memory feeDistribution =
-            feeCalculator.calculateDepositFees(address(mockPool), address(mockToken), depositAmount);
+            calculateDepositFees(address(mockPool), address(mockToken), depositAmount);
         address[] memory recipients = feeDistribution.recipients;
         uint256[] memory fees = feeDistribution.shares;
 
@@ -303,11 +307,11 @@ contract FeeCalculatorTest is Test {
 
         // Set up mock pool
         mockPool.setTotalSupply(1e5 * 1e18);
-        mockPool.setProjectSupply(1, 1e4 * 1e18);
+        setProjectSupply(address(mockToken), 1e4 * 1e18);
 
         // Act
         FeeDistribution memory feeDistribution =
-            feeCalculator.calculateDepositFees(address(mockPool), address(mockToken), depositAmount);
+            calculateDepositFees(address(mockPool), address(mockToken), depositAmount);
         address[] memory recipients = feeDistribution.recipients;
         uint256[] memory fees = feeDistribution.shares;
 
@@ -328,7 +332,7 @@ contract FeeCalculatorTest is Test {
 
         // Set up mock pool
         mockPool.setTotalSupply(1e5 * 1e18);
-        mockPool.setProjectSupply(1, 1e4 * 1e18);
+        setProjectSupply(address(mockToken), 1e4 * 1e18);
 
         address[] memory _recipients = new address[](5);
         _recipients[0] = feeRecipient1;
@@ -346,7 +350,7 @@ contract FeeCalculatorTest is Test {
 
         // Act
         FeeDistribution memory feeDistribution =
-            feeCalculator.calculateDepositFees(address(mockPool), address(mockToken), depositAmount);
+            calculateDepositFees(address(mockPool), address(mockToken), depositAmount);
         address[] memory recipients = feeDistribution.recipients;
         uint256[] memory fees = feeDistribution.shares;
 
@@ -376,7 +380,7 @@ contract FeeCalculatorTest is Test {
 
         // Set up mock pool
         mockPool.setTotalSupply(1e5 * 1e18);
-        mockPool.setProjectSupply(1, 1e4 * 1e18);
+        setProjectSupply(address(mockToken), 1e4 * 1e18);
 
         address[] memory _recipients = new address[](5);
         _recipients[0] = feeRecipient1;
@@ -394,7 +398,7 @@ contract FeeCalculatorTest is Test {
 
         // Act
         FeeDistribution memory feeDistribution =
-            feeCalculator.calculateDepositFees(address(mockPool), address(mockToken), depositAmount);
+            calculateDepositFees(address(mockPool), address(mockToken), depositAmount);
         address[] memory recipients = feeDistribution.recipients;
         uint256[] memory fees = feeDistribution.shares;
 
@@ -419,11 +423,11 @@ contract FeeCalculatorTest is Test {
 
         // Set up mock pool
         mockPool.setTotalSupply(100 * 1e6 * 1e18);
-        mockPool.setProjectSupply(1, 1e6 * 1e18);
+        setProjectSupply(address(mockToken), 1e6 * 1e18);
 
         // Act
         FeeDistribution memory feeDistribution =
-            feeCalculator.calculateDepositFees(address(mockPool), address(mockToken), depositAmount);
+            calculateDepositFees(address(mockPool), address(mockToken), depositAmount);
         address[] memory recipients = feeDistribution.recipients;
         uint256[] memory fees = feeDistribution.shares;
 
@@ -439,11 +443,11 @@ contract FeeCalculatorTest is Test {
 
         // Set up mock pool
         mockPool.setTotalSupply(1000 * 1e18);
-        mockPool.setProjectSupply(1, 500 * 1e18);
+        setProjectSupply(address(mockToken), 500 * 1e18);
 
         // Act
         vm.expectRevert("depositAmount must be > 0");
-        feeCalculator.calculateDepositFees(address(mockPool), address(mockToken), depositAmount);
+        calculateDepositFees(address(mockPool), address(mockToken), depositAmount);
     }
 
     function testCalculateDepositFees_CurrentGreaterThanTotal_ExceptionShouldBeThrown() public {
@@ -453,13 +457,13 @@ contract FeeCalculatorTest is Test {
 
         // Set up mock pool
         mockPool.setTotalSupply(1000 * 1e18);
-        mockPool.setProjectSupply(1, 1500 * 1e18);
+        setProjectSupply(address(mockToken), 1500 * 1e18);
 
         // Act
         vm.expectRevert(
             "The total volume in the pool must be greater than or equal to the volume for an individual asset"
         );
-        feeCalculator.calculateDepositFees(address(mockPool), address(mockToken), depositAmount);
+        calculateDepositFees(address(mockPool), address(mockToken), depositAmount);
     }
 
     function testCalculateRedemptionFees_CurrentGreaterThanTotal_ExceptionShouldBeThrown() public {
@@ -473,13 +477,13 @@ contract FeeCalculatorTest is Test {
 
         // Set up mock pool
         mockPool.setTotalSupply(1000 * 1e18);
-        mockPool.setProjectSupply(1, 1500 * 1e18);
+        setProjectSupply(address(mockToken), 1500 * 1e18);
 
         // Act & Assert
         vm.expectRevert(
             "The total volume in the pool must be greater than or equal to the volume for an individual asset"
         );
-        feeCalculator.calculateRedemptionFees(address(mockPool), tco2s, redemptionAmounts);
+        calculateRedemptionFees(address(mockPool), tco2s, redemptionAmounts);
     }
 
     function testCalculateRedemptionFees_AmountGreaterThanCurrent_ExceptionShouldBeThrown() public {
@@ -493,11 +497,11 @@ contract FeeCalculatorTest is Test {
 
         // Set up mock pool
         mockPool.setTotalSupply(1000 * 1e18);
-        mockPool.setProjectSupply(1, 500 * 1e18);
+        setProjectSupply(address(mockToken), 500 * 1e18);
 
         // Act
         vm.expectRevert("The amount to be redeemed cannot exceed the current balance of the pool");
-        feeCalculator.calculateRedemptionFees(address(mockPool), tco2s, redemptionAmounts);
+        calculateRedemptionFees(address(mockPool), tco2s, redemptionAmounts);
     }
 
     function testCalculateRedemptionFees_ZeroRedemption_ExceptionShouldBeThrown() public {
@@ -511,11 +515,11 @@ contract FeeCalculatorTest is Test {
 
         // Set up mock pool
         mockPool.setTotalSupply(1000 * 1e18);
-        mockPool.setProjectSupply(1, 500 * 1e18);
+        setProjectSupply(address(mockToken), 500 * 1e18);
 
         // Act & Assert
-        vm.expectRevert("redemptionAmount must be > 0");
-        feeCalculator.calculateRedemptionFees(address(mockPool), tco2s, redemptionAmounts);
+        vm.expectRevert("requested amount must be > 0");
+        calculateRedemptionFees(address(mockPool), tco2s, redemptionAmounts);
     }
 
     function testCalculateDepositFees_EmptyPool_FeeCappedAt10Percent() public {
@@ -525,11 +529,11 @@ contract FeeCalculatorTest is Test {
 
         // Set up mock pool
         mockPool.setTotalSupply(0);
-        mockPool.setProjectSupply(1, 0);
+        setProjectSupply(address(mockToken), 0);
 
         // Act
         FeeDistribution memory feeDistribution =
-            feeCalculator.calculateDepositFees(address(mockPool), address(mockToken), depositAmount);
+            calculateDepositFees(address(mockPool), address(mockToken), depositAmount);
         address[] memory recipients = feeDistribution.recipients;
         uint256[] memory fees = feeDistribution.shares;
 
@@ -545,11 +549,11 @@ contract FeeCalculatorTest is Test {
 
         // Set up mock pool
         mockPool.setTotalSupply(1);
-        mockPool.setProjectSupply(1, 0);
+        setProjectSupply(address(mockToken), 0);
 
         // Act
         FeeDistribution memory feeDistribution =
-            feeCalculator.calculateDepositFees(address(mockPool), address(mockToken), depositAmount);
+            calculateDepositFees(address(mockPool), address(mockToken), depositAmount);
         address[] memory recipients = feeDistribution.recipients;
         uint256[] memory fees = feeDistribution.shares;
 
@@ -569,11 +573,11 @@ contract FeeCalculatorTest is Test {
 
         // Set up mock pool
         mockPool.setTotalSupply(1000 * 1e18);
-        mockPool.setProjectSupply(1, 500 * 1e18);
+        setProjectSupply(address(mockToken), 500 * 1e18);
 
         // Act
-        vm.expectRevert("redemptionAmount must be > 0");
-        feeCalculator.calculateRedemptionFees(address(mockPool), tco2s, redemptionAmounts);
+        vm.expectRevert("requested amount must be > 0");
+        calculateRedemptionFees(address(mockPool), tco2s, redemptionAmounts);
     }
 
     function testCalculateRedemptionFees_TotalEqualCurrent_FeeCappedAt10Percent() public {
@@ -587,11 +591,11 @@ contract FeeCalculatorTest is Test {
 
         // Set up mock pool
         mockPool.setTotalSupply(1000);
-        mockPool.setProjectSupply(1, 1000);
+        setProjectSupply(address(mockToken), 1000);
 
         // Act
         FeeDistribution memory feeDistribution =
-            feeCalculator.calculateRedemptionFees(address(mockPool), tco2s, redemptionAmounts);
+            calculateRedemptionFees(address(mockPool), tco2s, redemptionAmounts);
         address[] memory recipients = feeDistribution.recipients;
         uint256[] memory fees = feeDistribution.shares;
 
@@ -607,11 +611,11 @@ contract FeeCalculatorTest is Test {
 
         // Set up mock pool
         mockPool.setTotalSupply(1000);
-        mockPool.setProjectSupply(1, 1000);
+        setProjectSupply(address(mockToken), 1000);
 
         // Act
         FeeDistribution memory feeDistribution =
-            feeCalculator.calculateDepositFees(address(mockPool), address(mockToken), depositAmount);
+            calculateDepositFees(address(mockPool), address(mockToken), depositAmount);
         address[] memory recipients = feeDistribution.recipients;
         uint256[] memory fees = feeDistribution.shares;
 
@@ -627,11 +631,11 @@ contract FeeCalculatorTest is Test {
 
         // Set up mock pool
         mockPool.setTotalSupply(1000);
-        mockPool.setProjectSupply(1, 999);
+        setProjectSupply(address(mockToken), 999);
 
         // Act
         FeeDistribution memory feeDistribution =
-            feeCalculator.calculateDepositFees(address(mockPool), address(mockToken), depositAmount);
+            calculateDepositFees(address(mockPool), address(mockToken), depositAmount);
         address[] memory recipients = feeDistribution.recipients;
         uint256[] memory fees = feeDistribution.shares;
 
@@ -647,11 +651,11 @@ contract FeeCalculatorTest is Test {
 
         // Set up mock pool
         mockPool.setTotalSupply(1000 * 1e18);
-        mockPool.setProjectSupply(1, 0);
+        setProjectSupply(address(mockToken), 0);
 
         // Act
         FeeDistribution memory feeDistribution =
-            feeCalculator.calculateDepositFees(address(mockPool), address(mockToken), depositAmount);
+            calculateDepositFees(address(mockPool), address(mockToken), depositAmount);
         address[] memory recipients = feeDistribution.recipients;
         uint256[] memory fees = feeDistribution.shares;
 
@@ -672,11 +676,11 @@ contract FeeCalculatorTest is Test {
         // Set up mock pool
         uint256 supply = 100000 * 1e18;
         mockPool.setTotalSupply(100000 * 1e18);
-        mockPool.setProjectSupply(1, supply - 1);
+        setProjectSupply(address(mockToken), supply - 1);
 
         // Act
         FeeDistribution memory feeDistribution =
-            feeCalculator.calculateRedemptionFees(address(mockPool), tco2s, redemptionAmounts);
+            calculateRedemptionFees(address(mockPool), tco2s, redemptionAmounts);
         address[] memory recipients = feeDistribution.recipients;
         uint256[] memory fees = feeDistribution.shares;
 
@@ -696,11 +700,11 @@ contract FeeCalculatorTest is Test {
 
         // Set up mock pool
         mockPool.setTotalSupply(56636794628913227180683983236);
-        mockPool.setProjectSupply(1, 55661911070827884041095553095);
+        setProjectSupply(address(mockToken), 55661911070827884041095553095);
 
         // Act
         FeeDistribution memory feeDistribution =
-            feeCalculator.calculateRedemptionFees(address(mockPool), tco2s, redemptionAmounts);
+            calculateRedemptionFees(address(mockPool), tco2s, redemptionAmounts);
         address[] memory recipients = feeDistribution.recipients;
         uint256[] memory fees = feeDistribution.shares;
 
@@ -840,12 +844,12 @@ contract FeeCalculatorTest is Test {
         // Arrange
         // Set up mock pool
         mockPool.setTotalSupply(1000 * 1e18);
-        mockPool.setProjectSupply(1, 500 * 1e18);
+        setProjectSupply(address(mockToken), 500 * 1e18);
         feeCalculator.setDepositFeeScale(0.09 * 1e18);
 
         // Act
         FeeDistribution memory feeDistribution =
-            feeCalculator.calculateDepositFees(address(mockPool), address(mockToken), 100 * 1e18);
+            calculateDepositFees(address(mockPool), address(mockToken), 100 * 1e18);
         uint256[] memory fees = feeDistribution.shares;
 
         // Assert
@@ -856,12 +860,12 @@ contract FeeCalculatorTest is Test {
         // Arrange
         // Set up mock pool
         mockPool.setTotalSupply(1000 * 1e18);
-        mockPool.setProjectSupply(1, 500 * 1e18);
+        setProjectSupply(address(mockToken), 500 * 1e18);
         feeCalculator.setDepositFeeRatioScale(0.2 * 1e18);
 
         // Act
         FeeDistribution memory feeDistribution =
-            feeCalculator.calculateDepositFees(address(mockPool), address(mockToken), 100 * 1e18);
+            calculateDepositFees(address(mockPool), address(mockToken), 100 * 1e18);
         uint256[] memory fees = feeDistribution.shares;
 
         // Assert
@@ -872,12 +876,12 @@ contract FeeCalculatorTest is Test {
         // Arrange
         // Set up mock pool
         mockPool.setTotalSupply(1000 * 1e18);
-        mockPool.setProjectSupply(1, 1000 * 1e18);
+        setProjectSupply(address(mockToken), 1000 * 1e18);
         feeCalculator.setSingleAssetDepositRelativeFee(0.67 * 1e18);
 
         // Act
         FeeDistribution memory feeDistribution =
-            feeCalculator.calculateDepositFees(address(mockPool), address(mockToken), 100 * 1e18);
+            calculateDepositFees(address(mockPool), address(mockToken), 100 * 1e18);
         uint256[] memory fees = feeDistribution.shares;
 
         // Assert
@@ -893,12 +897,12 @@ contract FeeCalculatorTest is Test {
 
         // Set up mock pool
         mockPool.setTotalSupply(1000 * 1e18);
-        mockPool.setProjectSupply(1, 500 * 1e18);
+        setProjectSupply(address(mockToken), 500 * 1e18);
         feeCalculator.setRedemptionFeeScale(0.4 * 1e18);
 
         // Act
         FeeDistribution memory feeDistribution =
-            feeCalculator.calculateRedemptionFees(address(mockPool), tco2s, redemptionAmounts);
+            calculateRedemptionFees(address(mockPool), tco2s, redemptionAmounts);
         uint256[] memory fees = feeDistribution.shares;
 
         // Assert
@@ -914,12 +918,12 @@ contract FeeCalculatorTest is Test {
 
         // Set up mock pool
         mockPool.setTotalSupply(1000 * 1e18);
-        mockPool.setProjectSupply(1, 500 * 1e18);
+        setProjectSupply(address(mockToken), 500 * 1e18);
         feeCalculator.setRedemptionFeeShift(0.5 * 1e18);
 
         // Act
         FeeDistribution memory feeDistribution =
-            feeCalculator.calculateRedemptionFees(address(mockPool), tco2s, redemptionAmounts);
+            calculateRedemptionFees(address(mockPool), tco2s, redemptionAmounts);
         uint256[] memory fees = feeDistribution.shares;
 
         // Assert
@@ -935,12 +939,12 @@ contract FeeCalculatorTest is Test {
 
         // Set up mock pool
         mockPool.setTotalSupply(1000 * 1e18);
-        mockPool.setProjectSupply(1, 1000 * 1e18);
+        setProjectSupply(address(mockToken), 1000 * 1e18);
         feeCalculator.setSingleAssetRedemptionRelativeFee(0.83 * 1e18);
 
         // Act
         FeeDistribution memory feeDistribution =
-            feeCalculator.calculateRedemptionFees(address(mockPool), tco2s, redemptionAmounts);
+            calculateRedemptionFees(address(mockPool), tco2s, redemptionAmounts);
         uint256[] memory fees = feeDistribution.shares;
 
         assertEq(fees[0], 83 * 1e18);
@@ -957,12 +961,12 @@ contract FeeCalculatorTest is Test {
 
         // Set up mock pool
         mockPool.setTotalSupply(56636794628913227180683983236);
-        mockPool.setProjectSupply(1, 55661911070827884041095553095);
+        setProjectSupply(address(mockToken), 55661911070827884041095553095);
         feeCalculator.setDustAssetRedemptionRelativeFee(0.91 * 1e18);
 
         // Act
         FeeDistribution memory feeDistribution =
-            feeCalculator.calculateRedemptionFees(address(mockPool), tco2s, redemptionAmounts);
+            calculateRedemptionFees(address(mockPool), tco2s, redemptionAmounts);
         uint256[] memory fees = feeDistribution.shares;
 
         // Assert

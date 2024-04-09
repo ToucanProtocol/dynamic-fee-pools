@@ -21,7 +21,9 @@ library TestUtilities {
 
 contract MockPool is IERC20 {
     uint256 private _totalSupply;
-    mapping(uint256 => uint256) private _totalPerProjectSupply;
+    mapping(address => uint256) private _totalPerTCO2Supply;
+    mapping(address => mapping(uint256 => uint256))
+        private _totalPerERC1155TokenSupply;
 
     function totalSupply() external view returns (uint256) {
         return _totalSupply;
@@ -31,19 +33,35 @@ contract MockPool is IERC20 {
         return _totalSupply;
     }
 
-    function totalPerProjectTCO2Supply(uint256 projectTokenId) external view returns (uint256) {
-        return _totalPerProjectSupply[projectTokenId];
+    function totalPerProjectSupply(
+        address tco2
+    ) external view returns (uint256) {
+        return _totalPerTCO2Supply[tco2];
+    }
+
+    function totalPerProjectSupply(
+        address erc1155,
+        uint256 tokenId
+    ) external view returns (uint256) {
+        return _totalPerERC1155TokenSupply[erc1155][tokenId];
     }
 
     function setTotalSupply(uint256 ts) public {
         _totalSupply = ts;
     }
 
-    function setProjectSupply(uint256 projectTokenId, uint256 ts) public {
-        _totalPerProjectSupply[projectTokenId] = ts;
+    function setTCO2Supply(address tco2, uint256 ts) public {
+        _totalPerTCO2Supply[tco2] = ts;
     }
 
-    function allowance(address, address) external pure override returns (uint256) {
+    function setERC1155Supply(address erc1155, uint256 tokenId, uint256 ts) public {
+        _totalPerERC1155TokenSupply[erc1155][tokenId] = ts;
+    }
+
+    function allowance(
+        address,
+        address
+    ) external pure override returns (uint256) {
         return 0;
     }
 
@@ -55,7 +73,11 @@ contract MockPool is IERC20 {
         return true;
     }
 
-    function transferFrom(address, address, uint256) external pure override returns (bool) {
+    function transferFrom(
+        address,
+        address,
+        uint256
+    ) external pure override returns (bool) {
         return true;
     }
 
@@ -67,7 +89,10 @@ contract MockPool is IERC20 {
 contract MockToken is IERC20 {
     mapping(address => uint256) public override balanceOf;
 
-    function allowance(address, address) external pure override returns (uint256) {
+    function allowance(
+        address,
+        address
+    ) external pure override returns (uint256) {
         return 0;
     }
 
@@ -79,7 +104,11 @@ contract MockToken is IERC20 {
         return true;
     }
 
-    function transferFrom(address, address, uint256) external pure override returns (bool) {
+    function transferFrom(
+        address,
+        address,
+        uint256
+    ) external pure override returns (bool) {
         return true;
     }
 
@@ -88,19 +117,20 @@ contract MockToken is IERC20 {
     }
 
     function getVintageData() external pure returns (VintageData memory) {
-        return VintageData({
-            name: "test",
-            startTime: 0,
-            endTime: 0,
-            projectTokenId: 1,
-            totalVintageQuantity: 0,
-            isCorsiaCompliant: false,
-            isCCPcompliant: false,
-            coBenefits: "",
-            correspAdjustment: "",
-            additionalCertification: "",
-            uri: "",
-            registry: ""
-        });
+        return
+            VintageData({
+                name: "test",
+                startTime: 0,
+                endTime: 0,
+                projectTokenId: 1,
+                totalVintageQuantity: 0,
+                isCorsiaCompliant: false,
+                isCCPcompliant: false,
+                coBenefits: "",
+                correspAdjustment: "",
+                additionalCertification: "",
+                uri: "",
+                registry: ""
+            });
     }
 }

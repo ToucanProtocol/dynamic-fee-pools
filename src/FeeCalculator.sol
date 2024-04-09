@@ -17,8 +17,8 @@ import "./interfaces/IPool.sol";
 /// @notice This contract calculates deposit and redemption fees for a given pool.
 /// @dev It implements the IFeeCalculator interface.
 contract FeeCalculator is IFeeCalculator, Ownable {
-    SD59x18 private zero = sd(0);
-    SD59x18 private one = sd(1e18);
+    SD59x18 private _zero = sd(0);
+    SD59x18 private _one = sd(1e18);
 
     SD59x18 public depositFeeScale = sd(0.18 * 1e18);
     SD59x18 public depositFeeRatioScale = sd(0.99 * 1e18);
@@ -28,7 +28,7 @@ contract FeeCalculator is IFeeCalculator, Ownable {
     SD59x18 public redemptionFeeShift = sd(0.1 * 1e18); //-log10(0+0.1)=1 -> 10^-1
 
     function redemptionFeeConstant() public view returns (SD59x18) {
-        return redemptionFeeScale * (one + redemptionFeeShift).log10(); //0.0413926851582251=log10(1+0.1)
+        return redemptionFeeScale * (_one + redemptionFeeShift).log10(); //0.0413926851582251=log10(1+0.1)
     }
 
     SD59x18 public singleAssetRedemptionRelativeFee = sd(0.1 * 1e18);
@@ -53,7 +53,7 @@ contract FeeCalculator is IFeeCalculator, Ownable {
     /// @param _depositFeeScale The new deposit fee scale.
     function setDepositFeeScale(int256 _depositFeeScale) external onlyOwner {
         SD59x18 depositFeeScaleSD = sd(_depositFeeScale);
-        require(depositFeeScaleSD >= zero && depositFeeScaleSD <= one, "Deposit fee scale must be between 0 and 1");
+        require(depositFeeScaleSD >= _zero && depositFeeScaleSD <= _one, "Deposit fee scale must be between 0 and 1");
         depositFeeScale = depositFeeScaleSD;
         emit DepositFeeScaleUpdated(_depositFeeScale);
     }
@@ -63,7 +63,7 @@ contract FeeCalculator is IFeeCalculator, Ownable {
     /// @param _depositFeeRatioScale The new deposit fee ratio scale.
     function setDepositFeeRatioScale(int256 _depositFeeRatioScale) external onlyOwner {
         SD59x18 depositFeeRatioScaleSD = sd(_depositFeeRatioScale);
-        require(depositFeeRatioScaleSD >= zero, "Deposit fee ratio scale must be above 0");
+        require(depositFeeRatioScaleSD >= _zero, "Deposit fee ratio scale must be above 0");
         depositFeeRatioScale = depositFeeRatioScaleSD;
         emit DepositFeeRatioUpdated(_depositFeeRatioScale);
     }
@@ -74,7 +74,7 @@ contract FeeCalculator is IFeeCalculator, Ownable {
     function setSingleAssetDepositRelativeFee(int256 _singleAssetDepositRelativeFee) external onlyOwner {
         SD59x18 singleAssetDepositRelativeFeeSD = sd(_singleAssetDepositRelativeFee);
         require(
-            singleAssetDepositRelativeFeeSD >= zero && singleAssetDepositRelativeFeeSD <= one,
+            singleAssetDepositRelativeFeeSD >= _zero && singleAssetDepositRelativeFeeSD <= _one,
             "Single asset deposit relative fee must be between 0 and 1"
         );
         singleAssetDepositRelativeFee = singleAssetDepositRelativeFeeSD;
@@ -87,7 +87,8 @@ contract FeeCalculator is IFeeCalculator, Ownable {
     function setRedemptionFeeScale(int256 _redemptionFeeScale) external onlyOwner {
         SD59x18 redemptionFeeScaleSD = sd(_redemptionFeeScale);
         require(
-            redemptionFeeScaleSD >= zero && redemptionFeeScaleSD <= one, "Redemption fee scale must be between 0 and 1"
+            redemptionFeeScaleSD >= _zero && redemptionFeeScaleSD <= _one,
+            "Redemption fee scale must be between 0 and 1"
         );
         redemptionFeeScale = redemptionFeeScaleSD;
         emit RedemptionFeeScaleUpdated(_redemptionFeeScale);
@@ -99,7 +100,8 @@ contract FeeCalculator is IFeeCalculator, Ownable {
     function setRedemptionFeeShift(int256 _redemptionFeeShift) external onlyOwner {
         SD59x18 redemptionFeeShiftSD = sd(_redemptionFeeShift);
         require(
-            redemptionFeeShiftSD >= zero && redemptionFeeShiftSD <= one, "Redemption fee shift must be between 0 and 1"
+            redemptionFeeShiftSD >= _zero && redemptionFeeShiftSD <= _one,
+            "Redemption fee shift must be between 0 and 1"
         );
         redemptionFeeShift = redemptionFeeShiftSD;
         emit RedemptionFeeShift(_redemptionFeeShift);
@@ -111,7 +113,7 @@ contract FeeCalculator is IFeeCalculator, Ownable {
     function setSingleAssetRedemptionRelativeFee(int256 _singleAssetRedemptionRelativeFee) external onlyOwner {
         SD59x18 singleAssetRedemptionRelativeFeeSD = sd(_singleAssetRedemptionRelativeFee);
         require(
-            singleAssetRedemptionRelativeFeeSD >= zero && singleAssetRedemptionRelativeFeeSD <= one,
+            singleAssetRedemptionRelativeFeeSD >= _zero && singleAssetRedemptionRelativeFeeSD <= _one,
             "Single asset redemption relative fee must be between 0 and 1"
         );
         singleAssetRedemptionRelativeFee = singleAssetRedemptionRelativeFeeSD;
@@ -124,7 +126,7 @@ contract FeeCalculator is IFeeCalculator, Ownable {
     function setDustAssetRedemptionRelativeFee(int256 _dustAssetRedemptionRelativeFee) external onlyOwner {
         SD59x18 dustAssetRedemptionRelativeFeeSD = sd(_dustAssetRedemptionRelativeFee);
         require(
-            dustAssetRedemptionRelativeFeeSD >= zero && dustAssetRedemptionRelativeFeeSD <= one,
+            dustAssetRedemptionRelativeFeeSD >= _zero && dustAssetRedemptionRelativeFeeSD <= _one,
             "Dust asset redemption relative fee must be between 0 and 1"
         );
         dustAssetRedemptionRelativeFee = dustAssetRedemptionRelativeFeeSD;
@@ -163,12 +165,8 @@ contract FeeCalculator is IFeeCalculator, Ownable {
     {
         require(depositAmount > 0, "depositAmount must be > 0");
 
-        feeDistribution = calculateFee(
-            getTotalSupply(pool),
-            IPool(pool).totalPerProjectSupply(tco2),
-            depositAmount,
-            getDepositFee
-        );
+        feeDistribution =
+            _calculateFee(_getTotalSupply(pool), IPool(pool).totalPerProjectSupply(tco2), depositAmount, _getDepositFee);
     }
 
     /// @notice Calculates the fee shares and recipients based on the total fee.
@@ -211,11 +209,8 @@ contract FeeCalculator is IFeeCalculator, Ownable {
         address tco2 = tco2s[0];
         uint256 redemptionAmount = redemptionAmounts[0];
 
-        feeDistribution = calculateFee(
-            getTotalSupply(pool),
-            IPool(pool).totalPerProjectSupply(tco2),
-            redemptionAmount,
-            getRedemptionFee
+        feeDistribution = _calculateFee(
+            _getTotalSupply(pool), IPool(pool).totalPerProjectSupply(tco2), redemptionAmount, _getRedemptionFee
         );
     }
 
@@ -226,19 +221,16 @@ contract FeeCalculator is IFeeCalculator, Ownable {
     /// @param depositAmount The amount to be deposited.
     /// @return feeDistribution How the fee is meant to be
     /// distributed among the fee recipients.
-    function calculateDepositFees(address pool, address erc1155, uint256 tokenId, uint256 depositAmount) 
+    function calculateDepositFees(address pool, address erc1155, uint256 tokenId, uint256 depositAmount)
         external
         view
         override
-        returns (FeeDistribution memory feeDistribution) 
+        returns (FeeDistribution memory feeDistribution)
     {
         require(depositAmount > 0, "depositAmount must be > 0");
 
-        feeDistribution = calculateFee(
-            getTotalSupply(pool),
-            IPool(pool).totalPerProjectSupply(erc1155, tokenId),
-            depositAmount,
-            getDepositFee
+        feeDistribution = _calculateFee(
+            _getTotalSupply(pool), IPool(pool).totalPerProjectSupply(erc1155, tokenId), depositAmount, _getDepositFee
         );
     }
 
@@ -250,7 +242,7 @@ contract FeeCalculator is IFeeCalculator, Ownable {
     /// @return feeDistribution How the fee is meant to be
     /// distributed among the fee recipients.
     function calculateRedemptionFees(
-        address pool, 
+        address pool,
         address[] calldata erc1155s,
         uint256[] calldata tokenIds,
         uint256[] calldata redemptionAmounts
@@ -262,18 +254,25 @@ contract FeeCalculator is IFeeCalculator, Ownable {
         uint256 tokenId = tokenIds[0];
         uint256 redemptionAmount = redemptionAmounts[0];
 
-        feeDistribution = calculateFee(
-            getTotalSupply(pool),
+        feeDistribution = _calculateFee(
+            _getTotalSupply(pool),
             IPool(pool).totalPerProjectSupply(erc1155, tokenId),
             redemptionAmount,
-            getRedemptionFee
+            _getRedemptionFee
         );
+    }
+
+    /// @notice Returns the current fee setup.
+    /// @return recipients shares The fee recipients and their share of the total fee.
+    function getFeeSetup() external view returns (address[] memory recipients, uint256[] memory shares) {
+        recipients = _recipients;
+        shares = _shares;
     }
 
     /// @notice Gets the total supply of a given pool.
     /// @param pool The address of the pool.
     /// @return The total supply of the pool.
-    function getTotalSupply(address pool) private view returns (uint256) {
+    function _getTotalSupply(address pool) private view returns (uint256) {
         uint256 totalSupply = IPool(pool).totalTCO2Supply();
         return totalSupply;
     }
@@ -284,8 +283,12 @@ contract FeeCalculator is IFeeCalculator, Ownable {
     /// @param total The total supply of the pool.
     /// @return The current and resulting ratios of the asset in the pool
     /// before and after the deposit.
-    function getRatiosDeposit(SD59x18 amount, SD59x18 current, SD59x18 total) private view returns (SD59x18, SD59x18) {
-        SD59x18 currentRatio = total == zero ? zero : current / total;
+    function _getRatiosDeposit(SD59x18 amount, SD59x18 current, SD59x18 total)
+        private
+        view
+        returns (SD59x18, SD59x18)
+    {
+        SD59x18 currentRatio = total == _zero ? _zero : current / total;
         SD59x18 resultingRatio = (current + amount) / (total + amount);
 
         return (currentRatio, resultingRatio);
@@ -297,13 +300,13 @@ contract FeeCalculator is IFeeCalculator, Ownable {
     /// @param total The total supply of the pool.
     /// @return The current and resulting ratios of the asset in the pool
     /// before and after the redemption.
-    function getRatiosRedemption(SD59x18 amount, SD59x18 current, SD59x18 total)
+    function _getRatiosRedemption(SD59x18 amount, SD59x18 current, SD59x18 total)
         private
         view
         returns (SD59x18, SD59x18)
     {
-        SD59x18 currentRatio = total == zero ? zero : current / total;
-        SD59x18 resultingRatio = (total - amount) == zero ? zero : (current - amount) / (total - amount);
+        SD59x18 currentRatio = total == _zero ? _zero : current / total;
+        SD59x18 resultingRatio = (total - amount) == _zero ? _zero : (current - amount) / (total - amount);
 
         return (currentRatio, resultingRatio);
     }
@@ -313,7 +316,7 @@ contract FeeCalculator is IFeeCalculator, Ownable {
     /// @param current The current balance of the pool.
     /// @param total The total supply of the pool.
     /// @return The calculated deposit fee.
-    function getDepositFee(uint256 amount, uint256 current, uint256 total) private view returns (uint256) {
+    function _getDepositFee(uint256 amount, uint256 current, uint256 total) private view returns (uint256) {
         require(
             total >= current,
             "The total volume in the pool must be greater than or equal to the volume for an individual asset"
@@ -330,12 +333,12 @@ contract FeeCalculator is IFeeCalculator, Ownable {
         SD59x18 currentSD = sd(int256(current));
         SD59x18 resultingSD = currentSD + amountSD;
 
-        (SD59x18 currentRatio, SD59x18 resultingRatio) = getRatiosDeposit(amountSD, currentSD, sd(int256(total)));
+        (SD59x18 currentRatio, SD59x18 resultingRatio) = _getRatiosDeposit(amountSD, currentSD, sd(int256(total)));
 
-        require(resultingRatio * depositFeeRatioScale < one, "Deposit outside range");
+        require(resultingRatio * depositFeeRatioScale < _one, "Deposit outside range");
 
-        SD59x18 currentLog = currentSD * (one - currentRatio * depositFeeRatioScale).log10();
-        SD59x18 resultingLog = resultingSD * (one - resultingRatio * depositFeeRatioScale).log10();
+        SD59x18 currentLog = currentSD * (_one - currentRatio * depositFeeRatioScale).log10();
+        SD59x18 resultingLog = resultingSD * (_one - resultingRatio * depositFeeRatioScale).log10();
 
         SD59x18 feeSD = depositFeeScale * (currentLog - resultingLog);
 
@@ -348,7 +351,7 @@ contract FeeCalculator is IFeeCalculator, Ownable {
     /// @param current The current balance of the pool.
     /// @param total The total supply of the pool.
     /// @return The calculated redemption fee.
-    function getRedemptionFee(uint256 amount, uint256 current, uint256 total) private view returns (uint256) {
+    function _getRedemptionFee(uint256 amount, uint256 current, uint256 total) private view returns (uint256) {
         require(
             total >= current,
             "The total volume in the pool must be greater than or equal to the volume for an individual asset"
@@ -367,7 +370,7 @@ contract FeeCalculator is IFeeCalculator, Ownable {
         SD59x18 currentSD = sd(int256(current));
         SD59x18 resultingSD = currentSD - amountSD;
 
-        (SD59x18 currentRatio, SD59x18 resultingRatio) = getRatiosRedemption(amountSD, currentSD, sd(int256(total)));
+        (SD59x18 currentRatio, SD59x18 resultingRatio) = _getRatiosRedemption(amountSD, currentSD, sd(int256(total)));
 
         //redemption_fee = scale * (resultingSD * log10(b+shift) - currentSD * log10(a+shift)) + constant*amount;
         SD59x18 currentLog = currentSD * (currentRatio + redemptionFeeShift).log10();
@@ -383,14 +386,14 @@ contract FeeCalculator is IFeeCalculator, Ownable {
 
              Case exists only if asset pool domination is > 90% and amount is ~1e-18 of that asset in the pool
         */
-        if (feeSD < zero) {
+        if (feeSD < _zero) {
             return intoUint256(amountSD * dustAssetRedemptionRelativeFee);
         }
 
         return intoUint256(feeSD);
     }
 
-    function calculateFee(
+    function _calculateFee(
         uint256 totalPoolSupply,
         uint256 projectSupply,
         uint256 requestedAmount,
@@ -404,12 +407,5 @@ contract FeeCalculator is IFeeCalculator, Ownable {
         require(feeAmount > 0, "Fee must be greater than 0");
 
         return calculateFeeShares(feeAmount);
-    }
-
-    /// @notice Returns the current fee setup.
-    /// @return recipients shares The fee recipients and their share of the total fee.
-    function getFeeSetup() external view returns (address[] memory recipients, uint256[] memory shares) {
-        recipients = _recipients;
-        shares = _shares;
     }
 }

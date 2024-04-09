@@ -12,29 +12,21 @@ contract FeeCalculatorTCO2Test is AbstractFeeCalculatorTest {
         mockPool.setTCO2Supply(address(token), supply);
     }
 
-    function calculateDepositFees(
-        address pool,
-        address token,
-        uint256 amount
-    ) internal view override returns (FeeDistribution memory) {
-        return
-            feeCalculator.calculateDepositFees(
-                address(pool),
-                address(token),
-                amount
-            );
+    function calculateDepositFees(address pool, address token, uint256 amount)
+        internal
+        view
+        override
+        returns (FeeDistribution memory)
+    {
+        return feeCalculator.calculateDepositFees(address(pool), address(token), amount);
     }
 
-    function calculateRedemptionFees(
-        address pool,
-        address[] memory tokens,
-        uint256[] memory amounts
-    ) internal view override returns (FeeDistribution memory) {
-        return
-            feeCalculator.calculateRedemptionFees(
-                address(pool),
-                tokens,
-                amounts
-            );
+    function calculateRedemptionFees(address pool, address[] memory tokens, uint256[] memory amounts)
+        internal
+        view
+        override
+        returns (FeeDistribution memory)
+    {
+        return feeCalculator.calculateRedemptionFees(address(pool), tokens, amounts);
     }
 }

@@ -33,7 +33,11 @@ abstract contract AbstractFeeCalculatorLaunchParamsTest is Test {
     }
 
     function setProjectSupply(address token, uint256 supply) internal virtual;
-    function calculateDepositFees(address pool, address token, uint256 amount) internal view virtual returns (FeeDistribution memory);
+    function calculateDepositFees(address pool, address token, uint256 amount)
+        internal
+        view
+        virtual
+        returns (FeeDistribution memory);
 
     function testCalculateDepositFeesNormalCase() public {
         // Arrange

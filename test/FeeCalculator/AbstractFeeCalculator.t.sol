@@ -37,8 +37,16 @@ abstract contract AbstractFeeCalculatorTest is Test {
     }
 
     function setProjectSupply(address token, uint256 supply) internal virtual;
-    function calculateDepositFees(address pool, address token, uint256 amount) internal view virtual returns (FeeDistribution memory);
-    function calculateRedemptionFees(address pool, address[] memory tokens, uint256[] memory amounts) internal view virtual returns (FeeDistribution memory);
+    function calculateDepositFees(address pool, address token, uint256 amount)
+        internal
+        view
+        virtual
+        returns (FeeDistribution memory);
+    function calculateRedemptionFees(address pool, address[] memory tokens, uint256[] memory amounts)
+        internal
+        view
+        virtual
+        returns (FeeDistribution memory);
 
     function testFeeSetupEmpty() public {
         address[] memory recipients = new address[](0);
@@ -102,8 +110,7 @@ abstract contract AbstractFeeCalculatorTest is Test {
         setProjectSupply(address(mockToken), 500 * 1e18);
 
         // Act
-        FeeDistribution memory feeDistribution =
-            calculateRedemptionFees(address(mockPool), tco2s, redemptionAmounts);
+        FeeDistribution memory feeDistribution = calculateRedemptionFees(address(mockPool), tco2s, redemptionAmounts);
         address[] memory recipients = feeDistribution.recipients;
         uint256[] memory fees = feeDistribution.shares;
 
@@ -127,8 +134,7 @@ abstract contract AbstractFeeCalculatorTest is Test {
         setProjectSupply(address(mockToken), 1 * 1e18);
 
         // Act
-        FeeDistribution memory feeDistribution =
-            calculateRedemptionFees(address(mockPool), tco2s, redemptionAmounts);
+        FeeDistribution memory feeDistribution = calculateRedemptionFees(address(mockPool), tco2s, redemptionAmounts);
         address[] memory recipients = feeDistribution.recipients;
         uint256[] memory fees = feeDistribution.shares;
 
@@ -153,8 +159,7 @@ abstract contract AbstractFeeCalculatorTest is Test {
         setProjectSupply(address(mockToken), 1e6 * 1e18);
 
         // Act
-        FeeDistribution memory feeDistribution =
-            calculateRedemptionFees(address(mockPool), tco2s, redemptionAmounts);
+        FeeDistribution memory feeDistribution = calculateRedemptionFees(address(mockPool), tco2s, redemptionAmounts);
         address[] memory recipients = feeDistribution.recipients;
         uint256[] memory fees = feeDistribution.shares;
 
@@ -594,8 +599,7 @@ abstract contract AbstractFeeCalculatorTest is Test {
         setProjectSupply(address(mockToken), 1000);
 
         // Act
-        FeeDistribution memory feeDistribution =
-            calculateRedemptionFees(address(mockPool), tco2s, redemptionAmounts);
+        FeeDistribution memory feeDistribution = calculateRedemptionFees(address(mockPool), tco2s, redemptionAmounts);
         address[] memory recipients = feeDistribution.recipients;
         uint256[] memory fees = feeDistribution.shares;
 
@@ -679,8 +683,7 @@ abstract contract AbstractFeeCalculatorTest is Test {
         setProjectSupply(address(mockToken), supply - 1);
 
         // Act
-        FeeDistribution memory feeDistribution =
-            calculateRedemptionFees(address(mockPool), tco2s, redemptionAmounts);
+        FeeDistribution memory feeDistribution = calculateRedemptionFees(address(mockPool), tco2s, redemptionAmounts);
         address[] memory recipients = feeDistribution.recipients;
         uint256[] memory fees = feeDistribution.shares;
 
@@ -703,8 +706,7 @@ abstract contract AbstractFeeCalculatorTest is Test {
         setProjectSupply(address(mockToken), 55661911070827884041095553095);
 
         // Act
-        FeeDistribution memory feeDistribution =
-            calculateRedemptionFees(address(mockPool), tco2s, redemptionAmounts);
+        FeeDistribution memory feeDistribution = calculateRedemptionFees(address(mockPool), tco2s, redemptionAmounts);
         address[] memory recipients = feeDistribution.recipients;
         uint256[] memory fees = feeDistribution.shares;
 
@@ -848,8 +850,7 @@ abstract contract AbstractFeeCalculatorTest is Test {
         feeCalculator.setDepositFeeScale(0.09 * 1e18);
 
         // Act
-        FeeDistribution memory feeDistribution =
-            calculateDepositFees(address(mockPool), address(mockToken), 100 * 1e18);
+        FeeDistribution memory feeDistribution = calculateDepositFees(address(mockPool), address(mockToken), 100 * 1e18);
         uint256[] memory fees = feeDistribution.shares;
 
         // Assert
@@ -864,8 +865,7 @@ abstract contract AbstractFeeCalculatorTest is Test {
         feeCalculator.setDepositFeeRatioScale(0.2 * 1e18);
 
         // Act
-        FeeDistribution memory feeDistribution =
-            calculateDepositFees(address(mockPool), address(mockToken), 100 * 1e18);
+        FeeDistribution memory feeDistribution = calculateDepositFees(address(mockPool), address(mockToken), 100 * 1e18);
         uint256[] memory fees = feeDistribution.shares;
 
         // Assert
@@ -880,8 +880,7 @@ abstract contract AbstractFeeCalculatorTest is Test {
         feeCalculator.setSingleAssetDepositRelativeFee(0.67 * 1e18);
 
         // Act
-        FeeDistribution memory feeDistribution =
-            calculateDepositFees(address(mockPool), address(mockToken), 100 * 1e18);
+        FeeDistribution memory feeDistribution = calculateDepositFees(address(mockPool), address(mockToken), 100 * 1e18);
         uint256[] memory fees = feeDistribution.shares;
 
         // Assert
@@ -901,8 +900,7 @@ abstract contract AbstractFeeCalculatorTest is Test {
         feeCalculator.setRedemptionFeeScale(0.4 * 1e18);
 
         // Act
-        FeeDistribution memory feeDistribution =
-            calculateRedemptionFees(address(mockPool), tco2s, redemptionAmounts);
+        FeeDistribution memory feeDistribution = calculateRedemptionFees(address(mockPool), tco2s, redemptionAmounts);
         uint256[] memory fees = feeDistribution.shares;
 
         // Assert
@@ -922,8 +920,7 @@ abstract contract AbstractFeeCalculatorTest is Test {
         feeCalculator.setRedemptionFeeShift(0.5 * 1e18);
 
         // Act
-        FeeDistribution memory feeDistribution =
-            calculateRedemptionFees(address(mockPool), tco2s, redemptionAmounts);
+        FeeDistribution memory feeDistribution = calculateRedemptionFees(address(mockPool), tco2s, redemptionAmounts);
         uint256[] memory fees = feeDistribution.shares;
 
         // Assert
@@ -943,8 +940,7 @@ abstract contract AbstractFeeCalculatorTest is Test {
         feeCalculator.setSingleAssetRedemptionRelativeFee(0.83 * 1e18);
 
         // Act
-        FeeDistribution memory feeDistribution =
-            calculateRedemptionFees(address(mockPool), tco2s, redemptionAmounts);
+        FeeDistribution memory feeDistribution = calculateRedemptionFees(address(mockPool), tco2s, redemptionAmounts);
         uint256[] memory fees = feeDistribution.shares;
 
         assertEq(fees[0], 83 * 1e18);
@@ -965,8 +961,7 @@ abstract contract AbstractFeeCalculatorTest is Test {
         feeCalculator.setDustAssetRedemptionRelativeFee(0.91 * 1e18);
 
         // Act
-        FeeDistribution memory feeDistribution =
-            calculateRedemptionFees(address(mockPool), tco2s, redemptionAmounts);
+        FeeDistribution memory feeDistribution = calculateRedemptionFees(address(mockPool), tco2s, redemptionAmounts);
         uint256[] memory fees = feeDistribution.shares;
 
         // Assert

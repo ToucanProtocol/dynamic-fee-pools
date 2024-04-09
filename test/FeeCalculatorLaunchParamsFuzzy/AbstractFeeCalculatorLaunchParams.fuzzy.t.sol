@@ -34,7 +34,11 @@ abstract contract AbstractFeeCalculatorLaunchParamsTestFuzzy is Test {
     }
 
     function setProjectSupply(address token, uint256 supply) internal virtual;
-    function calculateDepositFees(address pool, address token, uint256 amount) internal view virtual returns (FeeDistribution memory);
+    function calculateDepositFees(address pool, address token, uint256 amount)
+        internal
+        view
+        virtual
+        returns (FeeDistribution memory);
     function testCalculateDepositFeesFuzzy(uint256 depositAmount, uint256 current, uint256 total) public virtual;
     function testCalculateDepositFeesFuzzy_DepositDividedIntoMultipleChunksFeesGreaterOrEqualToOneDeposit(
         uint8 numberOfDeposits,
@@ -62,7 +66,6 @@ abstract contract AbstractFeeCalculatorLaunchParamsTestFuzzy is Test {
         vm.expectRevert("Fee must be greater than 0");
         calculateDepositFees(address(mockPool), address(mockToken), depositAmount);
     }
-
 
     function testCalculateDepositFeesFuzzy_DepositDividedIntoOneChunkFeesGreaterOrEqualToOneDeposit(
         uint256 depositAmount,

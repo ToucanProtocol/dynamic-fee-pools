@@ -14,18 +14,13 @@ contract FeeCalculatorLaunchParamsERC1155TestFuzzy is AbstractFeeCalculatorLaunc
         mockPool.setERC1155Supply(address(token), 1, supply);
     }
 
-    function calculateDepositFees(
-        address pool,
-        address token,
-        uint256 amount
-    ) internal view override returns (FeeDistribution memory) {
-        return
-            feeCalculator.calculateDepositFees(
-                address(pool),
-                address(token),
-                1,
-                amount
-            );
+    function calculateDepositFees(address pool, address token, uint256 amount)
+        internal
+        view
+        override
+        returns (FeeDistribution memory)
+    {
+        return feeCalculator.calculateDepositFees(address(pool), address(token), 1, amount);
     }
 
     function testCalculateDepositFeesFuzzy(uint256 depositAmount, uint256 current, uint256 total) public override {

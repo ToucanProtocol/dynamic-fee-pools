@@ -9,22 +9,18 @@ import "./AbstractFeeCalculator.fuzzy.t.sol";
 
 contract FeeCalculatorTCO2TestFuzzy is AbstractFeeCalculatorTestFuzzy {
     using TestUtilities for uint256[];
-    
+
     function setProjectSupply(address token, uint256 supply) internal override {
         mockPool.setTCO2Supply(address(token), supply);
     }
 
-    function calculateDepositFees(
-        address pool,
-        address token,
-        uint256 amount
-    ) internal view override returns (FeeDistribution memory) {
-        return
-            feeCalculator.calculateDepositFees(
-                address(pool),
-                address(token),
-                amount
-            );
+    function calculateDepositFees(address pool, address token, uint256 amount)
+        internal
+        view
+        override
+        returns (FeeDistribution memory)
+    {
+        return feeCalculator.calculateDepositFees(address(pool), address(token), amount);
     }
 
     function testCalculateDepositFeesFuzzy(uint256 depositAmount, uint256 current, uint256 total) public {
@@ -134,7 +130,6 @@ contract FeeCalculatorTCO2TestFuzzy is AbstractFeeCalculatorTestFuzzy {
         // @dev we allow for 0.1% error
         assertGe(1001 * feeFromDividedRedemptions / 1000, oneTimeFee);
     }
-
 
     function testCalculateDepositFeesFuzzy_DepositDividedIntoMultipleChunksFeesGreaterOrEqualToOneDeposit(
         uint8 numberOfDeposits,

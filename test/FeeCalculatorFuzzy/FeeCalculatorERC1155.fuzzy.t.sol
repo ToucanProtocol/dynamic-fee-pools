@@ -9,25 +9,19 @@ import "./AbstractFeeCalculator.fuzzy.t.sol";
 
 contract FeeCalculatorERC1155TestFuzzy is AbstractFeeCalculatorTestFuzzy {
     using TestUtilities for uint256[];
-    
+
     function setProjectSupply(address token, uint256 supply) internal override {
         mockPool.setERC1155Supply(address(token), 1, supply);
     }
 
-    function calculateDepositFees(
-        address pool,
-        address token,
-        uint256 amount
-    ) internal view override returns (FeeDistribution memory) {
-        return
-            feeCalculator.calculateDepositFees(
-                address(pool),
-                address(token),
-                1,
-                amount
-            );
+    function calculateDepositFees(address pool, address token, uint256 amount)
+        internal
+        view
+        override
+        returns (FeeDistribution memory)
+    {
+        return feeCalculator.calculateDepositFees(address(pool), address(token), 1, amount);
     }
-
 
     function testCalculateDepositFeesFuzzy(uint256 depositAmount, uint256 current, uint256 total) public {
         //vm.assume(depositAmount > 0);
@@ -141,7 +135,6 @@ contract FeeCalculatorERC1155TestFuzzy is AbstractFeeCalculatorTestFuzzy {
         // @dev we allow for 0.1% error
         assertGe(1001 * feeFromDividedRedemptions / 1000, oneTimeFee);
     }
-
 
     function testCalculateDepositFeesFuzzy_DepositDividedIntoMultipleChunksFeesGreaterOrEqualToOneDeposit(
         uint8 numberOfDeposits,

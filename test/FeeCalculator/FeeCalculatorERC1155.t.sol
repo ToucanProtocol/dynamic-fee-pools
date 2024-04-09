@@ -12,33 +12,23 @@ contract FeeCalculatorERC1155Test is AbstractFeeCalculatorTest {
         mockPool.setERC1155Supply(address(token), 1, supply);
     }
 
-    function calculateDepositFees(
-        address pool,
-        address token,
-        uint256 amount
-    ) internal view override returns (FeeDistribution memory) {
-        return
-            feeCalculator.calculateDepositFees(
-                address(pool),
-                address(token),
-                1,
-                amount
-            );
+    function calculateDepositFees(address pool, address token, uint256 amount)
+        internal
+        view
+        override
+        returns (FeeDistribution memory)
+    {
+        return feeCalculator.calculateDepositFees(address(pool), address(token), 1, amount);
     }
 
-    function calculateRedemptionFees(
-        address pool,
-        address[] memory tokens,
-        uint256[] memory amounts
-    ) internal view override returns (FeeDistribution memory) {
+    function calculateRedemptionFees(address pool, address[] memory tokens, uint256[] memory amounts)
+        internal
+        view
+        override
+        returns (FeeDistribution memory)
+    {
         uint256[] memory tokenIds = new uint256[](tokens.length);
         tokenIds[0] = 1;
-        return
-            feeCalculator.calculateRedemptionFees(
-                address(pool),
-                tokens,
-                tokenIds,
-                amounts
-            );
+        return feeCalculator.calculateRedemptionFees(address(pool), tokens, tokenIds, amounts);
     }
 }

@@ -16,8 +16,14 @@ interface IPool {
 
     /// @notice Exposes the total TCO2 supply of a project in a pool,
     /// tracked as the aggregation of deposit, redemmption and bridge actions
-    /// @param projectTokenId The token id of the project as it's tracked
-    /// in the CarbonProjects contract
+    /// @param tco2 The TCO2 address of the project
     /// @return supply Current supply of a project in the pool
-    function totalPerProjectTCO2Supply(uint256 projectTokenId) external view returns (uint256 supply);
+    function totalPerProjectSupply(address tco2) external view returns (uint256 supply);
+
+    /// @notice Exposes the total TCO2 supply of a project in a pool,
+    /// tracked as the aggregation of deposit, redemmption and bridge actions
+    /// @param erc1155 The ERC1155 address of the project
+    /// @param tokenId The token id of the project
+    /// @return supply Current supply of a project in the pool
+    function totalPerProjectSupply(address erc1155, uint256 tokenId) external view returns (uint256 supply);
 }

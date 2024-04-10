@@ -5,50 +5,22 @@
 // If you encounter a vulnerability or an issue, please contact <info@neutralx.com>
 pragma solidity ^0.8.13;
 
-import {Test, console2} from "forge-std/Test.sol";
-import {FeeCalculator} from "../src/FeeCalculator.sol";
-import {FeeDistribution} from "../src/interfaces/IFeeCalculator.sol";
-import {SD59x18, sd, intoUint256 as sdIntoUint256} from "@prb/math/src/SD59x18.sol";
-import {UD60x18, ud, intoUint256} from "@prb/math/src/UD60x18.sol";
-import "./TestUtilities.sol";
+import "./AbstractFeeCalculator.fuzzy.t.sol";
 
-contract FeeCalculatorTestFuzzy is Test {
+contract FeeCalculatorERC1155TestFuzzy is AbstractFeeCalculatorTestFuzzy {
     using TestUtilities for uint256[];
 
-    FeeCalculator public feeCalculator;
-    MockPool public mockPool;
-    MockToken public mockToken;
-    address public feeRecipient = 0xAb5801a7D398351b8bE11C439e05C5B3259aeC9B;
-
-    function setUp() public {
-        feeCalculator = new FeeCalculator();
-        mockPool = new MockPool();
-        mockToken = new MockToken();
-        address[] memory recipients = new address[](1);
-        recipients[0] = feeRecipient;
-        uint256[] memory feeShares = new uint256[](1);
-        feeShares[0] = 100;
-        feeCalculator.feeSetup(recipients, feeShares);
+    function setProjectSupply(address token, uint256 supply) internal override {
+        mockPool.setERC1155Supply(address(token), 1, supply);
     }
 
-    function testCalculateDepositFees_FuzzyExtremelySmallDepositsToLargePool_ShouldThrowError(uint256 depositAmount)
-        public
+    function calculateDepositFees(address pool, address token, uint256 amount)
+        internal
+        view
+        override
+        returns (FeeDistribution memory)
     {
-        vm.assume(depositAmount <= 1e-14 * 1e18);
-        vm.assume(depositAmount >= 10);
-
-        //Note! This is a bug, where a very small deposit to a very large pool
-        //causes a == b because of precision limited by ratioDenominator in FeeCalculator
-
-        // Arrange
-        // Set up your test data
-
-        // Set up mock pool
-        mockPool.setTotalSupply(1e12 * 1e18);
-        mockPool.setProjectSupply(1, 1e9 * 1e18);
-
-        vm.expectRevert("Fee must be greater than 0");
-        feeCalculator.calculateDepositFees(address(mockPool), address(mockToken), depositAmount);
+        return feeCalculator.calculateDepositFees(address(pool), address(token), 1, amount);
     }
 
     function testCalculateDepositFeesFuzzy(uint256 depositAmount, uint256 current, uint256 total) public {
@@ -65,28 +37,17 @@ contract FeeCalculatorTestFuzzy is Test {
 
         // Set up mock pool
         mockPool.setTotalSupply(total);
-        mockPool.setProjectSupply(1, current);
+        mockPool.setTCO2Supply(address(mockToken), current);
 
         // Act
-        try feeCalculator.calculateDepositFees(address(mockPool), address(mockToken), depositAmount) {}
+        try feeCalculator.calculateDepositFees(address(mockPool), address(mockToken), 1, depositAmount) {}
         catch Error(string memory reason) {
             assertTrue(
                 keccak256(bytes("Fee must be greater than 0")) == keccak256(bytes(reason))
-                    || keccak256(bytes("Fee must be lower or equal to deposit amount")) == keccak256(bytes(reason)),
-                "error should be 'Fee must be greater than 0' or 'Fee must be lower or equal to deposit amount'"
+                    || keccak256(bytes("Fee must be lower or equal to requested amount")) == keccak256(bytes(reason)),
+                "error should be 'Fee must be greater than 0' or 'Fee must be lower or equal to requested amount'"
             );
         }
-    }
-
-    function testCalculateRedemptionFeesFuzzy_RedemptionDividedIntoOneChunkFeesGreaterOrEqualToOneRedemption(
-        uint128 _redemptionAmount,
-        uint128 _current,
-        uint128 _total
-    ) public {
-        //just a sanity check
-        testCalculateRedemptionFeesFuzzy_RedemptionDividedIntoMultipleChunksFeesGreaterOrEqualToOneRedemption(
-            1, _redemptionAmount, _current, _total
-        );
     }
 
     function testCalculateRedemptionFeesFuzzy_RedemptionDividedIntoMultipleChunksFeesGreaterOrEqualToOneRedemption(
@@ -94,7 +55,7 @@ contract FeeCalculatorTestFuzzy is Test {
         uint128 _redemptionAmount,
         uint128 _current,
         uint128 _total
-    ) public {
+    ) public override {
         vm.assume(0 < numberOfRedemptions);
         vm.assume(_total >= _current);
         vm.assume(_redemptionAmount <= _current);
@@ -114,18 +75,20 @@ contract FeeCalculatorTestFuzzy is Test {
 
         // Set up mock pool
         mockPool.setTotalSupply(total);
-        mockPool.setProjectSupply(1, current);
+        setProjectSupply(address(mockToken), current);
         uint256 oneTimeFee = 0;
         bool oneTimeRedemptionFailed = false;
         uint256 multipleTimesRedemptionFailedCount = 0;
 
         address[] memory tco2s = new address[](1);
         tco2s[0] = address(mockToken);
+        uint256[] memory tokenIds = new uint256[](1);
+        tokenIds[0] = 1;
         uint256[] memory redemptionAmounts = new uint256[](1);
         redemptionAmounts[0] = redemptionAmount;
 
         // Act
-        try feeCalculator.calculateRedemptionFees(address(mockPool), tco2s, redemptionAmounts) returns (
+        try feeCalculator.calculateRedemptionFees(address(mockPool), tco2s, tokenIds, redemptionAmounts) returns (
             FeeDistribution memory feeDistribution
         ) {
             oneTimeFee = feeDistribution.shares.sumOf();
@@ -133,8 +96,8 @@ contract FeeCalculatorTestFuzzy is Test {
             oneTimeRedemptionFailed = true;
             assertTrue(
                 keccak256(bytes("Fee must be greater than 0")) == keccak256(bytes(reason))
-                    || keccak256(bytes("Fee must be lower or equal to deposit amount")) == keccak256(bytes(reason)),
-                "error should be 'Fee must be greater than 0' or 'Fee must be lower or equal to deposit amount'"
+                    || keccak256(bytes("Fee must be lower or equal to requested amount")) == keccak256(bytes(reason)),
+                "error should be 'Fee must be greater than 0' or 'Fee must be lower or equal to requested amount'"
             );
         }
 
@@ -151,20 +114,20 @@ contract FeeCalculatorTestFuzzy is Test {
         for (uint256 i = 0; i < numberOfRedemptions; i++) {
             uint256 redemption = equalRedemption + (i == 0 ? restRedemption : 0);
             redemptionAmounts[0] = redemption;
-            try feeCalculator.calculateRedemptionFees(address(mockPool), tco2s, redemptionAmounts) returns (
+            try feeCalculator.calculateRedemptionFees(address(mockPool), tco2s, tokenIds, redemptionAmounts) returns (
                 FeeDistribution memory feeDistribution
             ) {
                 feeFromDividedRedemptions += feeDistribution.shares.sumOf();
                 total -= redemption;
                 current -= redemption;
                 mockPool.setTotalSupply(total);
-                mockPool.setProjectSupply(1, current);
+                setProjectSupply(address(mockToken), current);
             } catch Error(string memory reason) {
                 multipleTimesRedemptionFailedCount++;
                 assertTrue(
                     keccak256(bytes("Fee must be greater than 0")) == keccak256(bytes(reason))
-                        || keccak256(bytes("Fee must be lower or equal to deposit amount")) == keccak256(bytes(reason)),
-                    "error should be 'Fee must be greater than 0' or 'Fee must be lower or equal to deposit amount'"
+                        || keccak256(bytes("Fee must be lower or equal to requested amount")) == keccak256(bytes(reason)),
+                    "error should be 'Fee must be greater than 0' or 'Fee must be lower or equal to requested amount'"
                 );
             }
         }
@@ -173,23 +136,12 @@ contract FeeCalculatorTestFuzzy is Test {
         assertGe(1001 * feeFromDividedRedemptions / 1000, oneTimeFee);
     }
 
-    function testCalculateDepositFeesFuzzy_DepositDividedIntoOneChunkFeesGreaterOrEqualToOneDeposit(
-        uint256 depositAmount,
-        uint256 current,
-        uint256 total
-    ) public {
-        //just a sanity check
-        testCalculateDepositFeesFuzzy_DepositDividedIntoMultipleChunksFeesGreaterOrEqualToOneDeposit(
-            1, depositAmount, current, total
-        );
-    }
-
     function testCalculateDepositFeesFuzzy_DepositDividedIntoMultipleChunksFeesGreaterOrEqualToOneDeposit(
         uint8 numberOfDeposits,
         uint256 depositAmount,
         uint256 current,
         uint256 total
-    ) public {
+    ) public override {
         vm.assume(0 < numberOfDeposits);
         vm.assume(total >= current);
 
@@ -204,12 +156,12 @@ contract FeeCalculatorTestFuzzy is Test {
         uint256 multipleTimesDepositFailedCount = 0;
         // Set up mock pool
         mockPool.setTotalSupply(total);
-        mockPool.setProjectSupply(1, current);
+        setProjectSupply(address(mockToken), current);
 
         uint256 oneTimeFee = 0;
 
         // Act
-        try feeCalculator.calculateDepositFees(address(mockPool), address(mockToken), depositAmount) returns (
+        try feeCalculator.calculateDepositFees(address(mockPool), address(mockToken), 1, depositAmount) returns (
             FeeDistribution memory feeDistribution
         ) {
             oneTimeFee = feeDistribution.shares.sumOf();
@@ -217,8 +169,8 @@ contract FeeCalculatorTestFuzzy is Test {
             oneTimeDepositFailed = true;
             assertTrue(
                 keccak256(bytes("Fee must be greater than 0")) == keccak256(bytes(reason))
-                    || keccak256(bytes("Fee must be lower or equal to deposit amount")) == keccak256(bytes(reason)),
-                "error should be 'Fee must be greater than 0' or 'Fee must be lower or equal to deposit amount'"
+                    || keccak256(bytes("Fee must be lower or equal to requested amount")) == keccak256(bytes(reason)),
+                "error should be 'Fee must be greater than 0' or 'Fee must be lower or equal to requested amount'"
             );
         }
 
@@ -229,20 +181,20 @@ contract FeeCalculatorTestFuzzy is Test {
         for (uint256 i = 0; i < numberOfDeposits; i++) {
             uint256 deposit = equalDeposit + (i == 0 ? restDeposit : 0);
 
-            try feeCalculator.calculateDepositFees(address(mockPool), address(mockToken), deposit) returns (
+            try feeCalculator.calculateDepositFees(address(mockPool), address(mockToken), 1, deposit) returns (
                 FeeDistribution memory feeDistribution
             ) {
                 feeFromDividedDeposits += feeDistribution.shares.sumOf();
                 total += deposit;
                 current += deposit;
                 mockPool.setTotalSupply(total);
-                mockPool.setProjectSupply(1, current);
+                setProjectSupply(address(mockToken), current);
             } catch Error(string memory reason) {
                 multipleTimesDepositFailedCount++;
                 assertTrue(
                     keccak256(bytes("Fee must be greater than 0")) == keccak256(bytes(reason))
-                        || keccak256(bytes("Fee must be lower or equal to deposit amount")) == keccak256(bytes(reason)),
-                    "error should be 'Fee must be greater than 0' or 'Fee must be lower or equal to deposit amount'"
+                        || keccak256(bytes("Fee must be lower or equal to requested amount")) == keccak256(bytes(reason)),
+                    "error should be 'Fee must be greater than 0' or 'Fee must be lower or equal to requested amount'"
                 );
             }
         }
@@ -256,51 +208,5 @@ contract FeeCalculatorTestFuzzy is Test {
                 assertGe((maximumAllowedErrorPercentage + 100) * feeFromDividedDeposits / 100, oneTimeFee);
             } //we add 1% tolerance for numerical errors
         }
-    }
-
-    function testFeeSetupFuzzy(address[] memory recipients, uint8 firstShare) public {
-        vm.assume(recipients.length <= 100);
-        vm.assume(recipients.length > 1); //at least two recipients
-        vm.assume(firstShare <= 100);
-        vm.assume(firstShare > 0);
-
-        uint256[] memory feeShares = new uint256[](recipients.length);
-
-        uint256 shareLeft = 100 - firstShare;
-        feeShares[0] = firstShare;
-        uint256 equalShare = shareLeft / (recipients.length - 1);
-        uint256 leftShare = shareLeft % (recipients.length - 1);
-
-        for (uint256 i = 1; i < recipients.length; i++) {
-            feeShares[i] = equalShare;
-        }
-        feeShares[recipients.length - 1] += leftShare; //last one gets additional share
-        feeCalculator.feeSetup(recipients, feeShares);
-
-        uint256 depositAmount = 100 * 1e18;
-        // Set up mock pool
-        mockPool.setTotalSupply(200 * 1e18);
-        mockPool.setProjectSupply(1, 100 * 1e18);
-
-        // Act
-        FeeDistribution memory feeDistribution =
-            feeCalculator.calculateDepositFees(address(mockPool), address(mockToken), depositAmount);
-        address[] memory gotRecipients = feeDistribution.recipients;
-        uint256[] memory fees = feeDistribution.shares;
-
-        // Assert
-        assertEq(gotRecipients.length, recipients.length);
-        for (uint256 i = 0; i < recipients.length; i++) {
-            assertEq(gotRecipients[i], recipients[i]);
-        }
-
-        assertEq(fees.sumOf(), 11526003792614720250);
-
-        assertApproxEqAbs(fees[0], 11526003792614720250 * uint256(firstShare) / 100, recipients.length - 1 + 1); //first fee might get the rest from division
-
-        for (uint256 i = 1; i < recipients.length - 1; i++) {
-            assertApproxEqAbs(fees[i], 11526003792614720250 * equalShare / 100, 1);
-        }
-        assertApproxEqAbs(fees[recipients.length - 1], 11526003792614720250 * (equalShare + leftShare) / 100, 1);
     }
 }

@@ -166,7 +166,7 @@ contract FeeCalculator is IFeeCalculator, Ownable {
         require(depositAmount > 0, "depositAmount must be > 0");
 
         feeDistribution =
-            _calculateFee(_getTotalSupply(pool), IPool(pool).totalPerProjectSupply(tco2), depositAmount, _getDepositFee);
+            _calculateFee(depositAmount, IPool(pool).totalPerProjectSupply(tco2), _getTotalSupply(pool), _getDepositFee);
     }
 
     /// @notice Calculates the fee shares and recipients based on the total fee.
@@ -210,7 +210,7 @@ contract FeeCalculator is IFeeCalculator, Ownable {
         uint256 redemptionAmount = redemptionAmounts[0];
 
         feeDistribution = _calculateFee(
-            _getTotalSupply(pool), IPool(pool).totalPerProjectSupply(tco2), redemptionAmount, _getRedemptionFee
+            redemptionAmount, IPool(pool).totalPerProjectSupply(tco2), _getTotalSupply(pool), _getRedemptionFee
         );
     }
 
@@ -230,7 +230,7 @@ contract FeeCalculator is IFeeCalculator, Ownable {
         require(depositAmount > 0, "depositAmount must be > 0");
 
         feeDistribution = _calculateFee(
-            _getTotalSupply(pool), IPool(pool).totalPerProjectSupply(erc1155, tokenId), depositAmount, _getDepositFee
+            depositAmount, IPool(pool).totalPerProjectSupply(erc1155, tokenId), _getTotalSupply(pool), _getDepositFee
         );
     }
 
@@ -255,9 +255,9 @@ contract FeeCalculator is IFeeCalculator, Ownable {
         uint256 redemptionAmount = redemptionAmounts[0];
 
         feeDistribution = _calculateFee(
-            _getTotalSupply(pool),
-            IPool(pool).totalPerProjectSupply(erc1155, tokenId),
             redemptionAmount,
+            IPool(pool).totalPerProjectSupply(erc1155, tokenId),
+            _getTotalSupply(pool),
             _getRedemptionFee
         );
     }
@@ -394,9 +394,9 @@ contract FeeCalculator is IFeeCalculator, Ownable {
     }
 
     function _calculateFee(
-        uint256 totalPoolSupply,
-        uint256 projectSupply,
         uint256 requestedAmount,
+        uint256 projectSupply,
+        uint256 totalPoolSupply,
         function(uint256, uint256, uint256) view returns (uint256) calculator
     ) internal view returns (FeeDistribution memory) {
         require(requestedAmount > 0, "requested amount must be > 0");

@@ -7,8 +7,6 @@ pragma solidity ^0.8.0;
 
 import {IERC20} from "@openzeppelin/contracts/token/ERC20/IERC20.sol";
 
-import {VintageData} from "../src/interfaces/ITCO2.sol";
-
 library TestUtilities {
     function sumOf(uint256[] memory numbers) internal pure returns (uint256) {
         uint256 sum = 0;
@@ -94,22 +92,5 @@ contract MockToken is IERC20 {
 
     function totalSupply() external pure returns (uint256) {
         return 0;
-    }
-
-    function getVintageData() external pure returns (VintageData memory) {
-        return VintageData({
-            name: "test",
-            startTime: 0,
-            endTime: 0,
-            projectTokenId: 1,
-            totalVintageQuantity: 0,
-            isCorsiaCompliant: false,
-            isCCPcompliant: false,
-            coBenefits: "",
-            correspAdjustment: "",
-            additionalCertification: "",
-            uri: "",
-            registry: ""
-        });
     }
 }

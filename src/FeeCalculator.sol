@@ -17,6 +17,12 @@ import "./interfaces/IPool.sol";
 /// @notice This contract calculates deposit and redemption fees for a given pool.
 /// @dev It implements the IFeeCalculator interface.
 contract FeeCalculator is IFeeCalculator, Ownable {
+    /// @dev Version-related parameters. VERSION keeps track of production
+    /// releases. VERSION_RELEASE_CANDIDATE keeps track of iterations
+    /// of a VERSION in our staging environment.
+    string public constant VERSION = "1.0.0";
+    uint256 public constant VERSION_RELEASE_CANDIDATE = 1;
+
     SD59x18 private _zero = sd(0);
     SD59x18 private _one = sd(1e18);
 

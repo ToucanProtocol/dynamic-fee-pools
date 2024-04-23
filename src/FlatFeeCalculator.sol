@@ -178,7 +178,7 @@ contract FlatFeeCalculator is IFeeCalculator, Ownable {
 
     function sumOf(uint256[] memory array) private pure returns (uint256) {
         uint256 total = 0;
-        for (uint i = 0; i < array.length; i++) {
+        for (uint256 i = 0; i < array.length; i++) {
             total += array[i];
         }
         return total;

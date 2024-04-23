@@ -125,7 +125,7 @@ contract FlatFeeCalculatorTestFuzzy is Test {
         assertEq(feeDistribution.recipients.length, feeDistribution.shares.length, "array length mismatch");
         assertEq(recipients[0], feeRecipient);
 
-        uint256 expected = 3*redemptionAmount*feeCalculator.feeBasisPoints() / 10000;
+        uint256 expected = 3 * redemptionAmount * feeCalculator.feeBasisPoints() / 10000;
         assertEq(fees[0], expected);
     }
 
@@ -163,7 +163,11 @@ contract FlatFeeCalculatorTestFuzzy is Test {
         assertEq(feeDistribution.shares[0], expected);
     }
 
-    function testCalculateRedemptionAmount_TCO2(uint256 redemptionAmount1, uint256 redemptionAmount2, uint256 redemptionAmount3) public {
+    function testCalculateRedemptionAmount_TCO2(
+        uint256 redemptionAmount1,
+        uint256 redemptionAmount2,
+        uint256 redemptionAmount3
+    ) public {
         // Arrange
         vm.assume(redemptionAmount1 > 100);
         vm.assume(redemptionAmount1 < 1e18 * 1e18);
@@ -183,12 +187,17 @@ contract FlatFeeCalculatorTestFuzzy is Test {
 
         FeeDistribution memory feeDistribution = feeCalculator.calculateRedemptionFees(empty, tco2s, redemptionAmounts);
 
-        uint256 expected = (redemptionAmount1 + redemptionAmount2 + redemptionAmount3) * feeCalculator.feeBasisPoints() / 10000;
+        uint256 expected =
+            (redemptionAmount1 + redemptionAmount2 + redemptionAmount3) * feeCalculator.feeBasisPoints() / 10000;
 
         assertEq(feeDistribution.shares[0], expected);
     }
 
-    function testCalculateRedemptionAmount_ERC1155(uint256 redemptionAmount1, uint256 redemptionAmount2, uint256 redemptionAmount3) public {
+    function testCalculateRedemptionAmount_ERC1155(
+        uint256 redemptionAmount1,
+        uint256 redemptionAmount2,
+        uint256 redemptionAmount3
+    ) public {
         // Arrange
         vm.assume(redemptionAmount1 > 100);
         vm.assume(redemptionAmount1 < 1e18 * 1e18);
@@ -213,7 +222,8 @@ contract FlatFeeCalculatorTestFuzzy is Test {
         FeeDistribution memory feeDistribution =
             feeCalculator.calculateRedemptionFees(empty, erc1155s, tokenIds, redemptionAmounts);
 
-        uint256 expected = (redemptionAmount1 + redemptionAmount2 + redemptionAmount3) * feeCalculator.feeBasisPoints() / 10000;
+        uint256 expected =
+            (redemptionAmount1 + redemptionAmount2 + redemptionAmount3) * feeCalculator.feeBasisPoints() / 10000;
 
         assertEq(feeDistribution.shares[0], expected);
     }

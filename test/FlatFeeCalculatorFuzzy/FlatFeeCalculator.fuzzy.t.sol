@@ -10,7 +10,7 @@ import {FeeCalculator} from "../../src/FeeCalculator.sol";
 import {FeeDistribution} from "../../src/interfaces/IFeeCalculator.sol";
 import {FlatFeeCalculator} from "../../src/FlatFeeCalculator.sol";
 
-contract FlatFeeCalculatorTest is Test {
+contract FlatFeeCalculatorTestFuzzy is Test {
     FlatFeeCalculator public feeCalculator;
     address public feeRecipient = 0xAb5801a7D398351b8bE11C439e05C5B3259aeC9B;
     address public empty = address(0);

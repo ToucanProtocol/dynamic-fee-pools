@@ -49,10 +49,7 @@ contract FlatFeeCalculator is IFeeCalculator, Ownable {
     function feeSetup(address[] memory recipients, uint256[] memory shares) external onlyOwner {
         require(recipients.length == shares.length, "Recipients and shares arrays must have the same length");
 
-        uint256 totalShares = 0;
-        for (uint256 i = 0; i < shares.length; i++) {
-            totalShares += shares[i];
-        }
+        uint256 totalShares = sumOf(shares);
         require(totalShares == 100, "Total shares must equal 100");
 
         _recipients = recipients;
@@ -113,9 +110,10 @@ contract FlatFeeCalculator is IFeeCalculator, Ownable {
         returns (FeeDistribution memory feeDistribution)
     {
         require(tco2s.length == redemptionAmounts.length, "length mismatch");
-        require(tco2s.length == 1, "only one");
 
-        feeDistribution = _calculateFee(redemptionAmounts[0]);
+        uint256 totalRedemptionAmount = sumOf(redemptionAmounts);
+
+        feeDistribution = _calculateFee(totalRedemptionAmount);
     }
 
     /// @notice Calculates the deposit fee for a given amount of an ERC1155 project.
@@ -151,9 +149,10 @@ contract FlatFeeCalculator is IFeeCalculator, Ownable {
     ) external view override returns (FeeDistribution memory feeDistribution) {
         require(erc1155s.length == tokenIds.length, "erc1155s/tokenIds length mismatch");
         require(erc1155s.length == redemptionAmounts.length, "erc1155s/redemptionAmounts length mismatch");
-        require(erc1155s.length == 1, "only one");
 
-        feeDistribution = _calculateFee(redemptionAmounts[0]);
+        uint256 totalRedemptionAmount = sumOf(redemptionAmounts);
+
+        feeDistribution = _calculateFee(totalRedemptionAmount);
     }
 
     /// @notice Returns the current fee setup.
@@ -175,5 +174,13 @@ contract FlatFeeCalculator is IFeeCalculator, Ownable {
         require(feeAmount > 0, "Fee must be greater than 0");
 
         return calculateFeeShares(feeAmount);
+    }
+
+    function sumOf(uint256[] memory array) private pure returns (uint256) {
+        uint256 total = 0;
+        for (uint i = 0; i < array.length; i++) {
+            total += array[i];
+        }
+        return total;
     }
 }

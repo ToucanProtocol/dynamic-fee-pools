@@ -103,6 +103,32 @@ contract FlatFeeCalculatorTestFuzzy is Test {
         assertEq(fees[0], 3000000000000000000);
     }
 
+    function testCalculateRedemptionFeesMultipleTokensNormalCase() public {
+        // Arrange
+        // Set up your test data
+        uint256 redemptionAmount = 100 * 1e18;
+        address[] memory tco2s = new address[](3);
+        tco2s[0] = empty;
+        tco2s[1] = empty;
+        tco2s[2] = empty;
+        uint256[] memory redemptionAmounts = new uint256[](3);
+        redemptionAmounts[0] = redemptionAmount;
+        redemptionAmounts[1] = redemptionAmount;
+        redemptionAmounts[2] = redemptionAmount;
+
+        // Act
+        FeeDistribution memory feeDistribution = feeCalculator.calculateRedemptionFees(empty, tco2s, redemptionAmounts);
+        address[] memory recipients = feeDistribution.recipients;
+        uint256[] memory fees = feeDistribution.shares;
+
+        // Assert
+        assertEq(feeDistribution.recipients.length, feeDistribution.shares.length, "array length mismatch");
+        assertEq(recipients[0], feeRecipient);
+
+        uint256 expected = 3*redemptionAmount*feeCalculator.feeBasisPoints() / 10000;
+        assertEq(fees[0], expected);
+    }
+
     function testCalculateRedemptionFeesDustAmount_ShouldThrow() public {
         // Arrange
         // Set up your test data
@@ -137,39 +163,57 @@ contract FlatFeeCalculatorTestFuzzy is Test {
         assertEq(feeDistribution.shares[0], expected);
     }
 
-    function testCalculateRedemptionAmount_TCO2(uint256 redemptionAmount) public {
+    function testCalculateRedemptionAmount_TCO2(uint256 redemptionAmount1, uint256 redemptionAmount2, uint256 redemptionAmount3) public {
         // Arrange
-        vm.assume(redemptionAmount > 100);
-        vm.assume(redemptionAmount < 1e18 * 1e18);
+        vm.assume(redemptionAmount1 > 100);
+        vm.assume(redemptionAmount1 < 1e18 * 1e18);
+        vm.assume(redemptionAmount2 > 100);
+        vm.assume(redemptionAmount2 < 1e18 * 1e18);
+        vm.assume(redemptionAmount3 > 100);
+        vm.assume(redemptionAmount3 < 1e18 * 1e18);
         // Act
-        address[] memory tco2s = new address[](1);
+        address[] memory tco2s = new address[](3);
         tco2s[0] = empty;
-        uint256[] memory redemptionAmounts = new uint256[](1);
-        redemptionAmounts[0] = redemptionAmount;
+        tco2s[1] = empty;
+        tco2s[2] = empty;
+        uint256[] memory redemptionAmounts = new uint256[](3);
+        redemptionAmounts[0] = redemptionAmount1;
+        redemptionAmounts[1] = redemptionAmount2;
+        redemptionAmounts[2] = redemptionAmount3;
 
         FeeDistribution memory feeDistribution = feeCalculator.calculateRedemptionFees(empty, tco2s, redemptionAmounts);
 
-        uint256 expected = redemptionAmount * feeCalculator.feeBasisPoints() / 10000;
+        uint256 expected = (redemptionAmount1 + redemptionAmount2 + redemptionAmount3) * feeCalculator.feeBasisPoints() / 10000;
 
         assertEq(feeDistribution.shares[0], expected);
     }
 
-    function testCalculateRedemptionAmount_ERC1155(uint256 redemptionAmount) public {
+    function testCalculateRedemptionAmount_ERC1155(uint256 redemptionAmount1, uint256 redemptionAmount2, uint256 redemptionAmount3) public {
         // Arrange
-        vm.assume(redemptionAmount > 100);
-        vm.assume(redemptionAmount < 1e18 * 1e18);
+        vm.assume(redemptionAmount1 > 100);
+        vm.assume(redemptionAmount1 < 1e18 * 1e18);
+        vm.assume(redemptionAmount2 > 100);
+        vm.assume(redemptionAmount2 < 1e18 * 1e18);
+        vm.assume(redemptionAmount3 > 100);
+        vm.assume(redemptionAmount3 < 1e18 * 1e18);
         // Act
-        address[] memory erc1155s = new address[](1);
+        address[] memory erc1155s = new address[](3);
         erc1155s[0] = empty;
-        uint256[] memory tokenIds = new uint256[](1);
+        erc1155s[1] = empty;
+        erc1155s[2] = empty;
+        uint256[] memory tokenIds = new uint256[](3);
         tokenIds[0] = 1;
-        uint256[] memory redemptionAmounts = new uint256[](1);
-        redemptionAmounts[0] = redemptionAmount;
+        tokenIds[1] = 2;
+        tokenIds[2] = 3;
+        uint256[] memory redemptionAmounts = new uint256[](3);
+        redemptionAmounts[0] = redemptionAmount1;
+        redemptionAmounts[1] = redemptionAmount2;
+        redemptionAmounts[2] = redemptionAmount3;
 
         FeeDistribution memory feeDistribution =
             feeCalculator.calculateRedemptionFees(empty, erc1155s, tokenIds, redemptionAmounts);
 
-        uint256 expected = redemptionAmount * feeCalculator.feeBasisPoints() / 10000;
+        uint256 expected = (redemptionAmount1 + redemptionAmount2 + redemptionAmount3) * feeCalculator.feeBasisPoints() / 10000;
 
         assertEq(feeDistribution.shares[0], expected);
     }

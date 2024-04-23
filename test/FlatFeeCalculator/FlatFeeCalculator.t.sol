@@ -73,8 +73,7 @@ contract FlatFeeCalculatorTest is Test {
         uint256 depositAmount = 100 * 1e18;
 
         // Act
-        FeeDistribution memory feeDistribution =
-                        feeCalculator.calculateDepositFees(empty, empty, depositAmount);
+        FeeDistribution memory feeDistribution = feeCalculator.calculateDepositFees(empty, empty, depositAmount);
         address[] memory recipients = feeDistribution.recipients;
         uint256[] memory fees = feeDistribution.shares;
 
@@ -111,17 +110,15 @@ contract FlatFeeCalculatorTest is Test {
 
         // Act
         vm.expectRevert("Fee must be greater than 0");
-        FeeDistribution memory feeDistribution =
-                            feeCalculator.calculateDepositFees(empty, empty, depositAmount);
+        FeeDistribution memory feeDistribution = feeCalculator.calculateDepositFees(empty, empty, depositAmount);
     }
 
     function testCalculateDepositFee_TCO2(uint256 depositAmount) public {
         // Arrange
         vm.assume(depositAmount > 100);
-        vm.assume(depositAmount < 1e18*1e18);
+        vm.assume(depositAmount < 1e18 * 1e18);
         // Act
-        FeeDistribution memory feeDistribution =
-                            feeCalculator.calculateDepositFees(empty, empty, depositAmount);
+        FeeDistribution memory feeDistribution = feeCalculator.calculateDepositFees(empty, empty, depositAmount);
 
         uint256 expected = depositAmount * feeCalculator.feeBasisPoints() / 10000;
 
@@ -131,10 +128,9 @@ contract FlatFeeCalculatorTest is Test {
     function testCalculateDepositFee_ERC1155(uint256 depositAmount) public {
         // Arrange
         vm.assume(depositAmount > 100);
-        vm.assume(depositAmount < 1e18*1e18);
+        vm.assume(depositAmount < 1e18 * 1e18);
         // Act
-        FeeDistribution memory feeDistribution =
-                            feeCalculator.calculateDepositFees(empty, empty, 0, depositAmount);
+        FeeDistribution memory feeDistribution = feeCalculator.calculateDepositFees(empty, empty, 0, depositAmount);
 
         uint256 expected = depositAmount * feeCalculator.feeBasisPoints() / 10000;
 
@@ -144,15 +140,14 @@ contract FlatFeeCalculatorTest is Test {
     function testCalculateRedemptionAmount_TCO2(uint256 redemptionAmount) public {
         // Arrange
         vm.assume(redemptionAmount > 100);
-        vm.assume(redemptionAmount < 1e18*1e18);
+        vm.assume(redemptionAmount < 1e18 * 1e18);
         // Act
         address[] memory tco2s = new address[](1);
         tco2s[0] = empty;
         uint256[] memory redemptionAmounts = new uint256[](1);
         redemptionAmounts[0] = redemptionAmount;
 
-        FeeDistribution memory feeDistribution =
-                            feeCalculator.calculateRedemptionFees(empty, tco2s, redemptionAmounts);
+        FeeDistribution memory feeDistribution = feeCalculator.calculateRedemptionFees(empty, tco2s, redemptionAmounts);
 
         uint256 expected = redemptionAmount * feeCalculator.feeBasisPoints() / 10000;
 
@@ -162,7 +157,7 @@ contract FlatFeeCalculatorTest is Test {
     function testCalculateRedemptionAmount_ERC1155(uint256 redemptionAmount) public {
         // Arrange
         vm.assume(redemptionAmount > 100);
-        vm.assume(redemptionAmount < 1e18*1e18);
+        vm.assume(redemptionAmount < 1e18 * 1e18);
         // Act
         address[] memory erc1155s = new address[](1);
         erc1155s[0] = empty;
@@ -172,7 +167,7 @@ contract FlatFeeCalculatorTest is Test {
         redemptionAmounts[0] = redemptionAmount;
 
         FeeDistribution memory feeDistribution =
-                            feeCalculator.calculateRedemptionFees(empty, erc1155s, tokenIds, redemptionAmounts);
+            feeCalculator.calculateRedemptionFees(empty, erc1155s, tokenIds, redemptionAmounts);
 
         uint256 expected = redemptionAmount * feeCalculator.feeBasisPoints() / 10000;
 

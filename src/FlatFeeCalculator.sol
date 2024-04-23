@@ -67,16 +67,14 @@ contract FlatFeeCalculator is IFeeCalculator, Ownable {
     /// @return feeDistribution How the fee is meant to be
     /// distributed among the fee recipients.
     function calculateDepositFees(address pool, address tco2, uint256 depositAmount)
-    external
-    view
-    override
-    returns (FeeDistribution memory feeDistribution)
+        external
+        view
+        override
+        returns (FeeDistribution memory feeDistribution)
     {
         require(depositAmount > 0, "depositAmount must be > 0");
 
-        feeDistribution = _calculateFee(
-            depositAmount
-        );
+        feeDistribution = _calculateFee(depositAmount);
     }
 
     /// @notice Calculates the fee shares and recipients based on the total fee.
@@ -109,17 +107,15 @@ contract FlatFeeCalculator is IFeeCalculator, Ownable {
     /// @return feeDistribution How the fee is meant to be
     /// distributed among the fee recipients.
     function calculateRedemptionFees(address pool, address[] calldata tco2s, uint256[] calldata redemptionAmounts)
-    external
-    view
-    override
-    returns (FeeDistribution memory feeDistribution)
+        external
+        view
+        override
+        returns (FeeDistribution memory feeDistribution)
     {
         require(tco2s.length == redemptionAmounts.length, "length mismatch");
         require(tco2s.length == 1, "only one");
 
-        feeDistribution = _calculateFee(
-            redemptionAmounts[0]
-        );
+        feeDistribution = _calculateFee(redemptionAmounts[0]);
     }
 
     /// @notice Calculates the deposit fee for a given amount of an ERC1155 project.
@@ -130,16 +126,14 @@ contract FlatFeeCalculator is IFeeCalculator, Ownable {
     /// @return feeDistribution How the fee is meant to be
     /// distributed among the fee recipients.
     function calculateDepositFees(address pool, address erc1155, uint256 tokenId, uint256 depositAmount)
-    external
-    view
-    override
-    returns (FeeDistribution memory feeDistribution)
+        external
+        view
+        override
+        returns (FeeDistribution memory feeDistribution)
     {
         require(depositAmount > 0, "depositAmount must be > 0");
 
-        feeDistribution = _calculateFee(
-            depositAmount
-        );
+        feeDistribution = _calculateFee(depositAmount);
     }
 
     /// @notice Calculates the redemption fees for a given amount on ERC1155 projects.
@@ -159,9 +153,7 @@ contract FlatFeeCalculator is IFeeCalculator, Ownable {
         require(erc1155s.length == redemptionAmounts.length, "erc1155s/redemptionAmounts length mismatch");
         require(erc1155s.length == 1, "only one");
 
-        feeDistribution = _calculateFee(
-            redemptionAmounts[0]
-        );
+        feeDistribution = _calculateFee(redemptionAmounts[0]);
     }
 
     /// @notice Returns the current fee setup.
@@ -174,9 +166,7 @@ contract FlatFeeCalculator is IFeeCalculator, Ownable {
     /// @notice Calculates the fee for a given amount.
     /// @param requestedAmount The amount to be used for the fee calculation.
     /// @return feeDistribution How the fee is meant to be
-    function _calculateFee(
-        uint256 requestedAmount
-    ) internal view returns (FeeDistribution memory) {
+    function _calculateFee(uint256 requestedAmount) internal view returns (FeeDistribution memory) {
         require(requestedAmount > 0, "requested amount must be > 0");
 
         uint256 feeAmount = requestedAmount * feeBasisPoints / 10000;

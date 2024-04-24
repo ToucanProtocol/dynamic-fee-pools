@@ -136,7 +136,7 @@ contract FlatFeeCalculatorTestFuzzy is Test {
 
         // Act
         vm.expectRevert("Fee must be greater than 0");
-        FeeDistribution memory feeDistribution = feeCalculator.calculateDepositFees(empty, empty, depositAmount);
+        feeCalculator.calculateDepositFees(empty, empty, depositAmount);
     }
 
     function testCalculateDepositFee_TCO2(uint256 depositAmount) public {

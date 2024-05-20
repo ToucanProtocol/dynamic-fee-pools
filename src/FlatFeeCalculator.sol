@@ -24,6 +24,12 @@ contract FlatFeeCalculator is IFeeCalculator, Ownable {
 
     uint256 public feeBasisPoints = 300;
 
+    /// @dev The scale between the decimals of the fee token and the underlying token.
+    /// For example, if the fee token has 18 decimals and the underlying token has 18 decimals, the
+    /// decimals scale is 1e0.
+    /// If the fee token has 18 decimals and the underlying token has 0 decimals, the decimals scale is 1e18
+    uint256 public feeToUnderlyingDecimalsScale = 1e0;
+
     address[] private _recipients;
     uint256[] private _shares;
 
@@ -31,6 +37,12 @@ contract FlatFeeCalculator is IFeeCalculator, Ownable {
     event FeeSetup(address[] recipients, uint256[] shares);
 
     constructor() Ownable() {}
+
+    function setFeeToUnderlyingDecimalsScale(uint256 _feeToUnderlyingDecimalsScale) external onlyOwner {
+        require(_feeToUnderlyingDecimalsScale > 0, "Fee to underlying decimals scale must be greater than 0");
+
+        feeToUnderlyingDecimalsScale = _feeToUnderlyingDecimalsScale;
+    }
 
     /// @notice Sets the fee basis points.
     /// @dev Can only be called by the current owner.
@@ -161,9 +173,10 @@ contract FlatFeeCalculator is IFeeCalculator, Ownable {
     function _calculateFee(uint256 requestedAmount) internal view returns (FeeDistribution memory) {
         require(requestedAmount > 0, "requested amount must be > 0");
 
-        uint256 feeAmount = requestedAmount * feeBasisPoints / 10000;
+        uint256 adjustedAmount = requestedAmount * feeToUnderlyingDecimalsScale;
+        uint256 feeAmount = adjustedAmount * feeBasisPoints / 10000;
 
-        require(feeAmount <= requestedAmount, "Fee must be lower or equal to requested amount");
+        require(feeAmount <= adjustedAmount, "Fee must be lower or equal to requested amount");
         require(feeAmount > 0, "Fee must be greater than 0");
 
         return calculateFeeShares(feeAmount);

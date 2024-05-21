@@ -28,7 +28,7 @@ contract FlatFeeCalculator is IFeeCalculator, Ownable {
     /// For example, if the fee token has 18 decimals and the underlying token has 18 decimals, the
     /// decimals scale is 1e0.
     /// If the fee token has 18 decimals and the underlying token has 0 decimals, the decimals scale is 1e18
-    uint256 public feeToUnderlyingDecimalsScale = 1e0;
+    uint256 public feeToUnderlyingDecimalsScale = 1e18;
 
     address[] private _recipients;
     uint256[] private _shares;

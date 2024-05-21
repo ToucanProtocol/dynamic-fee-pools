@@ -22,6 +22,7 @@ contract FlatFeeCalculatorTestFuzzy is Test {
         uint256[] memory feeShares = new uint256[](1);
         feeShares[0] = 100;
         feeCalculator.feeSetup(recipients, feeShares);
+        feeCalculator.setFeeToUnderlyingDecimalsScale(1);
     }
 
     function testFeeSetupEmpty() public {
@@ -151,6 +152,21 @@ contract FlatFeeCalculatorTestFuzzy is Test {
         assertEq(feeDistribution.shares[0], expected);
     }
 
+    function testCalculateDepositFee_withFeeToUnderlyingScale_TCO2(uint256 depositAmount) public {
+        // Arrange
+        vm.assume(depositAmount > 1);
+        vm.assume(depositAmount < 1e18);
+
+        uint256 feeToUnderlyingDecimalsScale = 1e18;
+        feeCalculator.setFeeToUnderlyingDecimalsScale(feeToUnderlyingDecimalsScale);
+        // Act
+        FeeDistribution memory feeDistribution = feeCalculator.calculateDepositFees(empty, empty, depositAmount);
+
+        uint256 expected = depositAmount * feeToUnderlyingDecimalsScale * feeCalculator.feeBasisPoints() / 10000;
+
+        assertEq(feeDistribution.shares[0], expected);
+    }
+
     function testCalculateDepositFee_ERC1155(uint256 depositAmount) public {
         // Arrange
         vm.assume(depositAmount > 100);
@@ -159,6 +175,21 @@ contract FlatFeeCalculatorTestFuzzy is Test {
         FeeDistribution memory feeDistribution = feeCalculator.calculateDepositFees(empty, empty, 0, depositAmount);
 
         uint256 expected = depositAmount * feeCalculator.feeBasisPoints() / 10000;
+
+        assertEq(feeDistribution.shares[0], expected);
+    }
+
+    function testCalculateDepositFee_withFeeToUnderlyingScale_ERC1155(uint256 depositAmount) public {
+        // Arrange
+        vm.assume(depositAmount > 1);
+        vm.assume(depositAmount < 1e18);
+
+        uint256 feeToUnderlyingDecimalsScale = 1e18;
+        feeCalculator.setFeeToUnderlyingDecimalsScale(feeToUnderlyingDecimalsScale);
+        // Act
+        FeeDistribution memory feeDistribution = feeCalculator.calculateDepositFees(empty, empty, 0, depositAmount);
+
+        uint256 expected = depositAmount * feeToUnderlyingDecimalsScale * feeCalculator.feeBasisPoints() / 10000;
 
         assertEq(feeDistribution.shares[0], expected);
     }
@@ -189,6 +220,39 @@ contract FlatFeeCalculatorTestFuzzy is Test {
 
         uint256 expected =
             (redemptionAmount1 + redemptionAmount2 + redemptionAmount3) * feeCalculator.feeBasisPoints() / 10000;
+
+        assertEq(feeDistribution.shares[0], expected);
+    }
+
+    function testCalculateRedemptionAmount_withFeeToUnderlyingScale_TCO2(
+        uint256 redemptionAmount1,
+        uint256 redemptionAmount2,
+        uint256 redemptionAmount3
+    ) public {
+        // Arrange
+        vm.assume(redemptionAmount1 > 100);
+        vm.assume(redemptionAmount1 < 1e18 * 1e18);
+        vm.assume(redemptionAmount2 > 100);
+        vm.assume(redemptionAmount2 < 1e18 * 1e18);
+        vm.assume(redemptionAmount3 > 100);
+        vm.assume(redemptionAmount3 < 1e18 * 1e18);
+
+        uint256 feeToUnderlyingDecimalsScale = 1e18;
+        feeCalculator.setFeeToUnderlyingDecimalsScale(feeToUnderlyingDecimalsScale);
+        // Act
+        address[] memory tco2s = new address[](3);
+        tco2s[0] = empty;
+        tco2s[1] = empty;
+        tco2s[2] = empty;
+        uint256[] memory redemptionAmounts = new uint256[](3);
+        redemptionAmounts[0] = redemptionAmount1;
+        redemptionAmounts[1] = redemptionAmount2;
+        redemptionAmounts[2] = redemptionAmount3;
+
+        FeeDistribution memory feeDistribution = feeCalculator.calculateRedemptionFees(empty, tco2s, redemptionAmounts);
+
+        uint256 expected = (redemptionAmount1 + redemptionAmount2 + redemptionAmount3) * feeToUnderlyingDecimalsScale
+            * feeCalculator.feeBasisPoints() / 10000;
 
         assertEq(feeDistribution.shares[0], expected);
     }
@@ -224,6 +288,44 @@ contract FlatFeeCalculatorTestFuzzy is Test {
 
         uint256 expected =
             (redemptionAmount1 + redemptionAmount2 + redemptionAmount3) * feeCalculator.feeBasisPoints() / 10000;
+
+        assertEq(feeDistribution.shares[0], expected);
+    }
+
+    function testCalculateRedemptionAmount_withFeeToUnderlyingScale_ERC1155(
+        uint256 redemptionAmount1,
+        uint256 redemptionAmount2,
+        uint256 redemptionAmount3
+    ) public {
+        // Arrange
+        vm.assume(redemptionAmount1 > 100);
+        vm.assume(redemptionAmount1 < 1e18 * 1e18);
+        vm.assume(redemptionAmount2 > 100);
+        vm.assume(redemptionAmount2 < 1e18 * 1e18);
+        vm.assume(redemptionAmount3 > 100);
+        vm.assume(redemptionAmount3 < 1e18 * 1e18);
+
+        uint256 feeToUnderlyingDecimalsScale = 1e18;
+        feeCalculator.setFeeToUnderlyingDecimalsScale(feeToUnderlyingDecimalsScale);
+        // Act
+        address[] memory erc1155s = new address[](3);
+        erc1155s[0] = empty;
+        erc1155s[1] = empty;
+        erc1155s[2] = empty;
+        uint256[] memory tokenIds = new uint256[](3);
+        tokenIds[0] = 1;
+        tokenIds[1] = 2;
+        tokenIds[2] = 3;
+        uint256[] memory redemptionAmounts = new uint256[](3);
+        redemptionAmounts[0] = redemptionAmount1;
+        redemptionAmounts[1] = redemptionAmount2;
+        redemptionAmounts[2] = redemptionAmount3;
+
+        FeeDistribution memory feeDistribution =
+            feeCalculator.calculateRedemptionFees(empty, erc1155s, tokenIds, redemptionAmounts);
+
+        uint256 expected = (redemptionAmount1 + redemptionAmount2 + redemptionAmount3) * feeToUnderlyingDecimalsScale
+            * feeCalculator.feeBasisPoints() / 10000;
 
         assertEq(feeDistribution.shares[0], expected);
     }

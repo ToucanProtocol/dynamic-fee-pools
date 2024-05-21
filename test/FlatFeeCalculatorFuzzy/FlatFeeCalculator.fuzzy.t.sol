@@ -22,6 +22,7 @@ contract FlatFeeCalculatorTestFuzzy is Test {
         uint256[] memory feeShares = new uint256[](1);
         feeShares[0] = 100;
         feeCalculator.feeSetup(recipients, feeShares);
+        feeCalculator.setFeeToUnderlyingDecimalsScale(1);
     }
 
     function testFeeSetupEmpty() public {

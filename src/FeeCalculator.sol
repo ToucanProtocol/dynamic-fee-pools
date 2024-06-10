@@ -401,12 +401,12 @@ contract FeeCalculator is IFeeCalculator, Ownable {
         uint256 totalPoolSupply,
         function(uint256, uint256, uint256) view returns (uint256) calculator
     ) internal view returns (FeeDistribution memory) {
-        require(requestedAmount > 0, "requested amount must be > 0");
+        require(requestedAmount != 0, "requested amount must be > 0");
 
         uint256 feeAmount = calculator(requestedAmount, projectSupply, totalPoolSupply);
 
         require(feeAmount <= requestedAmount, "Fee must be lower or equal to requested amount");
-        require(feeAmount > 0, "Fee must be greater than 0");
+        require(feeAmount != 0, "Fee must be greater than 0");
 
         return calculateFeeShares(feeAmount);
     }

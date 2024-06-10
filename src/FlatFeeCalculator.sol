@@ -39,7 +39,7 @@ contract FlatFeeCalculator is IFeeCalculator, Ownable {
     constructor() Ownable() {}
 
     function setFeeToUnderlyingDecimalsScale(uint256 _feeToUnderlyingDecimalsScale) external onlyOwner {
-        require(_feeToUnderlyingDecimalsScale > 0, "Fee to underlying decimals scale must be greater than 0");
+        require(_feeToUnderlyingDecimalsScale != 0, "Fee to underlying decimals scale must be greater than 0");
 
         feeToUnderlyingDecimalsScale = _feeToUnderlyingDecimalsScale;
     }
@@ -167,13 +167,13 @@ contract FlatFeeCalculator is IFeeCalculator, Ownable {
     /// @param requestedAmount The amount to be used for the fee calculation.
     /// @return feeDistribution How the fee is meant to be
     function _calculateFee(uint256 requestedAmount) internal view returns (FeeDistribution memory) {
-        require(requestedAmount > 0, "requested amount must be > 0");
+        require(requestedAmount != 0, "requested amount must be > 0");
 
         uint256 adjustedAmount = requestedAmount * feeToUnderlyingDecimalsScale;
         uint256 feeAmount = adjustedAmount * feeBasisPoints / 10000;
 
         require(feeAmount <= adjustedAmount, "Fee must be lower or equal to requested amount");
-        require(feeAmount > 0, "Fee must be greater than 0");
+        require(feeAmount != 0, "Fee must be greater than 0");
 
         return calculateFeeShares(feeAmount);
     }

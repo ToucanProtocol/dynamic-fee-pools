@@ -28,7 +28,12 @@ contract FlatFeeCalculator is IFeeCalculator, Ownable {
     /// For example, if the fee token has 18 decimals and the underlying token has 18 decimals, the
     /// decimals scale is 1e0.
     /// If the fee token has 18 decimals and the underlying token has 0 decimals, the decimals scale is 1e18
-    uint256 public feeToUnderlyingDecimalsScale = 1e18;
+    ///
+    /// NOTE: Currently the pool contract is converting the underlying
+    /// decimals to the pool token decimals before calling the
+    /// fee calculator so there is no need to adjust the amount
+    /// in the fee calculator, hence default feeToUnderlyingDecimalsScale to 1.
+    uint256 public feeToUnderlyingDecimalsScale = 1;
 
     address[] private _recipients;
     uint256[] private _shares;

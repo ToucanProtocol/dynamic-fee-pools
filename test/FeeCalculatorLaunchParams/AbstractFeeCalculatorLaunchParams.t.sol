@@ -349,7 +349,7 @@ abstract contract AbstractFeeCalculatorLaunchParamsTest is Test {
         setProjectSupply(address(mockToken), 500 * 1e18);
 
         // Act
-        vm.expectRevert("depositAmount must be > 0");
+        vm.expectRevert("requested amount must be > 0");
         calculateDepositFees(address(mockPool), address(mockToken), depositAmount);
     }
 

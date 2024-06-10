@@ -169,8 +169,6 @@ contract FeeCalculator is IFeeCalculator, Ownable {
         override
         returns (FeeDistribution memory feeDistribution)
     {
-        require(depositAmount > 0, "depositAmount must be > 0");
-
         feeDistribution =
             _calculateFee(depositAmount, IPool(pool).totalPerProjectSupply(tco2), _getTotalSupply(pool), _getDepositFee);
     }
@@ -233,8 +231,6 @@ contract FeeCalculator is IFeeCalculator, Ownable {
         override
         returns (FeeDistribution memory feeDistribution)
     {
-        require(depositAmount > 0, "depositAmount must be > 0");
-
         feeDistribution = _calculateFee(
             depositAmount, IPool(pool).totalPerProjectSupply(erc1155, tokenId), _getTotalSupply(pool), _getDepositFee
         );

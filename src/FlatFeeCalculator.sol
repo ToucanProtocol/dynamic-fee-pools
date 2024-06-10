@@ -79,8 +79,6 @@ contract FlatFeeCalculator is IFeeCalculator, Ownable {
         override
         returns (FeeDistribution memory feeDistribution)
     {
-        require(depositAmount > 0, "depositAmount must be > 0");
-
         feeDistribution = _calculateFee(depositAmount);
     }
 
@@ -135,8 +133,6 @@ contract FlatFeeCalculator is IFeeCalculator, Ownable {
         override
         returns (FeeDistribution memory feeDistribution)
     {
-        require(depositAmount > 0, "depositAmount must be > 0");
-
         feeDistribution = _calculateFee(depositAmount);
     }
 

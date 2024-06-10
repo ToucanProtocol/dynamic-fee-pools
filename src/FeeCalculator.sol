@@ -178,11 +178,11 @@ contract FeeCalculator is IFeeCalculator, Ownable {
     /// @return feeDistribution The recipients and the amount of fees each
     /// recipient should receive.
     function calculateFeeShares(uint256 totalFee) internal view returns (FeeDistribution memory feeDistribution) {
-        uint256 recipientsLenght = _recipients.length;
-        uint256[] memory shares = new uint256[](recipientsLenght);
+        uint256 recipientsLength = _recipients.length;
+        uint256[] memory shares = new uint256[](recipientsLength);
 
         uint256 restFee = totalFee;
-        for (uint256 i = 0; i < recipientsLenght; i++) {
+        for (uint256 i = 0; i < recipientsLength; i++) {
             shares[i] = (totalFee * _shares[i]) / 100;
             restFee -= shares[i];
         }

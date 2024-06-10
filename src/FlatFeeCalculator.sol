@@ -2,7 +2,7 @@
 //
 // SPDX-License-Identifier: UNLICENSED
 
-// If you encounter a vulnerability or an issue, please contact <info@neutralx.com>
+// If you encounter a vulnerability or an issue, please contact <security@toucan.earth> or visit security.toucan.earth
 pragma solidity 0.8.19;
 
 import "@openzeppelin/contracts/token/ERC20/IERC20.sol";
@@ -20,7 +20,7 @@ contract FlatFeeCalculator is IFeeCalculator, Ownable {
     /// releases. VERSION_RELEASE_CANDIDATE keeps track of iterations
     /// of a VERSION in our staging environment.
     string public constant VERSION = "1.0.0";
-    uint256 public constant VERSION_RELEASE_CANDIDATE = 1;
+    uint256 public constant VERSION_RELEASE_CANDIDATE = 2;
 
     uint256 public feeBasisPoints = 300;
 
@@ -39,7 +39,7 @@ contract FlatFeeCalculator is IFeeCalculator, Ownable {
     constructor() Ownable() {}
 
     function setFeeToUnderlyingDecimalsScale(uint256 _feeToUnderlyingDecimalsScale) external onlyOwner {
-        require(_feeToUnderlyingDecimalsScale > 0, "Fee to underlying decimals scale must be greater than 0");
+        require(_feeToUnderlyingDecimalsScale != 0, "Fee to underlying decimals scale must be greater than 0");
 
         feeToUnderlyingDecimalsScale = _feeToUnderlyingDecimalsScale;
     }
@@ -79,8 +79,6 @@ contract FlatFeeCalculator is IFeeCalculator, Ownable {
         override
         returns (FeeDistribution memory feeDistribution)
     {
-        require(depositAmount > 0, "depositAmount must be > 0");
-
         feeDistribution = _calculateFee(depositAmount);
     }
 
@@ -135,8 +133,6 @@ contract FlatFeeCalculator is IFeeCalculator, Ownable {
         override
         returns (FeeDistribution memory feeDistribution)
     {
-        require(depositAmount > 0, "depositAmount must be > 0");
-
         feeDistribution = _calculateFee(depositAmount);
     }
 
@@ -171,13 +167,13 @@ contract FlatFeeCalculator is IFeeCalculator, Ownable {
     /// @param requestedAmount The amount to be used for the fee calculation.
     /// @return feeDistribution How the fee is meant to be
     function _calculateFee(uint256 requestedAmount) internal view returns (FeeDistribution memory) {
-        require(requestedAmount > 0, "requested amount must be > 0");
+        require(requestedAmount != 0, "requested amount must be > 0");
 
         uint256 adjustedAmount = requestedAmount * feeToUnderlyingDecimalsScale;
         uint256 feeAmount = adjustedAmount * feeBasisPoints / 10000;
 
         require(feeAmount <= adjustedAmount, "Fee must be lower or equal to requested amount");
-        require(feeAmount > 0, "Fee must be greater than 0");
+        require(feeAmount != 0, "Fee must be greater than 0");
 
         return calculateFeeShares(feeAmount);
     }

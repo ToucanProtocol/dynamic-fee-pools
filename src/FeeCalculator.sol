@@ -2,7 +2,7 @@
 //
 // SPDX-License-Identifier: UNLICENSED
 
-// If you encounter a vulnerability or an issue, please contact <info@neutralx.com>
+// If you encounter a vulnerability or an issue, please contact <security@toucan.earth> or visit security.toucan.earth
 pragma solidity 0.8.19;
 
 import "@openzeppelin/contracts/token/ERC20/IERC20.sol";
@@ -20,7 +20,7 @@ contract FeeCalculator is IFeeCalculator, Ownable {
     /// @dev Version-related parameters. VERSION keeps track of production
     /// releases. VERSION_RELEASE_CANDIDATE keeps track of iterations
     /// of a VERSION in our staging environment.
-    string public constant VERSION = "1.0.0";
+    string public constant VERSION = "1.1.0";
     uint256 public constant VERSION_RELEASE_CANDIDATE = 1;
 
     SD59x18 private _zero = sd(0);
@@ -169,8 +169,6 @@ contract FeeCalculator is IFeeCalculator, Ownable {
         override
         returns (FeeDistribution memory feeDistribution)
     {
-        require(depositAmount > 0, "depositAmount must be > 0");
-
         feeDistribution =
             _calculateFee(depositAmount, IPool(pool).totalPerProjectSupply(tco2), _getTotalSupply(pool), _getDepositFee);
     }
@@ -180,11 +178,11 @@ contract FeeCalculator is IFeeCalculator, Ownable {
     /// @return feeDistribution The recipients and the amount of fees each
     /// recipient should receive.
     function calculateFeeShares(uint256 totalFee) internal view returns (FeeDistribution memory feeDistribution) {
-        uint256 recipientsLenght = _recipients.length;
-        uint256[] memory shares = new uint256[](recipientsLenght);
+        uint256 recipientsLength = _recipients.length;
+        uint256[] memory shares = new uint256[](recipientsLength);
 
         uint256 restFee = totalFee;
-        for (uint256 i = 0; i < recipientsLenght; i++) {
+        for (uint256 i = 0; i < recipientsLength; i++) {
             shares[i] = (totalFee * _shares[i]) / 100;
             restFee -= shares[i];
         }
@@ -233,8 +231,6 @@ contract FeeCalculator is IFeeCalculator, Ownable {
         override
         returns (FeeDistribution memory feeDistribution)
     {
-        require(depositAmount > 0, "depositAmount must be > 0");
-
         feeDistribution = _calculateFee(
             depositAmount, IPool(pool).totalPerProjectSupply(erc1155, tokenId), _getTotalSupply(pool), _getDepositFee
         );
@@ -405,12 +401,12 @@ contract FeeCalculator is IFeeCalculator, Ownable {
         uint256 totalPoolSupply,
         function(uint256, uint256, uint256) view returns (uint256) calculator
     ) internal view returns (FeeDistribution memory) {
-        require(requestedAmount > 0, "requested amount must be > 0");
+        require(requestedAmount != 0, "requested amount must be > 0");
 
         uint256 feeAmount = calculator(requestedAmount, projectSupply, totalPoolSupply);
 
         require(feeAmount <= requestedAmount, "Fee must be lower or equal to requested amount");
-        require(feeAmount > 0, "Fee must be greater than 0");
+        require(feeAmount != 0, "Fee must be greater than 0");
 
         return calculateFeeShares(feeAmount);
     }

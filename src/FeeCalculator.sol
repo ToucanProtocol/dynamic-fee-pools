@@ -20,7 +20,7 @@ contract FeeCalculator is IFeeCalculator, Ownable {
     /// @dev Version-related parameters. VERSION keeps track of production
     /// releases. VERSION_RELEASE_CANDIDATE keeps track of iterations
     /// of a VERSION in our staging environment.
-    string public constant VERSION = "1.0.0";
+    string public constant VERSION = "1.1.0";
     uint256 public constant VERSION_RELEASE_CANDIDATE = 1;
 
     SD59x18 private _zero = sd(0);

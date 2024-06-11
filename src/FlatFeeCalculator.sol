@@ -158,8 +158,6 @@ contract FlatFeeCalculator is IFeeCalculator, Ownable {
         require(requestedAmount != 0, "requested amount must be > 0");
 
         uint256 feeAmount = requestedAmount * feeBasisPoints / 10000;
-
-        require(feeAmount <= requestedAmount, "Fee must be lower or equal to requested amount");
         require(feeAmount != 0, "Fee must be greater than 0");
 
         return calculateFeeShares(feeAmount);

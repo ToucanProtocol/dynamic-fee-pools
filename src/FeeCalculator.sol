@@ -20,7 +20,7 @@ contract FeeCalculator is IFeeCalculator, Ownable {
     /// @dev Version-related parameters. VERSION keeps track of production
     /// releases. VERSION_RELEASE_CANDIDATE keeps track of iterations
     /// of a VERSION in our staging environment.
-    string public constant VERSION = "1.1.0";
+    string public constant VERSION = "1.2.0";
     uint256 public constant VERSION_RELEASE_CANDIDATE = 1;
 
     SD59x18 private _zero = sd(0);
@@ -406,7 +406,9 @@ contract FeeCalculator is IFeeCalculator, Ownable {
         uint256 feeAmount = calculator(requestedAmount, projectSupply, totalPoolSupply);
 
         require(feeAmount <= requestedAmount, "Fee must be lower or equal to requested amount");
-        require(feeAmount != 0, "Fee must be greater than 0");
+        if (feeAmount == 0) {
+            return FeeDistribution(new address[](0), new uint256[](0));
+        }
 
         return calculateFeeShares(feeAmount);
     }

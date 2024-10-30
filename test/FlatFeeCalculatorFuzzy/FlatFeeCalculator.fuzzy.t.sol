@@ -129,15 +129,14 @@ contract FlatFeeCalculatorTestFuzzy is Test {
         assertEq(fees[0], expected);
     }
 
-    function testCalculateRedemptionFeesDustAmount_ShouldNotThrow() public {
+    function testCalculateRedemptionFeesDustAmount_ShouldThrow() public {
         // Arrange
         // Set up your test data
         uint256 depositAmount = 1;
 
         // Act
-        FeeDistribution memory feeDistribution = feeCalculator.calculateDepositFees(empty, empty, depositAmount);
-        assertEq(feeDistribution.recipients.length, 0);
-        assertEq(feeDistribution.shares.length, 0);
+        vm.expectRevert("Fee must be greater than 0");
+        feeCalculator.calculateDepositFees(empty, empty, depositAmount);
     }
 
     function testCalculateDepositFee_TCO2(uint256 depositAmount) public {

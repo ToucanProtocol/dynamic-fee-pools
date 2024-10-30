@@ -254,7 +254,7 @@ abstract contract AbstractFeeCalculatorTest is Test {
         assertEq(fees[0], 46413457506542766270);
     }
 
-    function testCalculateDepositFees_DepositOfOneWei_ShouldNotThrowException() public {
+    function testCalculateDepositFees_DepositOfOneWei_ShouldThrowException() public {
         // Arrange
         // Set up your test data
         uint256 depositAmount = 1;
@@ -264,13 +264,11 @@ abstract contract AbstractFeeCalculatorTest is Test {
         setProjectSupply(address(mockToken), 1e4 * 1e18);
 
         // Act
-        FeeDistribution memory feeDistribution =
-            calculateDepositFees(address(mockPool), address(mockToken), depositAmount);
-        assertEq(feeDistribution.recipients.length, 0);
-        assertEq(feeDistribution.shares.length, 0);
+        vm.expectRevert("Fee must be greater than 0");
+        calculateDepositFees(address(mockPool), address(mockToken), depositAmount);
     }
 
-    function testCalculateDepositFees_DepositOfHundredWei_ShouldNotThrowError() public {
+    function testCalculateDepositFees_DepositOfHundredWei_ShouldThrowError() public {
         //Note! This is a bug, where a very small deposit to a very large pool
         //causes a == b because of precision limited by ratioDenominator in FeeCalculator
 
@@ -283,10 +281,8 @@ abstract contract AbstractFeeCalculatorTest is Test {
         setProjectSupply(address(mockToken), 1e4 * 1e18);
 
         // Act
-        FeeDistribution memory feeDistribution =
-            calculateDepositFees(address(mockPool), address(mockToken), depositAmount);
-        assertEq(feeDistribution.recipients.length, 0);
-        assertEq(feeDistribution.shares.length, 0);
+        vm.expectRevert("Fee must be greater than 0");
+        calculateDepositFees(address(mockPool), address(mockToken), depositAmount);
     }
 
     function testCalculateDepositFees_DepositOfHundredThousandsPartOfOne_NonzeroFee() public {

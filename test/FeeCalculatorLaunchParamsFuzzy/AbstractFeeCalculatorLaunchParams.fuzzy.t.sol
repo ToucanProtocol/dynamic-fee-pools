@@ -47,7 +47,7 @@ abstract contract AbstractFeeCalculatorLaunchParamsTestFuzzy is Test {
         uint256 total
     ) public virtual;
 
-    function testCalculateDepositFees_FuzzyExtremelySmallDepositsToLargePool_ShouldThrowError(uint256 depositAmount)
+    function testCalculateDepositFees_FuzzyExtremelySmallDepositsToLargePool_ShouldNotThrowError(uint256 depositAmount)
         public
     {
         vm.assume(depositAmount <= 1e-14 * 1e18);
@@ -63,8 +63,10 @@ abstract contract AbstractFeeCalculatorLaunchParamsTestFuzzy is Test {
         mockPool.setTotalSupply(1e12 * 1e18);
         setProjectSupply(address(mockToken), 1e9 * 1e18);
 
-        vm.expectRevert("Fee must be greater than 0");
-        calculateDepositFees(address(mockPool), address(mockToken), depositAmount);
+        FeeDistribution memory feeDistribution =
+            calculateDepositFees(address(mockPool), address(mockToken), depositAmount);
+        assertEq(feeDistribution.recipients.length, 0);
+        assertEq(feeDistribution.shares.length, 0);
     }
 
     function testCalculateDepositFeesFuzzy_DepositDividedIntoOneChunkFeesGreaterOrEqualToOneDeposit(

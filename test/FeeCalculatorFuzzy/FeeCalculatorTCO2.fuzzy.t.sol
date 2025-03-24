@@ -47,6 +47,22 @@ contract FeeCalculatorTCO2TestFuzzy is AbstractFeeCalculatorTestFuzzy {
         }
     }
 
+    struct FuzzCalculationArgs {
+        uint8 numberOfRedemptions;
+        uint256 redemptionAmount;
+        uint256 current;
+        uint256 total;
+        SD59x18 dustAssetRedemptionRelativeFee;
+        uint256 oneTimeFee;
+        bool oneTimeRedemptionFailed;
+        uint256 multipleTimesRedemptionFailedCount;
+        address[] tco2s;
+        uint256[] redemptionAmounts;
+        uint256 equalRedemption;
+        uint256 restRedemption;
+        uint256 feeFromDividedRedemptions;
+    }
+
     function testCalculateRedemptionFeesFuzzy_RedemptionDividedIntoMultipleChunksFeesGreaterOrEqualToOneRedemption(
         uint8 numberOfRedemptions,
         uint128 _redemptionAmount,
@@ -61,34 +77,39 @@ contract FeeCalculatorTCO2TestFuzzy is AbstractFeeCalculatorTestFuzzy {
         vm.assume(_redemptionAmount > 1e-6 * 1e18);
         vm.assume(_current > 1e12);
 
-        uint256 redemptionAmount = _redemptionAmount;
-        uint256 current = _current;
-        uint256 total = _total;
-
-        SD59x18 dustAssetRedemptionRelativeFee = sd(0.3 * 1e18);
-
         // Arrange
         // Set up your test data
 
-        // Set up mock pool
-        mockPool.setTotalSupply(total);
-        setProjectSupply(address(mockToken), current);
-        uint256 oneTimeFee = 0;
-        bool oneTimeRedemptionFailed = false;
-        uint256 multipleTimesRedemptionFailedCount = 0;
+        FuzzCalculationArgs memory args = FuzzCalculationArgs({
+            numberOfRedemptions: numberOfRedemptions,
+            redemptionAmount: uint128(_redemptionAmount),
+            current: uint128(_current),
+            total: uint128(_total),
+            dustAssetRedemptionRelativeFee: sd(0.3 * 1e18),
+            oneTimeFee: 0,
+            oneTimeRedemptionFailed: false,
+            multipleTimesRedemptionFailedCount: 0,
+            tco2s: new address[](1),
+            redemptionAmounts: new uint256[](1),
+            equalRedemption: 0,
+            restRedemption: 0,
+            feeFromDividedRedemptions: 0
+        });
 
-        address[] memory tco2s = new address[](1);
-        tco2s[0] = address(mockToken);
-        uint256[] memory redemptionAmounts = new uint256[](1);
-        redemptionAmounts[0] = redemptionAmount;
+        // Set up mock pool
+        mockPool.setTotalSupply(args.total);
+        setProjectSupply(address(mockToken), args.current);
+
+        args.tco2s[0] = address(mockToken);
+        args.redemptionAmounts[0] = args.redemptionAmount;
 
         // Act
-        try feeCalculator.calculateRedemptionFees(address(mockPool), tco2s, redemptionAmounts) returns (
+        try feeCalculator.calculateRedemptionFees(address(mockPool), args.tco2s, args.redemptionAmounts) returns (
             FeeDistribution memory feeDistribution
         ) {
-            oneTimeFee = feeDistribution.shares.sumOf();
+            args.oneTimeFee = feeDistribution.shares.sumOf();
         } catch Error(string memory reason) {
-            oneTimeRedemptionFailed = true;
+            args.oneTimeRedemptionFailed = true;
             assertTrue(
                 keccak256(bytes("Fee must be greater than 0")) == keccak256(bytes(reason))
                     || keccak256(bytes("Fee must be lower or equal to requested amount")) == keccak256(bytes(reason)),
@@ -97,28 +118,29 @@ contract FeeCalculatorTCO2TestFuzzy is AbstractFeeCalculatorTestFuzzy {
         }
 
         /// @dev if we fail at the first try, we do not want to test the rest of the function
-        vm.assume(oneTimeRedemptionFailed == false);
+        vm.assume(args.oneTimeRedemptionFailed == false);
         /// @dev This prevents the case when the fee is so small that it is being calculated using dustAssetRedemptionRelativeFee
         /// @dev we don not want to test this case
-        vm.assume(oneTimeFee != sdIntoUint256(sd(int256(redemptionAmount)) * dustAssetRedemptionRelativeFee));
+        vm.assume(
+            args.oneTimeFee != sdIntoUint256(sd(int256(args.redemptionAmount)) * args.dustAssetRedemptionRelativeFee)
+        );
 
-        uint256 equalRedemption = redemptionAmount / numberOfRedemptions;
-        uint256 restRedemption = redemptionAmount % numberOfRedemptions;
-        uint256 feeFromDividedRedemptions = 0;
+        args.equalRedemption = args.redemptionAmount / args.numberOfRedemptions;
+        args.restRedemption = args.redemptionAmount % args.numberOfRedemptions;
 
-        for (uint256 i = 0; i < numberOfRedemptions; i++) {
-            uint256 redemption = equalRedemption + (i == 0 ? restRedemption : 0);
-            redemptionAmounts[0] = redemption;
-            try feeCalculator.calculateRedemptionFees(address(mockPool), tco2s, redemptionAmounts) returns (
+        for (uint256 i = 0; i < args.numberOfRedemptions; i++) {
+            uint256 redemption = args.equalRedemption + (i == 0 ? args.restRedemption : 0);
+            args.redemptionAmounts[0] = redemption;
+            try feeCalculator.calculateRedemptionFees(address(mockPool), args.tco2s, args.redemptionAmounts) returns (
                 FeeDistribution memory feeDistribution
             ) {
-                feeFromDividedRedemptions += feeDistribution.shares.sumOf();
-                total -= redemption;
-                current -= redemption;
-                mockPool.setTotalSupply(total);
-                setProjectSupply(address(mockToken), current);
+                args.feeFromDividedRedemptions += feeDistribution.shares.sumOf();
+                args.total -= redemption;
+                args.current -= redemption;
+                mockPool.setTotalSupply(args.total);
+                setProjectSupply(address(mockToken), args.current);
             } catch Error(string memory reason) {
-                multipleTimesRedemptionFailedCount++;
+                args.multipleTimesRedemptionFailedCount++;
                 assertTrue(
                     keccak256(bytes("Fee must be greater than 0")) == keccak256(bytes(reason))
                         || keccak256(bytes("Fee must be lower or equal to requested amount")) == keccak256(bytes(reason)),
@@ -128,7 +150,7 @@ contract FeeCalculatorTCO2TestFuzzy is AbstractFeeCalculatorTestFuzzy {
         }
 
         // @dev we allow for 0.1% error
-        assertGe(1001 * feeFromDividedRedemptions / 1000, oneTimeFee);
+        assertGe(1001 * args.feeFromDividedRedemptions / 1000, args.oneTimeFee);
     }
 
     function testCalculateDepositFeesFuzzy_DepositDividedIntoMultipleChunksFeesGreaterOrEqualToOneDeposit(

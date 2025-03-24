@@ -27,7 +27,7 @@ jobs:
       - name: Run Forge build
         run: |
           forge --version
-          forge build --sizes --via-ir
+          forge build --sizes
         id: build
 
       - name: Check formatting
@@ -36,7 +36,7 @@ jobs:
 
       - name: Run Forge tests
         run: |
-          forge test -vvv --via-ir
+          forge test -vvv
         id: test
 
       - name: Install Slither

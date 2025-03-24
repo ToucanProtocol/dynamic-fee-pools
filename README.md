@@ -27,17 +27,17 @@ Run the following command in your terminal:
 
 all tests
 ```bash
-forge test -vv --via-ir
+forge test -vv
 ```
 
 basic tests only
 ```bash
-forge test --no-match-contract Fuzzy -vv --via-ir
+forge test --no-match-contract Fuzzy -vv
 ```
 
 fuzzy tests only
 ```bash
-forge test --match-contract Fuzzy -vv --via-ir
+forge test --match-contract Fuzzy -vv
 ```
 
 
@@ -126,15 +126,13 @@ Remember, the goal is to maintain a balanced pool composition and discourage mon
 
 1. Deploy the contract:
 
-    forge create --via-ir                    \
-                 --rpc-url <rpc-url>         \
+    forge create --rpc-url <rpc-url>         \
                  --private-key <private-key> \
                 FeeCalculator
 
 Optionally, if you want to verify the contract at the same time:
 
-    forge create --via-ir                            \
-                 --rpc-url <rpc-url>                 \
+    forge create --rpc-url <rpc-url>                 \
                  --private-key <private-key>         \
                  --etherscan-api-key <etherscan-key> \
                  --verify                            \

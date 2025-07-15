@@ -43,9 +43,8 @@ contract FeeCalculatorERC1155TestFuzzy is AbstractFeeCalculatorTestFuzzy {
         try feeCalculator.calculateDepositFees(address(mockPool), address(mockToken), 1, depositAmount) {}
         catch Error(string memory reason) {
             assertTrue(
-                keccak256(bytes("Fee must be greater than 0")) == keccak256(bytes(reason))
-                    || keccak256(bytes("Fee must be lower or equal to requested amount")) == keccak256(bytes(reason)),
-                "error should be 'Fee must be greater than 0' or 'Fee must be lower or equal to requested amount'"
+                keccak256(bytes("Fee must be lower or equal to requested amount")) == keccak256(bytes(reason)),
+                "error should be 'Fee must be lower or equal to requested amount'"
             );
         }
     }
@@ -116,9 +115,8 @@ contract FeeCalculatorERC1155TestFuzzy is AbstractFeeCalculatorTestFuzzy {
         } catch Error(string memory reason) {
             args.oneTimeRedemptionFailed = true;
             assertTrue(
-                keccak256(bytes("Fee must be greater than 0")) == keccak256(bytes(reason))
-                    || keccak256(bytes("Fee must be lower or equal to requested amount")) == keccak256(bytes(reason)),
-                "error should be 'Fee must be greater than 0' or 'Fee must be lower or equal to requested amount'"
+                keccak256(bytes("Fee must be lower or equal to requested amount")) == keccak256(bytes(reason)),
+                "error should be 'Fee must be lower or equal to requested amount'"
             );
         }
 
@@ -147,9 +145,8 @@ contract FeeCalculatorERC1155TestFuzzy is AbstractFeeCalculatorTestFuzzy {
             } catch Error(string memory reason) {
                 args.multipleTimesRedemptionFailedCount++;
                 assertTrue(
-                    keccak256(bytes("Fee must be greater than 0")) == keccak256(bytes(reason))
-                        || keccak256(bytes("Fee must be lower or equal to requested amount")) == keccak256(bytes(reason)),
-                    "error should be 'Fee must be greater than 0' or 'Fee must be lower or equal to requested amount'"
+                    keccak256(bytes("Fee must be lower or equal to requested amount")) == keccak256(bytes(reason)),
+                    "error should be 'Fee must be lower or equal to requested amount'"
                 );
             }
         }
@@ -190,9 +187,8 @@ contract FeeCalculatorERC1155TestFuzzy is AbstractFeeCalculatorTestFuzzy {
         } catch Error(string memory reason) {
             oneTimeDepositFailed = true;
             assertTrue(
-                keccak256(bytes("Fee must be greater than 0")) == keccak256(bytes(reason))
-                    || keccak256(bytes("Fee must be lower or equal to requested amount")) == keccak256(bytes(reason)),
-                "error should be 'Fee must be greater than 0' or 'Fee must be lower or equal to requested amount'"
+                keccak256(bytes("Fee must be lower or equal to requested amount")) == keccak256(bytes(reason)),
+                "error should be 'Fee must be lower or equal to requested amount'"
             );
         }
 
@@ -214,9 +210,8 @@ contract FeeCalculatorERC1155TestFuzzy is AbstractFeeCalculatorTestFuzzy {
             } catch Error(string memory reason) {
                 multipleTimesDepositFailedCount++;
                 assertTrue(
-                    keccak256(bytes("Fee must be greater than 0")) == keccak256(bytes(reason))
-                        || keccak256(bytes("Fee must be lower or equal to requested amount")) == keccak256(bytes(reason)),
-                    "error should be 'Fee must be greater than 0' or 'Fee must be lower or equal to requested amount'"
+                    keccak256(bytes("Fee must be lower or equal to requested amount")) == keccak256(bytes(reason)),
+                    "error should be 'Fee must be lower or equal to requested amount'"
                 );
             }
         }

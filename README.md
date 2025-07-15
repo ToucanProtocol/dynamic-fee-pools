@@ -99,13 +99,13 @@ The following graphs illustrate the fee functions for deposit and redemption.
 
 ### Deposit Fee Function Graph
 
-![Deposit Fee Function Graph](https://github.com/neutral-protocol/dynamic-fee-pools/assets/11928766/8247198c-a620-4533-aede-fa827a3cfc46)
+![Deposit Fee Function Graph](https://github.com/ToucanProtocol/dynamic-fee-pools/assets/11928766/8247198c-a620-4533-aede-fa827a3cfc46)
 
 In this graph, the X-axis represents the dominance of an asset, and the Y-axis represents the relative fee for deposit.
 
 ### Redemption Fee Function Graph
 
-![Redemption Fee Function Graph](https://github.com/neutral-protocol/dynamic-fee-pools/assets/11928766/e308e855-b89e-4311-b182-28f81bc3ab94)
+![Redemption Fee Function Graph](https://github.com/ToucanProtocol/dynamic-fee-pools/assets/11928766/e308e855-b89e-4311-b182-28f81bc3ab94)
 
 In this graph, the X-axis represents the dominance of an asset, and the Y-axis represents the relative fee for redemption.
 
